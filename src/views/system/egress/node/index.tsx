@@ -617,7 +617,7 @@ function getActionDescription(action: EgressNodeAction) {
   if (action.kind === "delete") {
     return action.node.lifecycle === "pending"
       ? "如目标机器已有残留安装，请先执行卸载脚本；删除后当前一次性安装命令立即失效。"
-      : "请先执行卸载脚本清理节点服务；仅未被环境分配、活动运行时或连接占用的节点可以删除。"
+      : "请先执行卸载脚本清理节点服务；在线节点仅在完全未占用时可删除，离线节点会自动解除环境绑定，但存在活动运行时仍会阻止删除。"
   }
   if (action.status === "draining") {
     return "排空后节点不再接收新的环境分配；已分配环境和现有连接会继续使用。"

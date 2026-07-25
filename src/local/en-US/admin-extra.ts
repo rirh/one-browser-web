@@ -391,8 +391,8 @@ export const enUSAdminExtraMessages: Record<string, string> = {
     "The previous command becomes invalid immediately after generation. Copy the new command and run it on the target server.",
   "如目标机器已有残留安装，请先执行卸载脚本；删除后当前一次性安装命令立即失效。":
     "If the target machine has a partial installation, run the uninstaller first. Deleting the node immediately invalidates its one-time installer.",
-  "请先执行卸载脚本清理节点服务；仅未被环境分配、活动运行时或连接占用的节点可以删除。":
-    "Run the uninstaller to remove the node service first. Only nodes without environment assignments, active runtimes, or connections can be deleted.",
+  "请先执行卸载脚本清理节点服务；在线节点仅在完全未占用时可删除，离线节点会自动解除环境绑定，但存在活动运行时仍会阻止删除。":
+    "Run the uninstaller first. Online nodes can be deleted only when completely unused. Offline nodes release their environment assignments automatically, but active runtimes still block deletion.",
   已接入节点的域名保持不变: "The domain of a connected node remains unchanged",
   "域名关联当前 Egress 接入点；如需更换域名，请新增节点并完成迁移后再删除旧节点。":
     "The domain is bound to the current Egress endpoint. To change it, add and migrate to a new node before deleting the old one.",
@@ -437,8 +437,6 @@ export const enUSAdminExtraMessages: Record<string, string> = {
     "The current one-time install command becomes invalid immediately.",
   "删除后当前一次性安装命令将立即失效。":
     "Deleting the pending node invalidates its one-time install command immediately.",
-  "仅未被环境分配、活动运行时或连接占用的节点可以删除；删除后该节点的控制凭证立即失效。":
-    "Only nodes without environment assignments, active runtimes, or connections can be deleted. Deletion invalidates the node control credential immediately.",
   "排空后节点不再接收新的环境分配；已分配环境和现有连接会继续使用。":
     "The node stops receiving new environment assignments; assigned environments and existing connections continue to use it.",
   "禁用后节点将停止接收新连接；有活动连接时后端会拒绝本次操作。":
