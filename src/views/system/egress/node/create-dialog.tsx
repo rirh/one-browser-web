@@ -184,7 +184,8 @@ export function CreateEgressNodeDialog({
       }),
     enabled: open && result != null,
     refetchOnWindowFocus: false,
-    refetchInterval: 1_000,
+    refetchOnReconnect: false,
+    staleTime: Number.POSITIVE_INFINITY,
   })
   const enrollmentNode = enrollmentStatusQuery.data?.list.find(
     (node) => node.egress_id === result?.egress_id
@@ -196,10 +197,6 @@ export function CreateEgressNodeDialog({
       return
     }
 
-    void queryClient.invalidateQueries({
-      queryKey: systemQueryKeys.egressNodes,
-      refetchType: "active",
-    })
     const closeTimer = window.setTimeout(() => {
       resetMutation()
       form.reset(defaultValues)
@@ -214,7 +211,6 @@ export function CreateEgressNodeDialog({
     form,
     onOpenChange,
     open,
-    queryClient,
     resetMutation,
     result,
   ])

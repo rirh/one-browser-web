@@ -114,30 +114,6 @@ export default function EgressNodePage() {
     enabled: authPermissions.isSuccess && canList,
     placeholderData: (previousData) => previousData,
   })
-  const invalidateTimerRef = React.useRef<ReturnType<
-    typeof window.setTimeout
-  > | null>(null)
-  const scheduleNodesInvalidate = React.useCallback(() => {
-    if (invalidateTimerRef.current !== null) {
-      return
-    }
-
-    invalidateTimerRef.current = window.setTimeout(() => {
-      invalidateTimerRef.current = null
-      void queryClient.invalidateQueries({
-        queryKey: systemQueryKeys.egressNodes,
-        refetchType: "active",
-      })
-    }, 300)
-  }, [queryClient])
-  React.useEffect(
-    () => () => {
-      if (invalidateTimerRef.current !== null) {
-        window.clearTimeout(invalidateTimerRef.current)
-      }
-    },
-    []
-  )
   const handleNodeEvent = React.useCallback(
     (event: EgressNodeEvent) => {
       queryClient.setQueriesData<EgressNodePageResponse>(
@@ -155,9 +131,8 @@ export default function EgressNodePage() {
               node: event.node,
             }
       })
-      scheduleNodesInvalidate()
     },
-    [queryClient, scheduleNodesInvalidate]
+    [queryClient]
   )
   const nodeStream = useSse<EgressNodeEvent>({
     path: EGRESS_NODE_EVENTS_PATH,
