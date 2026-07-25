@@ -347,6 +347,8 @@ function getRefreshQueryKeys(routeId: AppRouteMeta["id"]) {
       return [systemQueryKeys.dictTypes, systemQueryKeys.dictData]
     case "notices":
       return [systemQueryKeys.notices]
+    case "egress-nodes":
+      return [systemQueryKeys.egressNodes]
     case "operation-logs":
       return [systemQueryKeys.operationLogs]
     case "login-logs":

@@ -158,10 +158,18 @@ function ExpiresInBadge({ seconds }: { seconds: number }) {
 
 function formatDuration(seconds: number, locale: Locale) {
   const totalSeconds = Math.max(0, Math.floor(seconds))
-  const hours = Math.floor(totalSeconds / 3600)
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   const restSeconds = totalSeconds % 60
 
+  if (days > 0) {
+    return joinDurationParts(locale, [
+      durationPart(days, "duration.day", locale),
+      durationPart(hours, "duration.hour", locale),
+      durationPart(minutes, "duration.minute", locale),
+    ])
+  }
   if (hours > 0) {
     if (locale === "en-US") {
       return minutes > 0

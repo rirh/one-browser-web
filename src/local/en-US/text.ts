@@ -5,6 +5,7 @@ export const enUSTextMessages: Record<string, string> = {
   权限管理: "Permission management",
   字典管理: "Dictionary management",
   通知管理: "Notice management",
+  节点管理: "Node management",
   操作日志: "Operation logs",
   登录日志: "Login logs",
   服务监控: "Service monitor",

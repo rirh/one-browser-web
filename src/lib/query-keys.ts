@@ -35,6 +35,17 @@ export const systemQueryKeys = {
   dictTypes: ["system", "dict-types"] as const,
   dictData: ["system", "dict-data"] as const,
   notices: ["system", "notices"] as const,
+  egressNodes: ["system", "egress-nodes"] as const,
+  egressEnrollmentConfig: [
+    "system",
+    "egress-nodes",
+    "enrollment-config",
+  ] as const,
+  egressUninstallCommand: [
+    "system",
+    "egress-nodes",
+    "uninstall-command",
+  ] as const,
   operationLogs: ["system", "logs", "operation"] as const,
   loginLogs: ["system", "logs", "login"] as const,
 }

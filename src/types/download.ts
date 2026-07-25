@@ -15,6 +15,7 @@ export interface AppDownloadAssetResource {
   content_type: string | null
   updated_at: string | null
   digest: string | null
+  executable_sha256: string | null
 }
 
 export interface AppDownloadReleaseResource {

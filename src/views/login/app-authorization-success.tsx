@@ -16,7 +16,6 @@ import { gsap } from "gsap"
 import { APP_NAME } from "@/app"
 import { useTranslation } from "@/components/providers/language-context"
 import { Button } from "@/components/ui/button"
-import { Spinner } from "@/components/ui/spinner"
 import { wakeAppRedirect } from "@/lib/app-redirect"
 import { cn } from "@/lib/utils"
 
@@ -43,30 +42,26 @@ export function AppAuthorizationPending({
     <main
       ref={rootRef}
       className={cn(
-        "flex min-h-svh items-center justify-center bg-muted/40 p-4",
+        "flex min-h-svh items-center justify-center overflow-hidden bg-background px-6 py-8 text-foreground select-none",
         className
       )}
     >
-      <AuthPanel className="max-w-[21rem]">
-        <div className="flex flex-col items-center px-5 py-6 text-center">
-          <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Spinner className="size-5" />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <h1 className="text-lg font-semibold tracking-normal">
-              {t("appAuth.pendingTitle")}
-            </h1>
-            <p className="text-sm leading-6 text-muted-foreground">
-              {t("appAuth.pendingDescription", { appName: APP_NAME })}
-            </p>
-          </div>
-
-          <p className="mt-4 text-xs leading-5 text-muted-foreground">
-            {t("appAuth.pendingHint")}
-          </p>
-        </div>
-      </AuthPanel>
+      <section
+        className="flex w-full max-w-80 flex-col items-center text-center"
+        aria-live="polite"
+        aria-busy="true"
+        data-app-auth-reveal
+      >
+        <img
+          src="/pwa-512x512.png"
+          alt={APP_NAME}
+          className="size-16 rounded-[1.35rem] drop-shadow-[0_12px_20px_rgba(15,23,42,0.18)] select-none dark:drop-shadow-[0_14px_22px_rgba(0,0,0,0.4)]"
+          draggable={false}
+        />
+        <p className="sweep-shine mt-5 max-w-full text-sm/6 font-medium tracking-normal text-muted-foreground">
+          {t("appAuth.pendingDescription", { appName: APP_NAME })}
+        </p>
+      </section>
     </main>
   )
 }

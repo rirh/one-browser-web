@@ -74,8 +74,8 @@ export function UpdateAvailableDialog({
               className="col-start-2 col-end-4 mt-2.5 w-full sm:col-start-3 sm:col-end-4 sm:row-start-1 sm:mt-0 sm:w-auto sm:self-center"
             >
               {updating
-                ? t("updateAvailable.refreshing")
-                : t("updateAvailable.refresh")}
+                ? t("updateAvailable.updating")
+                : t("updateAvailable.update")}
             </Button>
 
             <Dialog.Close

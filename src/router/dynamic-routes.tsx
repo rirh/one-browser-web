@@ -16,6 +16,7 @@ const RolePage = lazy(() => import("@/views/system/role"))
 const MenuPage = lazy(() => import("@/views/system/menu"))
 const DictTypePage = lazy(() => import("@/views/system/dict/type"))
 const NoticePage = lazy(() => import("@/views/system/notice"))
+const EgressNodePage = lazy(() => import("@/views/system/egress/node"))
 const OperationLogPage = lazy(() => import("@/views/system/log/operation"))
 const LoginLogPage = lazy(() => import("@/views/system/log/login"))
 
@@ -39,6 +40,7 @@ const APP_ROUTE_ELEMENTS: Record<AppRouteId, ReactNode> = {
   menus: <MenuPage />,
   dict: <DictTypePage />,
   notices: <NoticePage />,
+  "egress-nodes": <EgressNodePage />,
   "operation-logs": <OperationLogPage />,
   "login-logs": <LoginLogPage />,
   health: <HealthPage />,

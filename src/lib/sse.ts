@@ -77,7 +77,10 @@ export function useSse<T>({
       }
     }
 
-    const handleError = (event: Event, message = "实时连接异常，正在重新连接。") => {
+    const handleError = (
+      event: Event,
+      message = "实时连接异常，正在重新连接。"
+    ) => {
       onError?.(event)
       if (cancelled) {
         return
@@ -230,10 +233,7 @@ async function readSseStream(
   }
 }
 
-function drainSseBuffer(
-  buffer: string,
-  onEvent: (event: SseEvent) => void
-) {
+function drainSseBuffer(buffer: string, onEvent: (event: SseEvent) => void) {
   let boundary = buffer.indexOf("\n\n")
 
   while (boundary >= 0) {

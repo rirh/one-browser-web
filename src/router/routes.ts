@@ -7,6 +7,7 @@ export type AppRouteId =
   | "menus"
   | "dict"
   | "notices"
+  | "egress-nodes"
   | "operation-logs"
   | "login-logs"
   | "health"
@@ -75,6 +76,14 @@ export const APP_ROUTES: AppRouteMeta[] = [
     path: "/system/notice",
   },
   {
+    id: "egress-nodes",
+    labelKey: "route.egressNodes",
+    label: "节点管理",
+    title: "节点管理",
+    description: "管理出口节点、接入登记和运行状态。",
+    path: "/system/egress/node",
+  },
+  {
     id: "operation-logs",
     labelKey: "route.operationLogs",
     label: "操作日志",
@@ -135,7 +144,7 @@ export const APP_ROUTE_GROUPS = [
     id: "system",
     labelKey: "routeGroup.system",
     label: "系统管理",
-    routes: ["users", "roles", "menus", "dict", "notices"],
+    routes: ["users", "roles", "menus", "dict", "notices", "egress-nodes"],
   },
   {
     id: "logs",

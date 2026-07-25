@@ -8,6 +8,17 @@ export type LogStatusFlag = "0" | "1"
 export type NoticeTypeFlag = "1" | "2"
 export type JobMisfirePolicyFlag = "1" | "2" | "3"
 export type JobConcurrentFlag = "0" | "1"
+export type EgressNodeStatus =
+  | "pending"
+  | "installing"
+  | "expired"
+  | "init"
+  | "healthy"
+  | "degraded"
+  | "draining"
+  | "unhealthy"
+  | "disabled"
+export type EgressNodeStatusUpdate = "draining" | "enabled"
 
 export interface CurrentUser {
   user_id: number
@@ -158,6 +169,10 @@ export interface JobListParams extends ListParams {
   job_group?: string
 }
 
+export interface EgressNodeListParams extends Omit<ListParams, "status"> {
+  status?: EgressNodeStatus
+}
+
 export interface PageResponse<T> {
   list: T[]
   total: number
@@ -274,6 +289,77 @@ export interface OnlineUserResource {
   os: string
   login_at: string
   expires_in: number
+}
+
+export interface EgressNodeResource {
+  egress_id: string
+  domain: string
+  public_endpoint: string | null
+  display_name: string
+  lifecycle: "active" | "pending"
+  status: EgressNodeStatus
+  online: boolean
+  environment: EgressEnvironment
+  tls_enabled: boolean
+  enabled: boolean | null
+  draining: boolean | null
+  active_connections: number | null
+  active_streams: number | null
+  max_connections: number
+  max_streams: number
+  load_percent: number | null
+  heartbeat_at: string | null
+  enrollment_expires_at: string | null
+  claimed_at: string | null
+  connected_at: string | null
+}
+
+export type EgressNodePageResponse = PageResponse<EgressNodeResource>
+
+export type EgressEnvironment = "development" | "production"
+
+export interface EgressEnrollmentConfig {
+  environment: EgressEnvironment
+  tls_enabled: boolean
+}
+
+export interface EgressUninstallCommand {
+  uninstall_command: string
+}
+
+export type EgressNodeEvent =
+  | {
+      kind: "upsert"
+      egress_id: string
+      node: EgressNodeResource
+    }
+  | {
+      kind: "remove"
+      egress_id: string
+    }
+
+export interface CreateEgressEnrollmentPayload {
+  domain: string
+  display_name: string
+  max_connections: number
+  max_streams: number
+  replace?: boolean
+  replace_egress_id?: string
+}
+
+export interface UpdateEgressNodePayload {
+  display_name: string
+}
+
+export interface EgressEnrollmentResult {
+  egress_id: string
+  expires_at: string
+  install_command: string
+  native_install_command: string
+  docker_install_command: string
+  uninstall_command: string
+  environment: EgressEnvironment
+  tls_enabled: boolean
 }
 
 export interface JobResource {

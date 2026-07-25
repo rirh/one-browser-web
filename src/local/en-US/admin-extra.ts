@@ -234,4 +234,208 @@ export const enUSAdminExtraMessages: Record<string, string> = {
   统计: "Statistics",
   柱状图: "Bar chart",
   报表: "Reports",
+
+  节点管理: "Node management",
+  节点: "Node",
+  "节点 ID": "Node ID",
+  节点名称: "Node name",
+  域名: "Domain",
+  域名与接入点: "Domain and endpoint",
+  连接与流负载: "Connections and stream load",
+  心跳与有效期: "Heartbeat and expiry",
+  连接: "Connections",
+  流: "Streams",
+  负载未上报: "Load not reported",
+  替换相同节点的未完成登记:
+    "Replace an unfinished enrollment for the same node",
+  "仅用于安装命令遗失或登记卡住；替换后，之前生成的命令会立即失效。":
+    "Use only when the install command was lost or enrollment is stuck. The previous command stops working immediately.",
+  最近心跳: "Last heartbeat",
+  登记有效期至: "Enrollment expires",
+  暂无: "N/A",
+  全部状态: "All statuses",
+  待接入: "Pending enrollment",
+  安装中: "Installing",
+  已过期: "Expired",
+  初始化: "Initializing",
+  降级: "Degraded",
+  排空中: "Draining",
+  异常: "Unhealthy",
+  已禁用: "Disabled",
+  节点状态筛选: "Node status filter",
+  节点操作: "Node actions",
+  修改节点: "Edit node",
+  删除节点: "Delete node",
+  取消登记: "Cancel enrollment",
+  取消节点登记: "Cancel node enrollment",
+  排空连接: "Drain connections",
+  恢复接入: "Resume traffic",
+  启用节点: "Enable node",
+  禁用节点: "Disable node",
+  节点登记已取消: "Node enrollment cancelled",
+  节点信息已更新: "Node details updated",
+  节点已删除: "Node deleted",
+  节点状态已更新: "Node status updated",
+  节点列表已刷新: "Node list refreshed",
+  "已获取服务器最新的节点状态。":
+    "Fetched the latest node status from the server.",
+  "当前账号没有节点列表权限。":
+    "This account does not have permission to view the node list.",
+  暂无节点: "No nodes",
+  "当前还没有已接入或待接入的出口节点。":
+    "There are no active or pending egress nodes yet.",
+  新增节点: "Add node",
+  节点信息未填写完整: "Node information is incomplete",
+  "请检查表单中的必填项或格式提示。":
+    "Check the required fields and format hints in the form.",
+  "请输入节点 ID": "Enter a node ID",
+  "节点 ID 不能超过 128 个字符": "Node ID cannot exceed 128 characters",
+  "节点 ID 仅支持字母、数字、下划线和连字符":
+    "Node ID can contain only letters, numbers, underscores, and hyphens",
+  请输入域名: "Enter a domain",
+  "请输入有效的完整域名，不要包含协议或端口":
+    "Enter a valid fully qualified domain without a protocol or port",
+  请输入节点名称: "Enter a node name",
+  "节点名称不能超过 128 个字符": "Node name cannot exceed 128 characters",
+  最大连接数必须是整数: "Maximum connections must be an integer",
+  "最大连接数不能小于 1": "Maximum connections cannot be less than 1",
+  "最大连接数不能超过 16384": "Maximum connections cannot exceed 16384",
+  最大流数必须是整数: "Maximum streams must be an integer",
+  "最大流数不能小于 1": "Maximum streams cannot be less than 1",
+  "最大流数不能超过 65535": "Maximum streams cannot exceed 65535",
+  安装命令已复制: "Install command copied",
+  普通安装命令已复制: "Native install command copied",
+  普通安装脚本已复制: "Native install script copied",
+  "Docker 安装命令已复制": "Docker install command copied",
+  "Docker 安装脚本已复制": "Docker install script copied",
+  卸载命令已复制: "Uninstall command copied",
+  卸载脚本已复制: "Uninstall script copied",
+  "复制失败，请手动选择命令复制。":
+    "Copy failed. Select the command manually to copy it.",
+  安装命令已生成: "Install command generated",
+  一键脚本已生成: "One-click scripts generated",
+  节点已创建: "Node created",
+  "请在目标服务器上执行以下一次性命令。":
+    "Run the following one-time command on the target server.",
+  "选择一种安装方式，在目标服务器执行对应的一键脚本。":
+    "Choose an installation method and run its one-click script on the target server.",
+  "选择一种方式，在目标服务器执行一键安装脚本。":
+    "Choose a method and run the one-click installer on the target server.",
+  该命令仅在本次弹窗中显示: "This command is shown only in this dialog",
+  这些脚本仅在本次弹窗中显示: "These scripts are shown only in this dialog",
+  "命令包含一次性登记令牌，请勿转发或在共享终端执行。执行完成后，请清理包含该命令的 shell 历史；关闭弹窗后将无法再次查看。":
+    "The command contains a one-time enrollment token. Do not share it or run it in a shared terminal. After installation, remove the command from shell history; it cannot be viewed again after closing this dialog.",
+  "安装脚本包含一次性登记令牌，请勿转发或在共享终端执行。普通安装和 Docker 安装只需选择一种；关闭弹窗后将无法再次查看。":
+    "The installer contains a one-time enrollment token. Do not share it or run it in a shared terminal. Choose either native or Docker installation; the scripts cannot be viewed again after closing this dialog.",
+  有效期至: "Expires at",
+  安装命令: "Install command",
+  复制命令: "Copy command",
+  "普通安装（systemd）": "Native install (systemd)",
+  普通安装: "Native install",
+  "Docker 安装": "Docker install",
+  安装方式: "Installation method",
+  安装与维护方式: "Install and maintenance method",
+  普通安装一键脚本: "Native one-click install script",
+  "Docker 一键安装脚本": "Docker one-click install script",
+  一键卸载脚本: "One-click uninstall script",
+  复制一键脚本: "Copy one-click script",
+  复制脚本: "Copy script",
+  "先在节点服务器执行卸载，再删除平台中的节点记录。":
+    "Run the uninstaller on the node server before deleting its platform record.",
+  "正在获取卸载脚本...": "Loading uninstall script...",
+  "卸载脚本获取失败，仍可继续删除节点记录。":
+    "Failed to load the uninstall script. You can still delete the node record.",
+  卸载: "Uninstall",
+  复制普通安装命令: "Copy native install command",
+  "复制 Docker 安装命令": "Copy Docker install command",
+  复制卸载命令: "Copy uninstall command",
+  "直接安装 amd64/arm64 原生程序并注册 systemd 服务。":
+    "Install the amd64/arm64 native binary and register a systemd service.",
+  "自动识别 amd64/arm64，安装原生程序并注册 systemd 服务。":
+    "Detect amd64/arm64 automatically, install the native binary, and register a systemd service.",
+  "安装或复用 Docker，通过 Compose 运行 amd64/arm64 镜像。":
+    "Install or reuse Docker and run the amd64/arm64 image with Compose.",
+  "自动识别 amd64/arm64，安装或复用 Docker 并启动 Egress 容器。":
+    "Detect amd64/arm64 automatically, install or reuse Docker, and start the Egress container.",
+  "自动识别普通安装或 Docker 安装；保留 Docker 和 Certbot 证书，节点记录需在列表中另行删除。":
+    "Automatically detect native or Docker mode and preserve Docker and Certbot certificates. Delete the node record separately from the list.",
+  "自动识别普通安装或 Docker 安装并清理 Egress；节点记录仍需在列表中删除。":
+    "Detect native or Docker installation automatically and remove Egress. Delete the node record separately from the list.",
+  "安装脚本默认使用最新版本；需要固定版本时可向 install.sh 传入 --version <版本号>。脚本连接成功后，节点会自动转为在线状态。":
+    "The installer uses the latest version by default. Pass --version <version> to install.sh to pin one. The node becomes online automatically after the script connects.",
+  "普通安装和 Docker 安装默认使用最新版本，并自动适配 amd64/arm64；需要固定版本时，可向 install.sh 传入 --version <版本号>。连接成功后，节点会自动转为在线状态。":
+    "Native and Docker installation use the latest version by default and detect amd64/arm64 automatically. Pass --version <version> to install.sh to pin one. The node becomes online automatically after it connects.",
+  "脚本包含一次性登记令牌，仅在本次弹窗显示；普通安装和 Docker 只需选择一种。":
+    "The script contains a one-time enrollment token and is only shown in this dialog. Choose either native or Docker installation.",
+  "脚本执行并连接成功后，节点会自动转为在线状态。":
+    "The node becomes online automatically after the script connects successfully.",
+  当前状态: "Current status",
+  "TLS 已启用": "TLS enabled",
+  无需证书: "No certificate required",
+  完成: "Done",
+  "创建一次性登记命令，再到目标服务器完成安装。":
+    "Generate a one-time enrollment command, then finish installation on the target server.",
+  "填写节点信息，系统将自动生成节点 ID 和一次性安装命令。":
+    "Enter the node details. The system will generate the node ID and one-time install command.",
+  "修改节点名称；域名和运行容量由已安装节点配置保持。":
+    "Edit the node name. The installed node keeps its domain and runtime capacity configuration.",
+  "修改待接入节点后会生成新的安装命令，旧命令立即失效。":
+    "Editing a pending node generates a new install command and invalidates the previous command immediately.",
+  "如目标机器已有残留安装，请先执行卸载脚本；删除后当前一次性安装命令立即失效。":
+    "If the target machine has a partial installation, run the uninstaller first. Deleting the node immediately invalidates its one-time installer.",
+  "请先执行卸载脚本清理节点服务；仅未被环境分配、活动运行时或连接占用的节点可以删除。":
+    "Run the uninstaller to remove the node service first. Only nodes without environment assignments, active runtimes, or connections can be deleted.",
+  已接入节点的域名保持不变: "The domain of a connected node remains unchanged",
+  "域名关联当前 Egress 接入点；如需更换域名，请新增节点并完成迁移后再删除旧节点。":
+    "The domain is bound to the current Egress endpoint. To change it, add and migrate to a new node before deleting the old one.",
+  "数据通道 TLS": "Data-plane TLS",
+  测试环境: "Development",
+  正式环境: "Production",
+  "未启用，无需证书": "Disabled; no certificate required",
+  "正在确认 Server 环境": "Checking Server environment",
+  "环境确认完成后才可以生成安装命令。":
+    "The install command can be generated after the environment check completes.",
+  "无法确认 Server 环境": "Unable to determine Server environment",
+  "请检查 Server 的 Egress 安装配置后重试。":
+    "Check the Server Egress installation configuration and try again.",
+  测试环境接入: "Development enrollment",
+  正式环境接入: "Production enrollment",
+  "Server 当前为测试环境，安装命令使用 HTTP 数据通道，不需要域名证书。":
+    "The Server is in development mode. The install command uses an HTTP data plane and does not require a domain certificate.",
+  "Server 当前为正式环境，节点域名必须解析到公网 IPv4，并准备有效 TLS 证书。":
+    "The Server is in production mode. The node domain must resolve to a public IPv4 address and have a valid TLS certificate.",
+  节点地址: "Node address",
+  节点域名: "Node domain",
+  替换相同域名的未完成登记:
+    "Replace an unfinished enrollment for the same domain",
+  "搜索节点名称、ID、地址...": "Search node name, ID, or address...",
+  "只填写域名，不要包含 http://、https:// 或端口。":
+    "Enter only the domain without http://, https://, or a port.",
+  高级容量配置: "Advanced capacity",
+  最大连接数: "Maximum connections",
+  最大流数: "Maximum streams",
+  在线: "Online",
+  离线: "Offline",
+  正在连接实时状态: "Connecting live status",
+  节点状态实时更新: "Node status is live",
+  "实时状态已断开，正在重连": "Live status disconnected. Reconnecting",
+  实时状态已关闭: "Live status closed",
+  正在生成命令: "Generating command",
+  正在保存节点: "Saving node",
+  生成安装命令: "Generate install command",
+  保存并重新生成命令: "Save and regenerate command",
+  "取消后当前一次性安装命令将立即失效。":
+    "The current one-time install command becomes invalid immediately.",
+  "删除后当前一次性安装命令将立即失效。":
+    "Deleting the pending node invalidates its one-time install command immediately.",
+  "仅未被环境分配、活动运行时或连接占用的节点可以删除；删除后该节点的控制凭证立即失效。":
+    "Only nodes without environment assignments, active runtimes, or connections can be deleted. Deletion invalidates the node control credential immediately.",
+  "排空后节点不再接收新的环境分配；已分配环境和现有连接会继续使用。":
+    "The node stops receiving new environment assignments; assigned environments and existing connections continue to use it.",
+  "禁用后节点将停止接收新连接；有活动连接时后端会拒绝本次操作。":
+    "The node stops accepting new connections. The backend rejects this action while connections are active.",
+  "启用后节点可以重新接收连接，并退出排空状态。":
+    "The node can accept connections again and leaves draining state.",
+  "恢复后节点可以重新接收连接。":
+    "The node can accept connections again after resuming.",
 }
