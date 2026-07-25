@@ -21,6 +21,7 @@ import {
 } from "@/api/system/egress-nodes"
 import { useTranslation } from "@/components/providers/language-context"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AnimatedSegmentedTabs } from "@/components/ui/animated-segmented-tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -43,7 +44,6 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { formatAbsoluteDateTime } from "@/lib/datetime"
 import { systemQueryKeys } from "@/lib/query-keys"
 import { cn } from "@/lib/utils"
@@ -86,6 +86,7 @@ const enrollmentSchema = z.object({
 })
 
 type EnrollmentFormValues = z.infer<typeof enrollmentSchema>
+type InstallMethod = "native" | "docker"
 
 const DEFAULT_VALUES: EnrollmentFormValues = {
   domain: "",
@@ -98,16 +99,22 @@ const DEFAULT_VALUES: EnrollmentFormValues = {
 export function CreateEgressNodeDialog({
   open,
   editingNode,
+  mode = "edit",
   onOpenChange,
 }: {
   open: boolean
   editingNode: EgressNodeResource | null
+  mode?: "edit" | "enroll"
   onOpenChange: (open: boolean) => void
 }) {
   const { locale, t } = useTranslation()
   const tt = (text: string) => translateAdminText(locale, text)
   const queryClient = useQueryClient()
+  const [installMethod, setInstallMethod] =
+    React.useState<InstallMethod>("native")
   const editingActiveNode = editingNode?.lifecycle === "active"
+  const enrollmentMode =
+    mode === "enroll" && editingNode?.lifecycle === "pending"
   const enrollmentConfigQuery = useQuery({
     queryKey: systemQueryKeys.egressEnrollmentConfig,
     queryFn: getEgressEnrollmentConfig,
@@ -177,10 +184,40 @@ export function CreateEgressNodeDialog({
       }),
     enabled: open && result != null,
     refetchOnWindowFocus: false,
+    refetchInterval: 1_000,
   })
   const enrollmentNode = enrollmentStatusQuery.data?.list.find(
     (node) => node.egress_id === result?.egress_id
   )
+  const resetMutation = mutation.reset
+
+  React.useEffect(() => {
+    if (!open || !result || enrollmentNode?.status !== "healthy") {
+      return
+    }
+
+    void queryClient.invalidateQueries({
+      queryKey: systemQueryKeys.egressNodes,
+      refetchType: "active",
+    })
+    const closeTimer = window.setTimeout(() => {
+      resetMutation()
+      form.reset(defaultValues)
+      setInstallMethod("native")
+      onOpenChange(false)
+    }, 0)
+
+    return () => window.clearTimeout(closeTimer)
+  }, [
+    defaultValues,
+    enrollmentNode?.status,
+    form,
+    onOpenChange,
+    open,
+    queryClient,
+    resetMutation,
+    result,
+  ])
 
   function handleOpenChange(nextOpen: boolean) {
     if (!nextOpen && mutation.isPending) {
@@ -189,6 +226,7 @@ export function CreateEgressNodeDialog({
     if (!nextOpen) {
       mutation.reset()
       form.reset(defaultValues)
+      setInstallMethod("native")
     }
     onOpenChange(nextOpen)
   }
@@ -221,7 +259,9 @@ export function CreateEgressNodeDialog({
         {result ? (
           <div className="flex min-h-0 flex-1 flex-col">
             <ResponsiveDialogHeader>
-              <ResponsiveDialogTitle>{tt("节点已创建")}</ResponsiveDialogTitle>
+              <ResponsiveDialogTitle>
+                {tt(editingNode ? "接入命令已生成" : "节点已创建")}
+              </ResponsiveDialogTitle>
               <ResponsiveDialogDescription>
                 {tt("选择一种方式，在目标服务器执行一键安装脚本。")}
               </ResponsiveDialogDescription>
@@ -236,55 +276,69 @@ export function CreateEgressNodeDialog({
                 tlsEnabled={result.tls_enabled}
               />
 
-              <Tabs defaultValue="native" className="gap-3">
-                <div className="flex items-center justify-between gap-3">
-                  <FieldLabel>{tt("安装方式")}</FieldLabel>
-                  <TabsList className="grid h-auto w-64 max-w-full grid-cols-2">
-                    <TabsTrigger value="native" className="py-1.5">
-                      <ServerIcon data-icon="inline-start" />
-                      {tt("普通安装")}
-                    </TabsTrigger>
-                    <TabsTrigger value="docker" className="py-1.5">
-                      <ContainerIcon data-icon="inline-start" />
-                      Docker
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
+              <div className="flex items-center justify-between gap-3">
+                <FieldLabel>{tt("安装方式")}</FieldLabel>
+                <AnimatedSegmentedTabs
+                  label={tt("安装方式")}
+                  value={installMethod}
+                  onValueChange={setInstallMethod}
+                  className="max-w-full"
+                  listClassName="grid h-8 w-64 max-w-full grid-cols-2"
+                  triggerClassName="w-full px-3"
+                  options={[
+                    {
+                      value: "native",
+                      label: (
+                        <>
+                          <ServerIcon data-icon="inline-start" />
+                          {tt("普通安装")}
+                        </>
+                      ),
+                    },
+                    {
+                      value: "docker",
+                      label: (
+                        <>
+                          <ContainerIcon data-icon="inline-start" />
+                          Docker
+                        </>
+                      ),
+                    },
+                  ]}
+                />
+              </div>
 
-                <TabsContent value="native">
-                  <EgressCommandField
-                    label={tt("普通安装一键脚本")}
-                    command={result.native_install_command}
-                    description={tt(
-                      "自动识别 amd64/arm64，安装原生程序并注册 systemd 服务。"
-                    )}
-                    copyLabel={tt("复制一键脚本")}
-                    onCopy={() =>
-                      copyCommand(
-                        result.native_install_command,
-                        "普通安装脚本已复制"
-                      )
-                    }
-                  />
-                </TabsContent>
-
-                <TabsContent value="docker">
-                  <EgressCommandField
-                    label={tt("Docker 一键安装脚本")}
-                    command={result.docker_install_command}
-                    description={tt(
-                      "自动识别 amd64/arm64，安装或复用 Docker 并启动 Egress 容器。"
-                    )}
-                    copyLabel={tt("复制一键脚本")}
-                    onCopy={() =>
-                      copyCommand(
-                        result.docker_install_command,
-                        "Docker 安装脚本已复制"
-                      )
-                    }
-                  />
-                </TabsContent>
-              </Tabs>
+              {installMethod === "native" ? (
+                <EgressCommandField
+                  label={tt("普通安装一键脚本")}
+                  command={result.native_install_command}
+                  description={tt(
+                    "自动识别 amd64/arm64，安装原生程序并注册 systemd 服务。"
+                  )}
+                  copyLabel={tt("复制一键脚本")}
+                  onCopy={() =>
+                    copyCommand(
+                      result.native_install_command,
+                      "普通安装脚本已复制"
+                    )
+                  }
+                />
+              ) : (
+                <EgressCommandField
+                  label={tt("Docker 一键安装脚本")}
+                  command={result.docker_install_command}
+                  description={tt(
+                    "自动识别 amd64/arm64，安装或复用 Docker 并启动 Egress 容器。"
+                  )}
+                  copyLabel={tt("复制一键脚本")}
+                  onCopy={() =>
+                    copyCommand(
+                      result.docker_install_command,
+                      "Docker 安装脚本已复制"
+                    )
+                  }
+                />
+              )}
 
               <div className="flex items-start gap-2 text-xs text-muted-foreground">
                 <ShieldAlertIcon className="mt-0.5 size-3.5 shrink-0" />
@@ -313,20 +367,42 @@ export function CreateEgressNodeDialog({
           >
             <ResponsiveDialogHeader>
               <ResponsiveDialogTitle>
-                {tt(editingNode ? "修改节点" : "新增节点")}
+                {tt(
+                  enrollmentMode
+                    ? "接入节点"
+                    : editingNode
+                      ? "修改节点"
+                      : "新增节点"
+                )}
               </ResponsiveDialogTitle>
               <ResponsiveDialogDescription>
-                {editingActiveNode
-                  ? tt("修改节点名称；域名和运行容量由已安装节点配置保持。")
-                  : editingNode
-                    ? tt("修改待接入节点后会生成新的安装命令，旧命令立即失效。")
-                    : tt(
-                        "填写节点信息，系统将自动生成节点 ID 和一次性安装命令。"
-                      )}
+                {enrollmentMode
+                  ? tt(
+                      "重新生成一次性接入命令，并在目标服务器选择一种方式完成安装。"
+                    )
+                  : editingActiveNode
+                    ? tt("修改节点名称；域名和运行容量由已安装节点配置保持。")
+                    : editingNode
+                      ? tt(
+                          "修改待接入节点后会生成新的安装命令，旧命令立即失效。"
+                        )
+                      : tt(
+                          "填写节点信息，系统将自动生成节点 ID 和一次性安装命令。"
+                        )}
               </ResponsiveDialogDescription>
             </ResponsiveDialogHeader>
 
             <ResponsiveDialogBody className="flex flex-col gap-4 overflow-y-auto">
+              {enrollmentMode && editingNode ? (
+                <EnrollmentStatusCard
+                  node={editingNode}
+                  egressId={editingNode.egress_id}
+                  expiresAt={editingNode.enrollment_expires_at ?? ""}
+                  environment={editingNode.environment}
+                  tlsEnabled={editingNode.tls_enabled}
+                />
+              ) : null}
+
               <EnrollmentEnvironmentAlert
                 locale={locale}
                 editingActiveNode={editingActiveNode}
@@ -335,105 +411,117 @@ export function CreateEgressNodeDialog({
                 isError={enrollmentConfigQuery.isError}
               />
 
-              <FieldGroup className="grid gap-4 md:grid-cols-2">
-                {editingNode ? (
-                  <ReadOnlyField
-                    label={tt("节点 ID")}
-                    value={editingNode.egress_id}
-                    monospace
-                  />
-                ) : null}
-                <TextField
-                  id="egress-display-name"
-                  label={tt("节点名称")}
-                  placeholder={tt("请输入节点名称")}
-                  error={form.formState.errors.display_name?.message}
-                  disabled={mutation.isPending}
-                  inputProps={form.register("display_name")}
-                />
-                {!editingActiveNode ? (
-                  <TextField
-                    id="egress-domain"
-                    label={tt("节点域名")}
-                    placeholder="egress-sg.example.com"
-                    description={tt(
-                      "只填写域名，不要包含 http://、https:// 或端口。"
+              {enrollmentMode ? (
+                <Alert>
+                  <ShieldAlertIcon />
+                  <AlertTitle>{tt("将生成新的接入命令")}</AlertTitle>
+                  <AlertDescription>
+                    {tt(
+                      "生成后，之前生成的命令会立即失效；请复制新命令到目标服务器执行。"
                     )}
-                    error={form.formState.errors.domain?.message}
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <FieldGroup className="grid gap-4 md:grid-cols-2">
+                  {editingNode ? (
+                    <ReadOnlyField
+                      label={tt("节点 ID")}
+                      value={editingNode.egress_id}
+                      monospace
+                    />
+                  ) : null}
+                  <TextField
+                    id="egress-display-name"
+                    label={tt("节点名称")}
+                    placeholder={tt("请输入节点名称")}
+                    error={form.formState.errors.display_name?.message}
                     disabled={mutation.isPending}
-                    inputProps={form.register("domain")}
+                    inputProps={form.register("display_name")}
                   />
-                ) : null}
-                {editingActiveNode && editingNode ? (
-                  <ReadOnlyField
-                    label={tt("节点域名")}
-                    value={editingNode.domain}
-                    monospace
-                  />
-                ) : null}
-                {!editingActiveNode ? (
-                  <details className="rounded-lg border md:col-span-2">
-                    <summary className="cursor-pointer px-3 py-2 text-sm font-medium">
-                      {tt("高级容量配置")}
-                    </summary>
-                    <div className="grid gap-4 border-t p-3 md:grid-cols-2">
-                      <TextField
-                        id="egress-max-connections"
-                        label={tt("最大连接数")}
-                        type="number"
-                        min={1}
-                        max={16_384}
-                        error={form.formState.errors.max_connections?.message}
-                        disabled={mutation.isPending}
-                        inputProps={form.register("max_connections", {
-                          setValueAs: parseNumberInput,
-                        })}
-                      />
-                      <TextField
-                        id="egress-max-streams"
-                        label={tt("最大流数")}
-                        type="number"
-                        min={1}
-                        max={65_535}
-                        error={form.formState.errors.max_streams?.message}
-                        disabled={mutation.isPending}
-                        inputProps={form.register("max_streams", {
-                          setValueAs: parseNumberInput,
-                        })}
-                      />
-                      {!editingNode ? (
-                        <Field className="md:col-span-2">
-                          <label
-                            htmlFor="egress-replace-enrollment"
-                            className="flex cursor-pointer items-start gap-2"
-                          >
-                            <Checkbox
-                              id="egress-replace-enrollment"
-                              checked={replaceEnrollment}
-                              disabled={mutation.isPending}
-                              onCheckedChange={(checked) =>
-                                form.setValue("replace", checked === true, {
-                                  shouldDirty: true,
-                                })
-                              }
-                            />
-                            <span className="flex flex-col gap-1">
-                              <span className="text-sm font-medium">
-                                {tt("替换相同域名的未完成登记")}
+                  {!editingActiveNode ? (
+                    <TextField
+                      id="egress-domain"
+                      label={tt("节点域名")}
+                      placeholder="egress-sg.example.com"
+                      description={tt(
+                        "只填写域名，不要包含 http://、https:// 或端口。"
+                      )}
+                      error={form.formState.errors.domain?.message}
+                      disabled={mutation.isPending}
+                      inputProps={form.register("domain")}
+                    />
+                  ) : null}
+                  {editingActiveNode && editingNode ? (
+                    <ReadOnlyField
+                      label={tt("节点域名")}
+                      value={editingNode.domain}
+                      monospace
+                    />
+                  ) : null}
+                  {!editingActiveNode ? (
+                    <details className="rounded-lg border md:col-span-2">
+                      <summary className="cursor-pointer px-3 py-2 text-sm font-medium">
+                        {tt("高级容量配置")}
+                      </summary>
+                      <div className="grid gap-4 border-t p-3 md:grid-cols-2">
+                        <TextField
+                          id="egress-max-connections"
+                          label={tt("最大连接数")}
+                          type="number"
+                          min={1}
+                          max={16_384}
+                          error={form.formState.errors.max_connections?.message}
+                          disabled={mutation.isPending}
+                          inputProps={form.register("max_connections", {
+                            setValueAs: parseNumberInput,
+                          })}
+                        />
+                        <TextField
+                          id="egress-max-streams"
+                          label={tt("最大流数")}
+                          type="number"
+                          min={1}
+                          max={65_535}
+                          error={form.formState.errors.max_streams?.message}
+                          disabled={mutation.isPending}
+                          inputProps={form.register("max_streams", {
+                            setValueAs: parseNumberInput,
+                          })}
+                        />
+                        {!editingNode ? (
+                          <Field className="md:col-span-2">
+                            <label
+                              htmlFor="egress-replace-enrollment"
+                              className="flex cursor-pointer items-start gap-2"
+                            >
+                              <Checkbox
+                                id="egress-replace-enrollment"
+                                checked={replaceEnrollment}
+                                disabled={mutation.isPending}
+                                onCheckedChange={(checked) =>
+                                  form.setValue("replace", checked === true, {
+                                    shouldDirty: true,
+                                  })
+                                }
+                              />
+                              <span className="flex flex-col gap-1">
+                                <span className="text-sm font-medium">
+                                  {tt("替换相同域名的未完成登记")}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {tt(
+                                    "仅用于安装命令遗失或登记卡住；替换后，之前生成的命令会立即失效。"
+                                  )}
+                                </span>
                               </span>
-                              <span className="text-xs text-muted-foreground">
-                                {tt(
-                                  "仅用于安装命令遗失或登记卡住；替换后，之前生成的命令会立即失效。"
-                                )}
-                              </span>
-                            </span>
-                          </label>
-                        </Field>
-                      ) : null}
-                    </div>
-                  </details>
-                ) : null}
-              </FieldGroup>
+                            </label>
+                          </Field>
+                        ) : null}
+                      </div>
+                    </details>
+                  ) : null}
+                </FieldGroup>
+              )}
             </ResponsiveDialogBody>
 
             <ResponsiveDialogFooter>
@@ -457,11 +545,13 @@ export function CreateEgressNodeDialog({
                   editingActiveNode ? tt("正在保存节点") : tt("正在生成命令")
                 }
               >
-                {editingActiveNode
-                  ? tt("保存修改")
-                  : editingNode
-                    ? tt("保存并重新生成命令")
-                    : tt("生成安装命令")}
+                {enrollmentMode
+                  ? tt("生成并显示接入命令")
+                  : editingActiveNode
+                    ? tt("保存修改")
+                    : editingNode
+                      ? tt("保存并重新生成命令")
+                      : tt("生成安装命令")}
               </DialogActionButton>
             </ResponsiveDialogFooter>
           </form>

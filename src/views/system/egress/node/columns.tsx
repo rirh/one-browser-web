@@ -20,7 +20,11 @@ export function createEgressNodeColumns(
       accessorKey: "status",
       header: ({ column }) => tableHeader(column, tt("状态")),
       cell: ({ row }) => <StatusCell node={row.original} locale={locale} />,
-      meta: { label: tt("状态"), cellClassName: "w-28" },
+      meta: {
+        label: tt("状态"),
+        headerClassName: "w-36 min-w-36",
+        cellClassName: "w-36 min-w-36",
+      },
     },
     {
       accessorKey: "display_name",
@@ -76,23 +80,23 @@ function StatusCell({
 }) {
   return (
     <div className="flex flex-col items-start gap-1">
-      <span className="inline-flex items-center gap-1.5 text-xs font-medium">
-        <span
-          className={`size-1.5 rounded-full ${
-            node.online ? "bg-emerald-500" : "bg-muted-foreground/50"
-          }`}
-        />
-        {translateAdminText(locale, node.online ? "在线" : "离线")}
-      </span>
-      <div className="flex flex-wrap items-center gap-1">
+      <div className="flex items-center gap-2">
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium">
+          <span
+            className={`size-1.5 rounded-full ${
+              node.online ? "bg-emerald-500" : "bg-muted-foreground/50"
+            }`}
+          />
+          {translateAdminText(locale, node.online ? "在线" : "离线")}
+        </span>
         <StatusBadge status={node.status} locale={locale} />
-        <Badge variant="outline">
-          {translateAdminText(
-            locale,
-            node.environment === "development" ? "测试环境" : "正式环境"
-          )}
-        </Badge>
       </div>
+      <Badge variant="outline">
+        {translateAdminText(
+          locale,
+          node.environment === "development" ? "测试环境" : "正式环境"
+        )}
+      </Badge>
     </div>
   )
 }

@@ -264,6 +264,8 @@ export const enUSAdminExtraMessages: Record<string, string> = {
   已禁用: "Disabled",
   节点状态筛选: "Node status filter",
   节点操作: "Node actions",
+  接入命令: "Enrollment command",
+  接入节点: "Enroll node",
   修改节点: "Edit node",
   删除节点: "Delete node",
   取消登记: "Cancel enrollment",
@@ -313,6 +315,7 @@ export const enUSAdminExtraMessages: Record<string, string> = {
   "复制失败，请手动选择命令复制。":
     "Copy failed. Select the command manually to copy it.",
   安装命令已生成: "Install command generated",
+  接入命令已生成: "Enrollment command generated",
   一键脚本已生成: "One-click scripts generated",
   节点已创建: "Node created",
   "请在目标服务器上执行以下一次性命令。":
@@ -381,6 +384,11 @@ export const enUSAdminExtraMessages: Record<string, string> = {
     "Edit the node name. The installed node keeps its domain and runtime capacity configuration.",
   "修改待接入节点后会生成新的安装命令，旧命令立即失效。":
     "Editing a pending node generates a new install command and invalidates the previous command immediately.",
+  "重新生成一次性接入命令，并在目标服务器选择一种方式完成安装。":
+    "Generate a new one-time enrollment command, then choose an installation method on the target server.",
+  将生成新的接入命令: "A new enrollment command will be generated",
+  "生成后，之前生成的命令会立即失效；请复制新命令到目标服务器执行。":
+    "The previous command becomes invalid immediately after generation. Copy the new command and run it on the target server.",
   "如目标机器已有残留安装，请先执行卸载脚本；删除后当前一次性安装命令立即失效。":
     "If the target machine has a partial installation, run the uninstaller first. Deleting the node immediately invalidates its one-time installer.",
   "请先执行卸载脚本清理节点服务；仅未被环境分配、活动运行时或连接占用的节点可以删除。":
@@ -423,6 +431,7 @@ export const enUSAdminExtraMessages: Record<string, string> = {
   正在生成命令: "Generating command",
   正在保存节点: "Saving node",
   生成安装命令: "Generate install command",
+  生成并显示接入命令: "Generate and show enrollment command",
   保存并重新生成命令: "Save and regenerate command",
   "取消后当前一次性安装命令将立即失效。":
     "The current one-time install command becomes invalid immediately.",

@@ -86,6 +86,9 @@ export default function EgressNodePage() {
   const [createOpen, setCreateOpen] = React.useState(false)
   const [editingNode, setEditingNode] =
     React.useState<EgressNodeResource | null>(null)
+  const [nodeDialogMode, setNodeDialogMode] = React.useState<"edit" | "enroll">(
+    "edit"
+  )
   const [pendingAction, setPendingAction] =
     React.useState<EgressNodeAction | null>(null)
   const canList = hasPermission(authPermissions.data, "system:egress:list")
@@ -273,16 +276,23 @@ export default function EgressNodePage() {
             ) : undefined
           }
           renderRowActions={
-            canUpdate || canDelete
+            canCreate || canUpdate || canDelete
               ? (node) => (
                   <EgressNodeRowActions
                     node={node}
                     locale={locale}
                     disabled={actionMutation.isPending}
+                    canEnroll={canCreate}
                     canUpdate={canUpdate}
                     canDelete={canDelete}
+                    onEnroll={(selectedNode) => {
+                      setEditingNode(selectedNode)
+                      setNodeDialogMode("enroll")
+                      setCreateOpen(true)
+                    }}
                     onEdit={(selectedNode) => {
                       setEditingNode(selectedNode)
+                      setNodeDialogMode("edit")
                       setCreateOpen(true)
                     }}
                     onAction={setPendingAction}
@@ -296,10 +306,12 @@ export default function EgressNodePage() {
       <CreateEgressNodeDialog
         open={createOpen}
         editingNode={editingNode}
+        mode={nodeDialogMode}
         onOpenChange={(open) => {
           setCreateOpen(open)
           if (!open) {
             setEditingNode(null)
+            setNodeDialogMode("edit")
           }
         }}
       />
@@ -327,7 +339,7 @@ function updateNodePage(
   current: EgressNodePageResponse | undefined,
   event: EgressNodeEvent
 ) {
-  if (!current) {
+  if (!current || !Array.isArray(current.list)) {
     return current
   }
 

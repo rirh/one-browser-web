@@ -2,6 +2,7 @@ import {
   CirclePlayIcon,
   MoreHorizontalIcon,
   PencilIcon,
+  TerminalIcon,
   Trash2Icon,
   UnplugIcon,
 } from "lucide-react"
@@ -30,16 +31,20 @@ export function EgressNodeRowActions({
   node,
   locale,
   disabled,
+  canEnroll,
   canUpdate,
   canDelete,
+  onEnroll,
   onEdit,
   onAction,
 }: {
   node: EgressNodeResource
   locale: Locale
   disabled?: boolean
+  canEnroll: boolean
   canUpdate: boolean
   canDelete: boolean
+  onEnroll: (node: EgressNodeResource) => void
   onEdit: (node: EgressNodeResource) => void
   onAction: (action: EgressNodeAction) => void
 }) {
@@ -47,6 +52,10 @@ export function EgressNodeRowActions({
   const pending = node.lifecycle === "pending"
   const disabledNode = node.status === "disabled" || node.enabled === false
   const draining = node.status === "draining" || node.draining === true
+
+  if (!canUpdate && !canDelete && !(canEnroll && pending)) {
+    return null
+  }
 
   return (
     <DropdownMenu>
@@ -64,6 +73,12 @@ export function EgressNodeRowActions({
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuGroup>
           <DropdownMenuLabel>{tt("节点操作")}</DropdownMenuLabel>
+          {canEnroll && pending ? (
+            <DropdownMenuItem onSelect={() => onEnroll(node)}>
+              <TerminalIcon />
+              {tt("接入命令")}
+            </DropdownMenuItem>
+          ) : null}
           {canUpdate ? (
             <DropdownMenuItem onSelect={() => onEdit(node)}>
               <PencilIcon />
