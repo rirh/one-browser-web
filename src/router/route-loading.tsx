@@ -1,5 +1,6 @@
 import { APP_NAME } from "@/app"
 import { useLanguage } from "@/components/providers/language-context"
+import { SweepShine } from "@/components/ui/sweep-shine"
 
 export function RouteLoading() {
   const { t } = useLanguage()
@@ -17,9 +18,11 @@ export function RouteLoading() {
           className="size-16 rounded-[1.35rem] drop-shadow-[0_12px_20px_rgba(15,23,42,0.18)] select-none dark:drop-shadow-[0_14px_22px_rgba(0,0,0,0.4)]"
           draggable={false}
         />
-        <p className="sweep-shine mt-5 max-w-full text-sm/6 font-medium tracking-normal text-muted-foreground">
-          {t("common.loading")}
-        </p>
+        <SweepShine asChild>
+          <p className="mt-5 max-w-full text-sm/6 font-medium tracking-normal text-muted-foreground">
+            {t("common.loading")}
+          </p>
+        </SweepShine>
       </section>
     </main>
   )

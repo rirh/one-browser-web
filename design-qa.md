@@ -119,3 +119,58 @@ final result: passed
 - Repeat full screenshot comparison from an authenticated browser session if pixel-level verification is required.
 
 final result: blocked
+
+---
+
+# Header icon size design QA
+
+**Source visual truth**
+
+- `/var/folders/23/j16wtksn2gv4mpfkln3k6t_c0000gn/T/codex-clipboard-4d03a242-0f7c-4dc7-8b91-5c266395a7bb.png`
+- Source dimensions: `280 × 152`. The source records the reported defect: the language control is `28 × 28` CSS pixels while the theme control is `24 × 24`.
+
+**Rendered implementation evidence**
+
+- Full page: `/Users/zh/.codex/visualizations/2026/07/26/019f9ebd-16cc-7a60-8422-8aa179599350/header-icons/implementation-download-page.png`
+- Focused Header crop: `/Users/zh/.codex/visualizations/2026/07/26/019f9ebd-16cc-7a60-8422-8aa179599350/header-icons/implementation-header-icons.png`
+- Focused source/implementation comparison: `/Users/zh/.codex/visualizations/2026/07/26/019f9ebd-16cc-7a60-8422-8aa179599350/header-icons/header-icons-comparison.png`
+
+**Viewport and normalization**
+
+- Browser CSS viewport: `768 × 600`, device scale factor `1`.
+- Implementation crop: `140 × 76`, upscaled to `280 × 152` only to normalize against the source screenshot density.
+- State: Simplified Chinese, light theme, public download page Header.
+
+**Comparison evidence**
+
+- Full-view evidence confirms both controls remain aligned in the existing Header layout.
+- Focused comparison confirms both rendered buttons are `28 × 28` CSS pixels and both SVG bounds are `16 × 16`.
+- A separate focused region was required because the full-page screenshot renders the controls too small for reliable pixel comparison.
+
+**Findings**
+
+- No remaining P0/P1/P2 findings.
+- Fonts and typography: unchanged; this scope contains icon-only controls with accessible labels.
+- Spacing and layout rhythm: both controls now use the same `icon-sm` size, radius, vertical alignment, and existing `6px` Header gap.
+- Colors and visual tokens: existing outline, muted background, hover, dark-mode, and border tokens are unchanged.
+- Image quality and asset fidelity: both controls continue to use the existing Lucide icon components; no raster assets or replacement drawings were introduced.
+- Copy and content: unchanged.
+- Accessibility and interaction: both controls retain their accessible labels. Theme switching changed the root state from light to dark and back; the language menu opened with Simplified Chinese selected and then closed.
+
+**Comparison history**
+
+1. P2: the language control used `icon-sm` while the theme control used `icon-xs`, producing mismatched `28 × 28` and `24 × 24` button frames plus mismatched `16 × 16` and `12 × 12` icon bounds.
+2. Fix: changed the shared `ThemeToggleButton` to `icon-sm`.
+3. Post-fix evidence: browser-computed bounds report both buttons at `28 × 28` and both icons at `16 × 16`; the focused comparison shows matching frames.
+
+**Primary interactions tested**
+
+- Toggled light → dark → light.
+- Opened and closed the language menu.
+- Checked browser console warnings and errors: none.
+
+**Follow-up polish**
+
+- None required for this scope.
+
+final result: passed

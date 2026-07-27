@@ -16,6 +16,7 @@ import { gsap } from "gsap"
 import { APP_NAME } from "@/app"
 import { useTranslation } from "@/components/providers/language-context"
 import { Button } from "@/components/ui/button"
+import { SweepShine } from "@/components/ui/sweep-shine"
 import { wakeAppRedirect } from "@/lib/app-redirect"
 import { cn } from "@/lib/utils"
 
@@ -58,9 +59,11 @@ export function AppAuthorizationPending({
           className="size-16 rounded-[1.35rem] drop-shadow-[0_12px_20px_rgba(15,23,42,0.18)] select-none dark:drop-shadow-[0_14px_22px_rgba(0,0,0,0.4)]"
           draggable={false}
         />
-        <p className="sweep-shine mt-5 max-w-full text-sm/6 font-medium tracking-normal text-muted-foreground">
-          {t("appAuth.pendingDescription", { appName: APP_NAME })}
-        </p>
+        <SweepShine asChild>
+          <p className="mt-5 max-w-full text-sm/6 font-medium tracking-normal text-muted-foreground">
+            {t("appAuth.pendingDescription", { appName: APP_NAME })}
+          </p>
+        </SweepShine>
       </section>
     </main>
   )

@@ -29,32 +29,26 @@ type ThemeToggleButtonProps = {
 }
 
 const THEME_TOGGLE_VIEW_TRANSITION_CSS = `
-  @supports (view-transition-name: none) {
-    :root {
-      view-transition-name: root;
-    }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
 
-    ::view-transition-old(root),
-    ::view-transition-new(root) {
-      animation: none;
-      mix-blend-mode: normal;
-    }
+  ::view-transition-old(root) {
+    z-index: 1;
+  }
 
-    ::view-transition-old(root) {
-      z-index: 1;
-    }
+  ::view-transition-new(root) {
+    z-index: 2147483646;
+  }
 
-    ::view-transition-new(root) {
-      z-index: 9999;
-    }
+  .dark::view-transition-old(root) {
+    z-index: 2147483646;
+  }
 
-    [data-theme-switching='dark']::view-transition-old(root) {
-      z-index: 9999;
-    }
-
-    [data-theme-switching='dark']::view-transition-new(root) {
-      z-index: 1;
-    }
+  .dark::view-transition-new(root) {
+    z-index: 1;
   }
 `
 
@@ -89,18 +83,17 @@ export function ThemeToggleButton({
     }
 
     const rect = event.currentTarget.getBoundingClientRect()
-    const x = event.clientX || rect.left + rect.width / 2
-    const y = event.clientY || rect.top + rect.height / 2
+    const x = rect.left + rect.width / 2
+    const y = rect.top + rect.height / 2
     const endRadius = Math.hypot(
       Math.max(x, window.innerWidth - x),
       Math.max(y, window.innerHeight - y)
     )
-
-    if (nextTheme === "dark") {
-      document.documentElement.dataset.themeSwitching = "dark"
-    } else {
-      delete document.documentElement.dataset.themeSwitching
-    }
+    const ratioX = (100 * x) / window.innerWidth
+    const ratioY = (100 * y) / window.innerHeight
+    const referenceRadius =
+      Math.hypot(window.innerWidth, window.innerHeight) / Math.SQRT2
+    const ratioRadius = (100 * endRadius) / referenceRadius
 
     const transition = transitionDocument.startViewTransition(() => {
       updateTheme(nextTheme)
@@ -109,8 +102,8 @@ export function ThemeToggleButton({
     void transition.ready
       .then(() => {
         const clipPath = [
-          `circle(0px at ${x}px ${y}px)`,
-          `circle(${endRadius}px at ${x}px ${y}px)`,
+          `circle(0% at ${ratioX}% ${ratioY}%)`,
+          `circle(${ratioRadius}% at ${ratioX}% ${ratioY}%)`,
         ]
 
         document.documentElement.animate(
@@ -118,9 +111,9 @@ export function ThemeToggleButton({
             clipPath: nextTheme === "dark" ? [...clipPath].reverse() : clipPath,
           },
           {
-            duration: 500,
-            easing: "cubic-bezier(0.4, 0, 0.2, 1)",
-            fill: "forwards",
+            duration: 400,
+            easing: "ease-in",
+            fill: "both",
             pseudoElement:
               nextTheme === "dark"
                 ? "::view-transition-old(root)"
@@ -128,18 +121,7 @@ export function ThemeToggleButton({
           }
         )
       })
-      .catch(() => {
-        delete document.documentElement.dataset.themeSwitching
-      })
-
-    void Promise.all([
-      transition.ready,
-      new Promise<void>((resolve) => setTimeout(resolve, 550)),
-    ])
       .catch(() => undefined)
-      .then(() => {
-        delete document.documentElement.dataset.themeSwitching
-      })
   }
 
   return (
@@ -152,7 +134,7 @@ export function ThemeToggleButton({
           className
         )}
         onClick={handleToggle}
-        size="icon-xs"
+        size="icon-sm"
         title={accessibleLabel}
         variant="outline"
       >
