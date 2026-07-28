@@ -3,12 +3,46 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
-import styles from "./sweep-shine.module.css"
-
 type SweepShineProps = React.ComponentProps<"span"> & {
   active?: boolean
   asChild?: boolean
 }
+
+const SWEEP_SHINE_CSS = `
+  @keyframes sweep-shine {
+    0% {
+      background-position: 200% 0;
+    }
+
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  .sweep-shine {
+    -webkit-text-fill-color: transparent;
+    background: linear-gradient(
+        90deg,
+        currentColor 0%,
+        currentColor 40%,
+        rgba(255, 255, 255, 0.9) 50%,
+        currentColor 60%,
+        currentColor 100%
+      )
+      0 0 / 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: 4s linear infinite sweep-shine;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sweep-shine {
+      animation: none;
+      -webkit-text-fill-color: currentColor;
+      background: none;
+    }
+  }
+`
 
 function SweepShine({
   active = true,
@@ -19,11 +53,16 @@ function SweepShine({
   const Comp = asChild ? Slot.Root : "span"
 
   return (
-    <Comp
-      data-slot="sweep-shine"
-      className={cn(active && styles.sweepShine, className)}
-      {...props}
-    />
+    <>
+      <style href="sweep-shine" precedence="default">
+        {SWEEP_SHINE_CSS}
+      </style>
+      <Comp
+        data-slot="sweep-shine"
+        className={cn(active && "sweep-shine", className)}
+        {...props}
+      />
+    </>
   )
 }
 
