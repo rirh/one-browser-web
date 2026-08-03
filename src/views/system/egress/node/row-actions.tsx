@@ -50,10 +50,12 @@ export function EgressNodeRowActions({
 }) {
   const tt = (text: string) => translateAdminText(locale, text)
   const pending = node.lifecycle === "pending"
+  const incomplete =
+    pending || (node.status === "init" && node.heartbeat_at === null)
   const disabledNode = node.status === "disabled" || node.enabled === false
   const draining = node.status === "draining" || node.draining === true
 
-  if (!canUpdate && !canDelete && !(canEnroll && pending)) {
+  if (!canUpdate && !canDelete && !(canEnroll && incomplete)) {
     return null
   }
 
@@ -73,10 +75,10 @@ export function EgressNodeRowActions({
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuGroup>
           <DropdownMenuLabel>{tt("节点操作")}</DropdownMenuLabel>
-          {canEnroll && pending ? (
+          {canEnroll && incomplete ? (
             <DropdownMenuItem onSelect={() => onEnroll(node)}>
               <TerminalIcon />
-              {tt("接入命令")}
+              {tt(pending ? "接入命令" : "重新接入")}
             </DropdownMenuItem>
           ) : null}
           {canUpdate ? (

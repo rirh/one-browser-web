@@ -265,6 +265,7 @@ export const enUSAdminExtraMessages: Record<string, string> = {
   节点状态筛选: "Node status filter",
   节点操作: "Node actions",
   接入命令: "Enrollment command",
+  重新接入: "Re-enroll",
   接入节点: "Enroll node",
   修改节点: "Edit node",
   删除节点: "Delete node",

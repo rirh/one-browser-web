@@ -112,9 +112,13 @@ export function CreateEgressNodeDialog({
   const queryClient = useQueryClient()
   const [installMethod, setInstallMethod] =
     React.useState<InstallMethod>("native")
-  const editingActiveNode = editingNode?.lifecycle === "active"
   const enrollmentMode =
-    mode === "enroll" && editingNode?.lifecycle === "pending"
+    mode === "enroll" &&
+    editingNode != null &&
+    (editingNode.lifecycle === "pending" ||
+      (editingNode.status === "init" && editingNode.heartbeat_at === null))
+  const editingActiveNode =
+    editingNode?.lifecycle === "active" && !enrollmentMode
   const enrollmentConfigQuery = useQuery({
     queryKey: systemQueryKeys.egressEnrollmentConfig,
     queryFn: getEgressEnrollmentConfig,
