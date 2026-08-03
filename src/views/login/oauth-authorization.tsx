@@ -20,7 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Spinner } from "@/components/ui/spinner"
+import { SweepShine } from "@/components/ui/sweep-shine"
 import {
   TurnstileWidget,
   type TurnstileWidgetHandle,
@@ -250,14 +250,15 @@ function AuthorizationCard({
         {children}
         {isAuthorizing ? (
           <div
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-foreground"
+            className="flex w-full items-center justify-center rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-foreground"
             role="status"
             aria-live="polite"
           >
-            <Spinner className="size-4" />
-            <span>
-              {t("appAuth.pendingDescription", { appName: APP_NAME })}
-            </span>
+            <SweepShine asChild>
+              <span>
+                {t("appAuth.pendingDescription", { appName: APP_NAME })}
+              </span>
+            </SweepShine>
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
