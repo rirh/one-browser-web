@@ -1,0 +1,1 @@
+export { RemoteTeamsPage } from './page';

@@ -1,0 +1,1 @@
+export { useRemoteProxiesQuery } from './queries';

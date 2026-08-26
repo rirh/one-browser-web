@@ -1,39 +1,32 @@
-"use client"
-
-import * as React from "react"
-import { LaptopIcon, MoonIcon, SunIcon } from "lucide-react"
-
-import { AnimatedSegmentedTabs } from "@/components/ui/animated-segmented-tabs"
-import { cn } from "@/lib/utils"
-
-import { useTheme } from "./provider"
+import { AnimatedSegmentedTabs } from '@/components/ui/animated-segmented-tabs';
+import { cn } from '@/lib/utils';
 import {
-  type Theme,
-  type ThemeName,
-  applyThemeToRoot,
-  getDomTheme,
-  getSystemTheme,
-} from "./shared"
+  ComputerIcon,
+  Moon02Icon,
+  Sun02Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import * as React from 'react';
 
-type ThemePointer = { x: number; y: number }
+import { useTheme } from './runtime';
+import { type ThemeName, applyThemeToRoot, getDomTheme } from './shared';
+
+type ThemeMode = 'system' | 'light' | 'dark';
+type ThemePointer = { x: number; y: number };
 
 type ViewTransition = {
-  ready: Promise<void>
-}
+  ready: Promise<void>;
+};
 
 type DocumentWithViewTransition = Document & {
-  startViewTransition?: (update: () => Promise<void> | void) => ViewTransition
-}
+  startViewTransition?: (update: () => Promise<void> | void) => ViewTransition;
+};
 
 const themeModes = [
-  { value: "system", labelKey: "theme.system", Icon: LaptopIcon },
-  { value: "light", labelKey: "theme.light", Icon: SunIcon },
-  { value: "dark", labelKey: "theme.dark", Icon: MoonIcon },
-] as const satisfies ReadonlyArray<{
-  value: Theme
-  labelKey: "theme.system" | "theme.light" | "theme.dark"
-  Icon: typeof LaptopIcon
-}>
+  { value: 'light', label: '浅色模式', icon: Sun02Icon },
+  { value: 'dark', label: '深色模式', icon: Moon02Icon },
+  { value: 'system', label: '跟随系统', icon: ComputerIcon },
+] as const;
 
 const THEME_TOGGLE_VIEW_TRANSITION_CSS = `
   @supports (view-transition-name: none) {
@@ -63,196 +56,204 @@ const THEME_TOGGLE_VIEW_TRANSITION_CSS = `
       z-index: 1;
     }
   }
-`
+`;
 
-function isTheme(value: string | undefined): value is Theme {
-  return value === "system" || value === "light" || value === "dark"
+function isThemeMode(value: string | undefined): value is ThemeMode {
+  return value === 'system' || value === 'light' || value === 'dark';
 }
 
-function resolveThemeMode(theme: Theme): ThemeName {
-  return theme === "system" ? getSystemTheme() : theme
+function getSystemTheme(): ThemeName {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
+}
+
+function resolveThemeMode(theme: ThemeMode): ThemeName {
+  return theme === 'system' ? getSystemTheme() : theme;
 }
 
 function ThemeToggleViewTransitionStyles() {
-  return <style>{THEME_TOGGLE_VIEW_TRANSITION_CSS}</style>
+  return <style>{THEME_TOGGLE_VIEW_TRANSITION_CSS}</style>;
 }
 
 export function ThemeModeToggle({
   className,
-  label,
-  labels,
+  display = 'compact',
 }: {
-  className?: string
-  label?: string
-  labels: Record<(typeof themeModes)[number]["labelKey"], string>
+  className?: string;
+  display?: 'compact' | 'full';
 }) {
-  const { theme, setTheme } = useTheme()
-  const rootRef = React.useRef<HTMLDivElement>(null)
-  const pointerRef = React.useRef<ThemePointer | null>(null)
-  const transitionFrameRef = React.useRef<number | null>(null)
+  const { theme, setTheme } = useTheme();
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const pointerRef = React.useRef<ThemePointer | null>(null);
+  const transitionFrameRef = React.useRef<number | null>(null);
+  const value = isThemeMode(theme) ? theme : 'system';
   const options = React.useMemo(
     () =>
-      themeModes.map((mode) => {
-        const label = labels[mode.labelKey]
-
-        return {
-          value: mode.value,
-          tooltip: label,
-          label: (
-            <>
-              <mode.Icon aria-hidden="true" strokeWidth={2} />
-              <span className="sr-only">{label}</span>
-            </>
-          ),
-        }
-      }),
-    [labels]
-  )
+      themeModes.map((mode) => ({
+        value: mode.value,
+        tooltip: mode.label,
+        label: (
+          <>
+            <HugeiconsIcon
+              icon={mode.icon}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+            <span className={display === 'compact' ? 'sr-only' : undefined}>
+              {mode.label}
+            </span>
+          </>
+        ),
+      })),
+    [display],
+  );
 
   React.useEffect(() => {
     return () => {
       if (transitionFrameRef.current !== null) {
-        window.cancelAnimationFrame(transitionFrameRef.current)
+        window.cancelAnimationFrame(transitionFrameRef.current);
       }
-    }
-  }, [])
+    };
+  }, []);
 
-  function updateTheme(nextMode: Theme, nextResolvedTheme: ThemeName) {
-    applyThemeToRoot(nextResolvedTheme)
-    setTheme(nextMode)
+  function updateTheme(nextMode: ThemeMode, nextResolvedTheme: ThemeName) {
+    applyThemeToRoot(nextResolvedTheme);
+    setTheme(nextMode);
   }
 
   function getTransitionOrigin(): ThemePointer {
-    const pointer = pointerRef.current
+    const pointer = pointerRef.current;
 
     if (pointer) {
-      return pointer
+      return pointer;
     }
 
-    const rect = rootRef.current?.getBoundingClientRect()
+    const rect = rootRef.current?.getBoundingClientRect();
     if (!rect) {
       return {
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
-      }
+      };
     }
 
     return {
       x: rect.left + rect.width / 2,
       y: rect.top + rect.height / 2,
-    }
+    };
   }
 
-  function startThemeTransition(nextTheme: Theme, origin: ThemePointer) {
-    const nextResolvedTheme = resolveThemeMode(nextTheme)
+  function startThemeTransition(nextTheme: ThemeMode, origin: ThemePointer) {
+    const nextResolvedTheme = resolveThemeMode(nextTheme);
     if (getDomTheme() === nextResolvedTheme) {
-      updateTheme(nextTheme, nextResolvedTheme)
-      return
+      updateTheme(nextTheme, nextResolvedTheme);
+      return;
     }
 
-    const transitionDocument = document as DocumentWithViewTransition
+    const transitionDocument = document as DocumentWithViewTransition;
     const supportsTransition =
-      typeof transitionDocument.startViewTransition === "function" &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      typeof transitionDocument.startViewTransition === 'function' &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (!supportsTransition) {
-      updateTheme(nextTheme, nextResolvedTheme)
-      return
+      updateTheme(nextTheme, nextResolvedTheme);
+      return;
     }
 
-    const { x, y } = origin
+    const { x, y } = origin;
     const endRadius = Math.hypot(
       Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y)
-    )
+      Math.max(y, window.innerHeight - y),
+    );
 
-    if (nextResolvedTheme === "dark") {
-      document.documentElement.dataset.themeSwitching = "dark"
+    if (nextResolvedTheme === 'dark') {
+      document.documentElement.dataset.themeSwitching = 'dark';
     } else {
-      delete document.documentElement.dataset.themeSwitching
+      delete document.documentElement.dataset.themeSwitching;
     }
 
     const transition = transitionDocument.startViewTransition(() => {
-      updateTheme(nextTheme, nextResolvedTheme)
-    })
+      updateTheme(nextTheme, nextResolvedTheme);
+    });
 
     void transition.ready
       .then(() => {
         const clipPath = [
           `circle(0px at ${x}px ${y}px)`,
           `circle(${endRadius}px at ${x}px ${y}px)`,
-        ]
+        ];
 
         document.documentElement.animate(
           {
             clipPath:
-              nextResolvedTheme === "dark" ? [...clipPath].reverse() : clipPath,
+              nextResolvedTheme === 'dark' ? [...clipPath].reverse() : clipPath,
           },
           {
             duration: 500,
-            easing: "cubic-bezier(0.4, 0, 0.2, 1)",
-            fill: "forwards",
+            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            fill: 'forwards',
             pseudoElement:
-              nextResolvedTheme === "dark"
-                ? "::view-transition-old(root)"
-                : "::view-transition-new(root)",
-          }
-        )
+              nextResolvedTheme === 'dark'
+                ? '::view-transition-old(root)'
+                : '::view-transition-new(root)',
+          },
+        );
       })
       .catch(() => {
-        delete document.documentElement.dataset.themeSwitching
-      })
+        delete document.documentElement.dataset.themeSwitching;
+      });
 
-    void Promise.all([
-      transition.ready,
-      new Promise<void>((resolve) => setTimeout(resolve, 550)),
-    ])
-      .catch(() => undefined)
-      .then(() => {
-        delete document.documentElement.dataset.themeSwitching
-      })
+    window.setTimeout(() => {
+      delete document.documentElement.dataset.themeSwitching;
+    }, 550);
   }
 
-  function handleThemeChange(nextTheme: Theme) {
-    if (nextTheme === theme) {
-      return
+  function handleThemeChange(nextTheme: ThemeMode) {
+    if (nextTheme === value) {
+      return;
     }
 
-    const origin = getTransitionOrigin()
+    const origin = getTransitionOrigin();
 
     if (transitionFrameRef.current !== null) {
-      window.cancelAnimationFrame(transitionFrameRef.current)
+      window.cancelAnimationFrame(transitionFrameRef.current);
     }
 
     transitionFrameRef.current = window.requestAnimationFrame(() => {
       transitionFrameRef.current = window.requestAnimationFrame(() => {
-        transitionFrameRef.current = null
-        startThemeTransition(nextTheme, origin)
-      })
-    })
+        transitionFrameRef.current = null;
+        startThemeTransition(nextTheme, origin);
+      });
+    });
   }
 
   return (
     <div
       ref={rootRef}
-      className={cn("inline-flex shrink-0", className)}
+      className={cn('inline-flex shrink-0', className)}
       onPointerDownCapture={(event) => {
-        pointerRef.current = { x: event.clientX, y: event.clientY }
+        pointerRef.current = { x: event.clientX, y: event.clientY };
       }}
     >
       <ThemeToggleViewTransitionStyles />
       <AnimatedSegmentedTabs
-        label={label ?? labels["theme.system"]}
+        label="主题"
         options={options}
-        value={theme}
-        onValueChange={(nextTheme) => {
-          if (isTheme(nextTheme)) {
-            handleThemeChange(nextTheme)
-          }
-        }}
-        listClassName="h-6 rounded-md p-0.5"
-        triggerClassName="min-w-6 px-1.5"
+        value={value}
+        onValueChange={handleThemeChange}
+        className={display === 'full' ? 'w-full' : undefined}
+        listClassName={cn(
+          display === 'compact'
+            ? 'h-6 rounded-md p-0.5'
+            : 'grid h-auto w-full grid-cols-3 gap-2 rounded-none bg-transparent p-0',
+        )}
+        triggerClassName={cn(
+          display === 'compact'
+            ? 'min-w-6 px-1.5'
+            : 'h-8 rounded-md border border-input px-1.5 text-xs text-foreground data-[state=active]:border-primary data-[state=active]:bg-primary/5 data-[state=active]:ring-1 data-[state=active]:ring-primary/40',
+        )}
+        highlightClassName={display === 'full' ? 'hidden' : undefined}
       />
     </div>
-  )
+  );
 }

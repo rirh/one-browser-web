@@ -1,27 +1,31 @@
-import BuildInfo from "@/components/build-info"
-import { LanguageProvider } from "@/components/providers/language"
-import { ThemeProvider } from "@/components/theme/provider"
-import { Toaster } from "@/components/ui/sonner"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { AppUpdateChecker } from "./app-update-checker"
-import { QueryProvider } from "./query"
+import {
+  AppearancePreferencesProvider,
+  ThemeColorProvider,
+} from '@/components/theme';
+import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { I18nProvider } from '@/i18n/provider';
+
+import { AppUpdateChecker } from './app-update-checker';
+import BuildInfo from './build-info';
+import { QueryProvider } from './query';
+import { ThemeProvider } from './theme';
 
 export function Providers({ children }: React.PropsWithChildren) {
   return (
-    <QueryProvider>
-      <LanguageProvider>
+    <I18nProvider>
+      <QueryProvider>
         <ThemeProvider>
-          <TooltipProvider>{children}</TooltipProvider>
-          <Toaster
-            richColors
-            position="bottom-right"
-            duration={5_000}
-            closeButton
-          />
-          <BuildInfo />
-          <AppUpdateChecker />
+          <ThemeColorProvider>
+            <AppearancePreferencesProvider>
+              <TooltipProvider>{children}</TooltipProvider>
+              <BuildInfo />
+              <AppUpdateChecker />
+              <Toaster position="bottom-right" richColors />
+            </AppearancePreferencesProvider>
+          </ThemeColorProvider>
         </ThemeProvider>
-      </LanguageProvider>
-    </QueryProvider>
-  )
+      </QueryProvider>
+    </I18nProvider>
+  );
 }

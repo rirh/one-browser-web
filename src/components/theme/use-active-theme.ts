@@ -1,13 +1,11 @@
-"use client"
-
-import { useTheme } from "./provider"
-import { type ThemeName, getDomTheme, resolveThemeName } from "./shared"
+import { useTheme } from './runtime';
+import { type ThemeName, getDomTheme, resolveThemeName } from './shared';
 
 export function useActiveTheme() {
-  const { resolvedTheme } = useTheme()
+  const { resolvedTheme } = useTheme();
   const theme: ThemeName =
     resolveThemeName(resolvedTheme) ||
-    (typeof document === "undefined" ? "dark" : getDomTheme())
+    (typeof document === 'undefined' ? 'dark' : getDomTheme());
 
-  return theme
+  return theme;
 }

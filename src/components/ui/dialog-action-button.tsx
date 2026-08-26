@@ -1,48 +1,47 @@
-import * as React from "react"
-
 import {
   AlertDialogAction,
   AlertDialogCancel,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { Kbd, KbdGroup } from "@/components/ui/kbd"
-import { Spinner } from "@/components/ui/spinner"
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Kbd, KbdGroup } from '@/components/ui/kbd';
+import { SweepShine } from '@/components/ui/sweep-shine';
+import * as React from 'react';
 
-type DialogActionKind = "confirm" | "cancel"
-type DialogActionTone = DialogActionKind | "destructive"
-type DialogShortcutKind = DialogActionKind | "none"
+type DialogActionKind = 'confirm' | 'cancel';
+type DialogActionTone = DialogActionKind | 'destructive';
+type ShortcutKind = DialogActionKind | 'none';
 
 type DialogActionButtonProps = Omit<
   React.ComponentProps<typeof Button>,
-  "children"
+  'children'
 > & {
-  action?: DialogActionKind
-  children: React.ReactNode
-  loading?: boolean
-  loadingText?: React.ReactNode
-  shortcut?: DialogShortcutKind
-}
+  action?: DialogActionKind;
+  children: React.ReactNode;
+  loading?: boolean;
+  loadingText?: React.ReactNode;
+  shortcut?: ShortcutKind;
+};
 
 type AlertDialogActionButtonProps = Omit<
   React.ComponentProps<typeof AlertDialogAction>,
-  "children"
+  'children'
 > & {
-  children: React.ReactNode
-  loading?: boolean
-  loadingText?: React.ReactNode
-  shortcut?: DialogShortcutKind
-}
+  children: React.ReactNode;
+  loading?: boolean;
+  loadingText?: React.ReactNode;
+  shortcut?: ShortcutKind;
+};
 
 type AlertDialogCancelButtonProps = Omit<
   React.ComponentProps<typeof AlertDialogCancel>,
-  "children"
+  'children'
 > & {
-  children?: React.ReactNode
-  shortcut?: DialogShortcutKind
-}
+  children?: React.ReactNode;
+  shortcut?: ShortcutKind;
+};
 
 function DialogActionButton({
-  action = "confirm",
+  action = 'confirm',
   children,
   disabled,
   loading,
@@ -52,22 +51,21 @@ function DialogActionButton({
   variant,
   ...props
 }: DialogActionButtonProps) {
-  const tone = resolveShortcutTone(action, variant)
-  const buttonRef = React.useRef<HTMLButtonElement>(null)
-  const composedRef = useComposedButtonRef(buttonRef, ref)
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const composedRef = useComposedButtonRef(buttonRef, ref);
 
   useDialogActionShortcut({
     buttonRef,
     disabled: disabled || loading,
     shortcut,
-  })
+  });
 
   return (
     <Button
-      variant={variant ?? (action === "cancel" ? "outline" : "default")}
+      variant={variant ?? (action === 'cancel' ? 'outline' : 'default')}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      data-dialog-shortcut={shortcut === "none" ? undefined : shortcut}
+      data-dialog-shortcut={shortcut === 'none' ? undefined : shortcut}
       {...props}
       ref={composedRef}
     >
@@ -75,12 +73,12 @@ function DialogActionButton({
         loading={loading}
         loadingText={loadingText}
         shortcut={shortcut}
-        tone={tone}
+        tone={variant === 'destructive' ? 'destructive' : action}
       >
         {children}
       </DialogActionButtonContent>
     </Button>
-  )
+  );
 }
 
 function AlertDialogActionButton({
@@ -89,25 +87,23 @@ function AlertDialogActionButton({
   loading,
   loadingText,
   ref,
-  shortcut = "confirm",
-  variant,
+  shortcut = 'confirm',
   ...props
 }: AlertDialogActionButtonProps) {
-  const buttonRef = React.useRef<HTMLButtonElement>(null)
-  const composedRef = useComposedButtonRef(buttonRef, ref)
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const composedRef = useComposedButtonRef(buttonRef, ref);
 
   useDialogActionShortcut({
     buttonRef,
     disabled: disabled || loading,
     shortcut,
-  })
+  });
 
   return (
     <AlertDialogAction
-      variant={variant}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      data-dialog-shortcut={shortcut === "none" ? undefined : shortcut}
+      data-dialog-shortcut={shortcut === 'none' ? undefined : shortcut}
       {...props}
       ref={composedRef}
     >
@@ -115,34 +111,34 @@ function AlertDialogActionButton({
         loading={loading}
         loadingText={loadingText}
         shortcut={shortcut}
-        tone={resolveShortcutTone("confirm", variant)}
+        tone={props.variant === 'destructive' ? 'destructive' : 'confirm'}
       >
         {children}
       </DialogActionButtonContent>
     </AlertDialogAction>
-  )
+  );
 }
 
 function AlertDialogCancelButton({
-  children = "取消",
-  shortcut = "cancel",
+  children = '取消',
+  shortcut = 'cancel',
   disabled,
   ref,
   ...props
 }: AlertDialogCancelButtonProps) {
-  const buttonRef = React.useRef<HTMLButtonElement>(null)
-  const composedRef = useComposedButtonRef(buttonRef, ref)
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const composedRef = useComposedButtonRef(buttonRef, ref);
 
   useDialogActionShortcut({
     buttonRef,
     disabled,
     shortcut,
-  })
+  });
 
   return (
     <AlertDialogCancel
       disabled={disabled}
-      data-dialog-shortcut={shortcut === "none" ? undefined : shortcut}
+      data-dialog-shortcut={shortcut === 'none' ? undefined : shortcut}
       {...props}
       ref={composedRef}
     >
@@ -150,7 +146,7 @@ function AlertDialogCancelButton({
         {children}
       </DialogActionButtonContent>
     </AlertDialogCancel>
-  )
+  );
 }
 
 function DialogActionButtonContent({
@@ -160,104 +156,91 @@ function DialogActionButtonContent({
   shortcut,
   tone,
 }: {
-  children: React.ReactNode
-  loading?: boolean
-  loadingText?: React.ReactNode
-  shortcut: DialogShortcutKind
-  tone: DialogActionTone
+  children: React.ReactNode;
+  loading?: boolean;
+  loadingText?: React.ReactNode;
+  shortcut: ShortcutKind;
+  tone: DialogActionTone;
 }) {
   return (
     <>
-      {loading ? <Spinner data-icon="inline-start" /> : null}
-      {loading && loadingText ? loadingText : children}
-      <DialogShortcutHint shortcut={shortcut} tone={tone} />
+      {loading ? <SweepShine>{loadingText || children}</SweepShine> : children}
+      <DialogShortcutHint tone={tone} shortcut={shortcut} />
     </>
-  )
+  );
 }
 
 function DialogShortcutHint({
-  shortcut,
   tone,
+  shortcut,
 }: {
-  shortcut: DialogShortcutKind
-  tone: DialogActionTone
+  tone: DialogActionTone;
+  shortcut: ShortcutKind;
 }) {
-  const keys = getShortcutKeys(shortcut)
-
-  if (keys.length === 0) {
-    return null
+  const keys = shortcutKeys(shortcut);
+  if (!keys.length) {
+    return null;
   }
 
   return (
     <KbdGroup className="ml-0.5">
       {keys.map((key) => (
-        <Kbd key={key} className={getKbdTone(tone)}>
+        <Kbd key={key} className={shortcutToneClassName(tone)}>
           {key}
         </Kbd>
       ))}
     </KbdGroup>
-  )
+  );
 }
 
-function resolveShortcutTone(
-  action: DialogActionKind,
-  variant?: React.ComponentProps<typeof Button>["variant"]
-): DialogActionTone {
-  if (variant === "destructive") {
-    return "destructive"
+function shortcutToneClassName(tone: DialogActionTone) {
+  if (tone === 'destructive') {
+    return 'bg-destructive/15 text-destructive';
   }
 
-  return action
+  if (tone === 'confirm') {
+    return 'bg-primary-foreground/20 text-primary-foreground';
+  }
+
+  return 'bg-muted-foreground/15 text-foreground';
 }
 
-function getKbdTone(tone: DialogActionTone) {
-  if (tone === "destructive") {
-    return "bg-destructive/15 text-destructive"
+function shortcutKeys(shortcut: ShortcutKind) {
+  if (shortcut === 'confirm') {
+    return ['⌘', '↵'];
   }
 
-  if (tone === "confirm") {
-    return "bg-primary-foreground/20 text-primary-foreground"
+  if (shortcut === 'cancel') {
+    return ['Esc'];
   }
 
-  return "bg-muted-foreground/15 text-foreground"
-}
-
-function getShortcutKeys(shortcut: DialogShortcutKind) {
-  if (shortcut === "confirm") {
-    return ["⌘", "↵"]
-  }
-
-  if (shortcut === "cancel") {
-    return ["Esc"]
-  }
-
-  return []
+  return [];
 }
 
 function useComposedButtonRef(
   buttonRef: React.MutableRefObject<HTMLButtonElement | null>,
-  forwardedRef: React.Ref<HTMLButtonElement> | undefined
+  forwardedRef: React.Ref<HTMLButtonElement> | undefined,
 ) {
   return React.useCallback(
     (node: HTMLButtonElement | null) => {
-      buttonRef.current = node
-      setRef(forwardedRef, node)
+      buttonRef.current = node;
+      setRef(forwardedRef, node);
     },
-    [buttonRef, forwardedRef]
-  )
+    [buttonRef, forwardedRef],
+  );
 }
 
 function setRef<T>(ref: React.Ref<T> | undefined, value: T | null) {
   if (!ref) {
-    return
+    return;
   }
 
-  if (typeof ref === "function") {
-    ref(value)
-    return
+  if (typeof ref === 'function') {
+    ref(value);
+    return;
   }
 
-  ref.current = value
+  ref.current = value;
 }
 
 function useDialogActionShortcut({
@@ -265,25 +248,25 @@ function useDialogActionShortcut({
   disabled,
   shortcut,
 }: {
-  buttonRef: React.RefObject<HTMLButtonElement | null>
-  disabled?: boolean
-  shortcut: DialogShortcutKind
+  buttonRef: React.RefObject<HTMLButtonElement | null>;
+  disabled?: boolean;
+  shortcut: ShortcutKind;
 }) {
   React.useEffect(() => {
-    if (shortcut === "none") {
-      return
+    if (shortcut === 'none') {
+      return;
     }
 
-    const activeShortcut: DialogActionKind = shortcut
-    const ownerDocument = buttonRef.current?.ownerDocument ?? document
-    const ownerWindow = ownerDocument.defaultView
+    const activeShortcut: DialogActionKind = shortcut;
+    const ownerDocument = buttonRef.current?.ownerDocument ?? document;
+    const ownerWindow = ownerDocument.defaultView;
 
     if (!ownerWindow) {
-      return
+      return;
     }
 
     function handleKeyDown(event: KeyboardEvent) {
-      const button = buttonRef.current
+      const button = buttonRef.current;
 
       if (
         disabled ||
@@ -294,64 +277,64 @@ function useDialogActionShortcut({
         !matchesShortcut(event, activeShortcut) ||
         !isElementActionable(button)
       ) {
-        return
+        return;
       }
 
-      const topLayer = getTopDialogLayer(ownerDocument)
+      const topLayer = getTopDialogLayer(ownerDocument);
 
       if (topLayer && !topLayer.contains(button)) {
-        return
+        return;
       }
 
       if (
         getActiveShortcutButton(ownerDocument, activeShortcut, topLayer) !==
         button
       ) {
-        return
+        return;
       }
 
-      event.preventDefault()
-      button.click()
+      event.preventDefault();
+      button.click();
     }
 
-    ownerWindow.addEventListener("keydown", handleKeyDown)
-    return () => ownerWindow.removeEventListener("keydown", handleKeyDown)
-  }, [buttonRef, disabled, shortcut])
+    ownerWindow.addEventListener('keydown', handleKeyDown);
+    return () => ownerWindow.removeEventListener('keydown', handleKeyDown);
+  }, [buttonRef, disabled, shortcut]);
 }
 
 function matchesShortcut(event: KeyboardEvent, shortcut: DialogActionKind) {
-  if (shortcut === "confirm") {
-    return (event.metaKey || event.ctrlKey) && event.key === "Enter"
+  if (shortcut === 'confirm') {
+    return (event.metaKey || event.ctrlKey) && event.key === 'Enter';
   }
 
-  if (shortcut === "cancel") {
+  if (shortcut === 'cancel') {
     return (
-      event.key === "Escape" &&
+      event.key === 'Escape' &&
       !event.altKey &&
       !event.ctrlKey &&
       !event.metaKey &&
       !event.shiftKey
-    )
+    );
   }
 
-  return false
+  return false;
 }
 
 function getActiveShortcutButton(
   ownerDocument: Document,
   shortcut: DialogActionKind,
-  topLayer: Element | null
+  topLayer: Element | null,
 ) {
   const buttons = Array.from(
     ownerDocument.querySelectorAll<HTMLButtonElement>(
-      `[data-dialog-shortcut="${shortcut}"]`
-    )
-  ).filter(isElementActionable)
+      `[data-dialog-shortcut="${shortcut}"]`,
+    ),
+  ).filter(isElementActionable);
   const scopedButtons = topLayer
     ? buttons.filter((button) => topLayer.contains(button))
-    : buttons
+    : buttons;
 
-  return scopedButtons.at(-1) ?? null
+  return scopedButtons.at(-1) ?? null;
 }
 
 function getTopDialogLayer(ownerDocument: Document) {
@@ -361,29 +344,29 @@ function getTopDialogLayer(ownerDocument: Document) {
         "[data-slot='alert-dialog-content']",
         "[data-slot='dialog-content']",
         "[data-slot='drawer-content']",
-      ].join(",")
-    )
-  ).filter(isElementVisible)
+      ].join(','),
+    ),
+  ).filter(isElementVisible);
 
-  return layers.at(-1) ?? null
+  return layers.at(-1) ?? null;
 }
 
 function isElementActionable(element: HTMLButtonElement) {
   return (
     !element.disabled &&
-    element.getAttribute("aria-disabled") !== "true" &&
+    element.getAttribute('aria-disabled') !== 'true' &&
     isElementVisible(element)
-  )
+  );
 }
 
 function isElementVisible(element: Element) {
   if (!element.isConnected || element.getClientRects().length === 0) {
-    return false
+    return false;
   }
 
-  const style = element.ownerDocument.defaultView?.getComputedStyle(element)
+  const style = element.ownerDocument.defaultView?.getComputedStyle(element);
 
-  return style?.visibility !== "hidden" && style?.display !== "none"
+  return style?.visibility !== 'hidden' && style?.display !== 'none';
 }
 
 export {
@@ -391,4 +374,4 @@ export {
   AlertDialogCancelButton,
   DialogActionButton,
   DialogShortcutHint,
-}
+};

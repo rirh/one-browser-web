@@ -2,21 +2,77 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon-32x32.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="renderer" content="webkit" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" href="/favicon-16x16.png" sizes="16x16" />
+    <meta name="theme-color" content="#1976d2" />
     <title>%APP_NAME%</title>
     <script>
-      ;(function () {
-        var isIE = /MSIE|Trident/.test(navigator.userAgent)
-        var isOldIE = /MSIE [1-9]\.|MSIE 10\./.test(navigator.userAgent)
-
-        if (isIE || isOldIE) {
-          window.location.href = "/ie.html"
+      (function () {
+        var root = document.documentElement;
+        if (/MSIE [1-9]\.|MSIE 10\./.test(navigator.userAgent)) {
+          window.location.replace('/ie.html');
+          return;
         }
-      })()
+
+        var storedTheme = 'system';
+        var themeColor = 'default';
+        var radius = '0.5';
+        var fontSize = 'default';
+        var contentLayout = 'full';
+
+        try {
+          storedTheme = localStorage.getItem('theme') || storedTheme;
+          themeColor =
+            localStorage.getItem('one-browser.theme-color') || themeColor;
+          radius = localStorage.getItem('one-browser.ui-radius') || radius;
+          fontSize =
+            localStorage.getItem('one-browser.ui-font-size') || fontSize;
+          contentLayout =
+            localStorage.getItem('one-browser.content-layout') ||
+            contentLayout;
+        } catch (_error) {}
+
+        var dark =
+          storedTheme === 'dark' ||
+          (storedTheme === 'system' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches);
+        root.classList.toggle('dark', dark);
+        if (
+          ['zinc', 'red', 'rose', 'orange', 'green', 'blue', 'yellow', 'violet'].indexOf(
+            themeColor,
+          ) !== -1
+        ) {
+          root.dataset.themeColor = themeColor;
+        }
+        if (['0', '0.25', '0.5', '0.75', '1'].indexOf(radius) !== -1) {
+          root.setAttribute('data-ui-radius', radius);
+        }
+        if (['default', 'sm', 'md', 'lg'].indexOf(fontSize) !== -1) {
+          root.setAttribute('data-ui-font-size', fontSize);
+        }
+        if (['full', 'centered'].indexOf(contentLayout) !== -1) {
+          root.setAttribute('data-content-layout', contentLayout);
+        }
+
+        var platform = navigator.platform || '';
+        var userAgent = navigator.userAgent || '';
+        root.classList.add(
+          /Mac|iPhone|iPad|iPod/.test(platform)
+            ? 'platform-macos'
+            : /Win/.test(platform) || /Windows/.test(userAgent)
+              ? 'platform-windows'
+              : 'platform-other',
+        );
+      })();
     </script>
   </head>
-
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

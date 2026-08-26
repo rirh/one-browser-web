@@ -1,56 +1,94 @@
-import { Toaster as Sonner, type ToasterProps } from "sonner"
 import {
-  CircleCheckIcon,
-  InfoIcon,
-  TriangleAlertIcon,
-  OctagonXIcon,
-  Loader2Icon,
-} from "lucide-react"
+  Alert02Icon,
+  CheckmarkCircle02Icon,
+  InformationCircleIcon,
+  Loading03Icon,
+  MultiplicationSignCircleIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Toaster as Sonner, type ToasterProps } from 'sonner';
 
-import { useTranslation } from "@/components/providers/language-context"
-import { useTheme } from "@/components/theme/provider"
-import { cn } from "@/lib/utils"
+import { useTheme } from '@/components/theme/runtime';
 
-const closeButtonClassName =
-  "!left-auto !right-2 !top-2 !size-6 !transform-none !rounded-md !border-transparent !bg-transparent !text-inherit !opacity-60 !shadow-none transition hover:!bg-black/5 hover:!opacity-100 focus-visible:!outline-none focus-visible:!ring-2 focus-visible:!ring-current/20 dark:hover:!bg-white/10 [&>svg]:!size-3.5"
-
-const Toaster = ({ toastOptions, ...props }: ToasterProps) => {
-  const { resolvedTheme } = useTheme()
-  const { t } = useTranslation()
-  const toastClassNames = toastOptions?.classNames
+const Toaster = ({ ...props }: ToasterProps) => {
+  const { theme = 'system' } = useTheme();
 
   return (
     <Sonner
-      theme={resolvedTheme as ToasterProps["theme"]}
+      theme={theme as ToasterProps['theme']}
       className="toaster group"
       icons={{
-        success: <CircleCheckIcon className="size-4" />,
-        info: <InfoIcon className="size-4" />,
-        warning: <TriangleAlertIcon className="size-4" />,
-        error: <OctagonXIcon className="size-4" />,
-        loading: <Loader2Icon className="size-4 animate-spin" />,
+        success: (
+          <HugeiconsIcon
+            icon={CheckmarkCircle02Icon}
+            strokeWidth={2}
+            className="size-4"
+          />
+        ),
+        info: (
+          <HugeiconsIcon
+            icon={InformationCircleIcon}
+            strokeWidth={2}
+            className="size-4"
+          />
+        ),
+        warning: (
+          <HugeiconsIcon
+            icon={Alert02Icon}
+            strokeWidth={2}
+            className="size-4"
+          />
+        ),
+        error: (
+          <HugeiconsIcon
+            icon={MultiplicationSignCircleIcon}
+            strokeWidth={2}
+            className="size-4"
+          />
+        ),
+        loading: (
+          <HugeiconsIcon
+            icon={Loading03Icon}
+            strokeWidth={2}
+            className="size-4 animate-spin"
+          />
+        ),
       }}
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
+          '--width': '24rem',
+          '--normal-bg': 'var(--popover)',
+          '--normal-text': 'var(--popover-foreground)',
+          '--normal-border': 'var(--border)',
+          '--success-bg':
+            'color-mix(in oklch, var(--success) 12%, var(--popover))',
+          '--success-border':
+            'color-mix(in oklch, var(--success) 30%, var(--border))',
+          '--success-text': 'var(--success)',
+          '--info-bg': 'color-mix(in oklch, var(--info) 12%, var(--popover))',
+          '--info-border':
+            'color-mix(in oklch, var(--info) 30%, var(--border))',
+          '--info-text': 'var(--info)',
+          '--warning-bg':
+            'color-mix(in oklch, var(--warning) 12%, var(--popover))',
+          '--warning-border':
+            'color-mix(in oklch, var(--warning) 30%, var(--border))',
+          '--warning-text': 'var(--warning)',
+          '--error-bg': 'color-mix(in oklch, var(--error) 12%, var(--popover))',
+          '--error-border':
+            'color-mix(in oklch, var(--error) 30%, var(--border))',
+          '--error-text': 'var(--error)',
+          '--border-radius': 'var(--radius)',
         } as React.CSSProperties
       }
       toastOptions={{
-        ...toastOptions,
-        closeButtonAriaLabel:
-          toastOptions?.closeButtonAriaLabel ?? t("common.closeNotification"),
         classNames: {
-          ...toastClassNames,
-          toast: cn("cn-toast !pr-10", toastClassNames?.toast),
-          closeButton: cn(closeButtonClassName, toastClassNames?.closeButton),
+          toast: 'cn-toast',
         },
       }}
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };

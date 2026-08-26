@@ -1,0 +1,1 @@
+export { RemoteProxiesPage } from './page';
