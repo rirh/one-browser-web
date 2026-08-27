@@ -22,7 +22,7 @@ import {
   remoteTeamQueryKeys,
   selectRemoteTeamId,
 } from '@/features/browser/organization/teams/public';
-import { HttpError } from '@/platform/http';
+import { HttpError } from '@/lib/http';
 import {
   ArrowReloadVerticalIcon,
   ArrowRight01Icon,

@@ -28,6 +28,7 @@ import {
   checkProxy as checkProxyApi,
 } from '@/features/browser/proxy-core';
 import { cn } from '@/lib/utils';
+import { useDesktopAppGate } from '@/lib/desktop/app-gate';
 import {
   Add01Icon,
   ArrowDown01Icon,
@@ -49,6 +50,7 @@ import { proxyDialogKey } from './remote-proxy-mappers';
 import { useRemoteProxyActions } from './use-remote-proxy-actions';
 
 export function RemoteProxiesPage() {
+  const { requireDesktopApp } = useDesktopAppGate();
   const { access } = useAuth();
   const { search } = useBrowserShell();
   const teamsQuery = useRemoteTeamsQuery({ page_size: 100 });
@@ -191,7 +193,7 @@ export function RemoteProxiesPage() {
   }
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col overflow-hidden bg-card">
+    <section className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden">
       <BrowserTableToolbar
         filters={
           <BrowserTableFilterTabs
@@ -313,7 +315,15 @@ export function RemoteProxiesPage() {
         open={actions.batchDialogOpen}
         existingProxies={actions.proxyRows}
         isImporting={actions.batchImporting}
-        onBeforeCheck={() => Promise.resolve(true)}
+        onBeforeCheck={() =>
+          Promise.resolve(
+            requireDesktopApp({
+              title: '在 App 中批量检测代理',
+              description:
+                '批量导入前的代理检测需要使用 One Browser App 的本机网络能力。',
+            }),
+          )
+        }
         onOpenChange={actions.setBatchDialogOpen}
         onImport={actions.importBatch}
         onCheckProxy={checkProxyApi}

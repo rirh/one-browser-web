@@ -1,4 +1,4 @@
-import { useDesktopPlatform } from '@/platform/desktop/use-desktop-platform';
+import { useDesktopPlatform } from '@/lib/desktop/use-desktop-platform';
 import * as React from 'react';
 
 type WindowAction = 'minimize' | 'toggleMaximize' | 'close';

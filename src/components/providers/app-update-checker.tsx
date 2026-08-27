@@ -1,5 +1,5 @@
 import { UpdateAvailableDialog } from '@/components/update-available-dialog';
-import { desktopInvoke, isTauriRuntime } from '@/platform/desktop';
+import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
 import * as React from 'react';
 
 import {

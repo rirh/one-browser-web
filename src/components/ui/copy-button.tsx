@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { copyTextToClipboard } from '@/platform/clipboard';
+import { copyTextToClipboard } from '@/lib/clipboard';
 import { CheckIcon, Copy01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import * as React from 'react';

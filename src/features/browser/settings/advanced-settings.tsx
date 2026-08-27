@@ -14,8 +14,8 @@ import {
   AlertDialogCancelButton,
 } from '@/components/ui/dialog-action-button';
 import { FieldGroup } from '@/components/ui/field';
-import { desktopInvoke } from '@/platform/desktop';
-import { reloadClient } from '@/platform/desktop/reload-client';
+import { desktopInvoke } from '@/lib/desktop';
+import { reloadClient } from '@/lib/desktop/reload-client';
 import { FileViewIcon, Refresh01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { useState } from 'react';

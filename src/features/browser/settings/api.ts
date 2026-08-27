@@ -4,7 +4,7 @@ import type {
   UpdateSettingsRequest,
   ValidateChromiumPathRequest,
 } from '@/features/browser/contracts';
-import { desktopInvoke } from '@/platform/desktop';
+import { desktopInvoke } from '@/lib/desktop';
 
 export function getSettings() {
   return desktopInvoke<AppSettings>('get_settings');

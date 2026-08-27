@@ -1,5 +1,5 @@
 import { browserQueryKeys } from '@/features/browser/cache/query-keys';
-import { isTauriRuntime } from '@/platform/desktop';
+import { isTauriRuntime } from '@/lib/desktop';
 import type { QueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 

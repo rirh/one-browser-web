@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "sh scripts/free-dev-ports.sh 27515 && vite",
     "build": "tsc -b && vite build",
     "build:stage": "tsc -b && vite build --mode stage",
     "lint": "oxlint src --deny-warnings",

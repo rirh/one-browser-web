@@ -4,7 +4,7 @@ import type {
   ChromiumDownloadProgress,
 } from '@/features/browser/contracts';
 import { toBrowserErrorMessage } from '@/features/browser/errors';
-import { isTauriRuntime } from '@/platform/desktop';
+import { isTauriRuntime } from '@/lib/desktop';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 

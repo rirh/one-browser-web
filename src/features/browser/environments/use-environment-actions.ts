@@ -1,4 +1,6 @@
 import { toBrowserErrorMessage } from '@/features/browser/errors';
+import { isTauriRuntime } from '@/lib/desktop';
+import { useDesktopAppGate } from '@/lib/desktop/app-gate';
 import * as React from 'react';
 import { toast } from 'sonner';
 
@@ -48,6 +50,7 @@ export function useEnvironmentActions({
   canDelete: boolean;
   canChangeStatus: boolean;
 }) {
+  const { requireDesktopApp } = useDesktopAppGate();
   const [dialogState, setDialogState] =
     React.useState<RemoteEnvironmentDialogState | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<DeleteTarget | null>(
@@ -66,7 +69,7 @@ export function useEnvironmentActions({
     isFetching: appStatusFetching,
     isLoading: appStatusLoading,
     refetch: refetchAppStatus,
-  } = useAppStatusQuery();
+  } = useAppStatusQuery({ enabled: isTauriRuntime() });
   const environmentById = React.useMemo(
     () =>
       new Map(
@@ -203,6 +206,15 @@ export function useEnvironmentActions({
   );
 
   const ensureLaunchReady = React.useCallback(async () => {
+    if (
+      !requireDesktopApp({
+        title: '在 App 中打开环境',
+        description:
+          '启动浏览器环境需要本机 Chromium、代理隧道与进程管理能力。',
+      })
+    ) {
+      return false;
+    }
     toastBrowserOpenPreflight(8);
     const statusResult = await refetchAppStatus();
     if (statusResult.error) {
@@ -217,7 +229,7 @@ export function useEnvironmentActions({
       return false;
     }
     return true;
-  }, [refetchAppStatus]);
+  }, [refetchAppStatus, requireDesktopApp]);
 
   const open = React.useCallback(
     async (environmentId: number) => {
@@ -238,6 +250,14 @@ export function useEnvironmentActions({
   );
   const close = React.useCallback(
     (environmentId: number) => {
+      if (
+        !requireDesktopApp({
+          title: '在 App 中关闭环境',
+          description: '关闭正在运行的浏览器环境需要连接本机 App。',
+        })
+      ) {
+        return;
+      }
       if (!localRuntimeEnvironmentIds.has(environmentId)) {
         return;
       }
@@ -246,7 +266,7 @@ export function useEnvironmentActions({
         { onSuccess: () => toast.success('环境已关闭') },
       );
     },
-    [localRuntimeEnvironmentIds, runtimeMutation],
+    [localRuntimeEnvironmentIds, requireDesktopApp, runtimeMutation],
   );
 
   function submit(payload: RemoteEnvironmentPayload) {

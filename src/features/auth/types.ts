@@ -27,6 +27,8 @@ export interface AuthRoute {
 export interface AuthPermissions {
   roles: string[];
   is_super_admin: boolean;
+  permissions: string[];
+  buttons: string[];
   global_roles: AuthGlobalRole[];
   global_permissions: string[];
   global_buttons: string[];

@@ -8,7 +8,7 @@ import {
   readAuthSessionStatus,
 } from '@/features/auth/session';
 import { isUnauthorizedAuthError } from '@/features/auth/auth-errors';
-import { desktopInvoke, isTauriRuntime } from '@/platform/desktop';
+import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
 import { Door01Icon, Globe02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { useQueryClient } from '@tanstack/react-query';

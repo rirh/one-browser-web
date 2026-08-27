@@ -2,7 +2,7 @@ import type {
   AuthSessionStatus,
   AuthTokens,
 } from '@/features/auth/session/types';
-import { desktopInvoke, isTauriRuntime } from '@/platform/desktop';
+import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
 
 export const AUTH_TOKEN_STORAGE_KEY = 'one-browser:app-auth-token';
 export const AUTH_TOKENS_STORAGE_KEY = 'one-browser:app-auth-tokens';

@@ -4,6 +4,7 @@ import type {
 } from '@/features/browser/contracts';
 import { toBrowserErrorMessage } from '@/features/browser/errors';
 import { checkProxy as checkProxyApi } from '@/features/browser/proxy-core';
+import { useDesktopAppGate } from '@/lib/desktop/app-gate';
 import * as React from 'react';
 import { toast } from 'sonner';
 
@@ -49,6 +50,7 @@ export function useRemoteProxyActions({
   canCheck: boolean;
   refetch: () => Promise<unknown>;
 }) {
+  const { requireDesktopApp } = useDesktopAppGate();
   const [dialogState, setDialogState] =
     React.useState<RemoteProxyDialogState | null>(null);
   const [batchDialogOpen, setBatchDialogOpen] = React.useState(false);
@@ -151,6 +153,14 @@ export function useRemoteProxyActions({
   }
 
   async function checkProxyLocally(proxy: RemoteProxyResource) {
+    if (
+      !requireDesktopApp({
+        title: '在 App 中检测代理',
+        description: '代理检测需要使用 One Browser App 的本机网络与出口线路。',
+      })
+    ) {
+      return null;
+    }
     const proxyId = String(proxy.proxy_id);
     setCheckingProxyIds((current) => new Set(current).add(proxyId));
     try {

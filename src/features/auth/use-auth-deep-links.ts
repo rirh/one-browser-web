@@ -2,8 +2,8 @@ import {
   type AuthTokens,
   clearAuthExpiredNotice,
 } from '@/features/auth/session';
-import { desktopInvoke, isTauriRuntime } from '@/platform/desktop';
-import { http } from '@/platform/http';
+import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
+import { http } from '@/lib/http';
 import * as React from 'react';
 
 const desktopAuthSessionUpdatedEvent = 'one-browser-auth-session-updated';

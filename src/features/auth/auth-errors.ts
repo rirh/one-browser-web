@@ -1,4 +1,4 @@
-import { HttpError } from '@/platform/http';
+import { HttpError } from '@/lib/http';
 
 export function isUnauthorizedAuthError(error: unknown) {
   if (error instanceof HttpError) {

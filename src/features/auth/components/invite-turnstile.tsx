@@ -1,6 +1,6 @@
 import { useActiveTheme } from '@/components/theme/use-active-theme';
 import { cn } from '@/lib/utils';
-import { isTauriRuntime } from '@/platform/desktop';
+import { isTauriRuntime } from '@/lib/desktop';
 import * as React from 'react';
 
 import {

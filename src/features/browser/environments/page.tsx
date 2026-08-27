@@ -23,6 +23,7 @@ import { Add01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import type { VisibilityState } from '@tanstack/react-table';
 import * as React from 'react';
+import { isTauriRuntime } from '@/lib/desktop';
 
 import { useRemoteTeamsQuery } from '../organization/teams/queries';
 import {
@@ -123,7 +124,7 @@ export function RemoteEnvironmentsPage() {
     [environmentsQuery.data?.list],
   );
   const runtimeQuery = useRuntimeQuery({
-    enabled: canListEnvironments && Boolean(selectedTeamId),
+    enabled: isTauriRuntime() && canListEnvironments && Boolean(selectedTeamId),
   });
   const localRuntimeByProfileId = React.useMemo(
     () =>
@@ -260,7 +261,7 @@ export function RemoteEnvironmentsPage() {
   }
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col overflow-hidden bg-card">
+    <section className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden">
       <BrowserTableToolbar
         filters={
           <BrowserTableFilterTabs
@@ -300,8 +301,8 @@ export function RemoteEnvironmentsPage() {
       />
 
       {groupFilters.length > 1 ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-border/60 px-4 py-2">
-          <span className="text-xs text-muted-foreground">分组</span>
+        <div className="border-border/60 flex shrink-0 flex-wrap items-center gap-1.5 border-b px-4 py-2">
+          <span className="text-muted-foreground text-xs">分组</span>
           <ToggleGroup
             type="single"
             value={activeGroupFilter}
@@ -315,7 +316,7 @@ export function RemoteEnvironmentsPage() {
                 value={group.value}
                 variant="outline"
                 size="sm"
-                className="h-6 min-w-0 gap-1 px-2 data-[state=on]:border-primary/50 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                className="data-[state=on]:border-primary/50 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground h-6 min-w-0 gap-1 px-2"
               >
                 <span className="truncate">{group.label}</span>
                 <span className="text-[0.625rem] opacity-70">

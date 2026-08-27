@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { SweepShine } from '@/components/ui/sweep-shine';
 import { getWebLoginConfig, prepareWebLoginUrl } from '@/features/auth/api';
 import { isReducedMotionPreferred } from '@/features/auth/components/auth-motion';
-import { desktopInvoke, isTauriRuntime } from '@/platform/desktop';
+import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
 import {
   AlertCircleIcon,
   ArrowReloadVerticalIcon,

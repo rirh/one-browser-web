@@ -7,8 +7,12 @@ One Browser 的 Vite + React SPA。页面和业务模块由旧 `one-browser-app`
 
 ```bash
 pnpm install
-pnpm dev
+make dev
 ```
+
+`make dev` 和 `pnpm dev` 都会先关闭占用 27515 的旧开发进程，再启动
+Vite。`one-browser/app` 中的 `pnpm dev` 复用同一个 Web 命令，因此也会执行
+相同的端口清理。
 
 开发服务监听 `http://127.0.0.1:27515`，并把 `/api`、`/healthz`、
 `/docs`、`/openapi.json` 代理到 `VITE_DEV_BACKEND_URL`；默认 backend 为

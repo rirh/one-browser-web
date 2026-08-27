@@ -1,5 +1,5 @@
 import { readAuthTokens } from '@/features/auth/session';
-import { isTauriRuntime } from '@/platform/desktop';
+import { isTauriRuntime } from '@/lib/desktop';
 import * as React from 'react';
 
 import type { RuntimeProfile, TunnelRoute } from '../contracts';

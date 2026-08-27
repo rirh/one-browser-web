@@ -3,7 +3,7 @@ import {
   getAuthSessionGeneration,
 } from '@/features/auth/session';
 import { closeAllProfiles } from '@/features/browser/runtime/api';
-import { isTauriRuntime } from '@/platform/desktop';
+import { isTauriRuntime } from '@/lib/desktop';
 import * as React from 'react';
 
 type AuthSessionExpiredPayload = {

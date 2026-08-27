@@ -1,6 +1,8 @@
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { useDesktopPlatform } from '@/platform/desktop/use-desktop-platform';
+import { DesktopAppGateProvider } from '@/lib/desktop/app-gate';
+import { isTauriRuntime } from '@/lib/desktop';
+import { useDesktopPlatform } from '@/lib/desktop/use-desktop-platform';
 import * as React from 'react';
 
 import { AppFooter } from './components/app-footer';
@@ -28,44 +30,49 @@ export function useBrowserShell() {
 export function DashboardShell({ children }: React.PropsWithChildren) {
   const [search, setSearch] = React.useState('');
   const platform = useDesktopPlatform();
-  const usesNativeFrame = platform !== 'macos';
+  const showSiteHeader = isTauriRuntime() && platform === 'macos';
 
   const contextValue = React.useMemo(() => ({ search, setSearch }), [search]);
 
   return (
     <BrowserShellContext.Provider value={contextValue}>
-      <SidebarProvider
-        className="h-dvh flex-col bg-background"
-        style={
-          {
-            '--sidebar-width': '11.75rem',
-            '--header-height': '2.5rem',
-          } as React.CSSProperties
-        }
-      >
-        <div
-          className={cn(
-            'flex min-h-0 flex-1 flex-col overflow-hidden bg-background',
-            usesNativeFrame
-              ? 'rounded-none border-0 shadow-none'
-              : 'rounded-[var(--app-radius)] border border-border/70 shadow-2xl',
-          )}
+      <DesktopAppGateProvider>
+        <SidebarProvider
+          className="bg-background h-dvh flex-col"
+          style={
+            {
+              '--sidebar-width': '11.75rem',
+              '--header-height': '2.5rem',
+            } as React.CSSProperties
+          }
         >
-          {usesNativeFrame ? null : <SiteHeader />}
-          <div className="flex min-h-0 flex-1">
-            <AppSidebar collapsible="none" className="border-r bg-sidebar/70" />
-            <SidebarInset className="min-w-0 rounded-none bg-card shadow-none md:m-0 md:peer-data-[variant=inset]:m-0">
-              <div
-                data-slot="app-content"
-                className="app-content-container flex min-h-0 w-full flex-1 flex-col"
-              >
-                {children}
-              </div>
-            </SidebarInset>
+          <div
+            className={cn(
+              'bg-background flex min-h-0 flex-1 flex-col overflow-hidden',
+              showSiteHeader
+                ? 'border-border/70 rounded-[var(--app-radius)] border shadow-2xl'
+                : 'rounded-none border-0 shadow-none',
+            )}
+          >
+            {showSiteHeader ? <SiteHeader /> : null}
+            <div className="flex min-h-0 flex-1">
+              <AppSidebar
+                collapsible="none"
+                className="bg-sidebar/70 border-r"
+              />
+              <SidebarInset className="bg-card min-w-0 rounded-none shadow-none md:m-0 md:peer-data-[variant=inset]:m-0">
+                <div
+                  data-slot="app-content"
+                  className="app-content-container flex min-h-0 w-full flex-1 flex-col"
+                >
+                  {children}
+                </div>
+              </SidebarInset>
+            </div>
+            <AppFooter />
           </div>
-          <AppFooter />
-        </div>
-      </SidebarProvider>
+        </SidebarProvider>
+      </DesktopAppGateProvider>
     </BrowserShellContext.Provider>
   );
 }

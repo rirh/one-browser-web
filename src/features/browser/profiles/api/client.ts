@@ -17,7 +17,7 @@ import type {
   UpdateProfileProxyResult,
   UpdateProfileRequest,
 } from '@/features/browser/contracts';
-import { desktopInvoke } from '@/platform/desktop';
+import { desktopInvoke } from '@/lib/desktop';
 
 import { sanitizeProfileConfig } from './sanitize';
 

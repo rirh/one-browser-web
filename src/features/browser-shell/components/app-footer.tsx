@@ -14,7 +14,10 @@ import {
 } from '@/features/browser/status/network-guard';
 import { useAppStatusQuery } from '@/features/browser/status/queries';
 import { cn } from '@/lib/utils';
-import { desktopInvoke, isTauriRuntime } from '@/platform/desktop';
+import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
+import { useDesktopAppGate } from '@/lib/desktop/app-gate';
+import { ServerStack03Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -75,10 +78,10 @@ function StatusRow({
   );
 
   return (
-    <div className="grid min-w-0 grid-cols-[4.25rem_minmax(0,1fr)] items-center gap-2 rounded-sm px-1.5 py-0.5 hover:bg-muted/45">
+    <div className="hover:bg-muted/45 grid min-w-0 grid-cols-[4.25rem_minmax(0,1fr)] items-center gap-2 rounded-sm px-1.5 py-0.5">
       <div
         className={cn(
-          'truncate text-[0.6875rem] font-medium leading-5',
+          'truncate text-[0.6875rem] leading-5 font-medium',
           statusLabelToneClass[labelTone],
         )}
         title={label}
@@ -121,7 +124,9 @@ function StatusDot({ tone, label }: { tone: StatusTone; label: string }) {
 }
 
 export function AppFooter() {
-  const statusQuery = useAppStatusQuery();
+  const tauriRuntimeAvailable = isTauriRuntime();
+  const { requireDesktopApp } = useDesktopAppGate();
+  const statusQuery = useAppStatusQuery({ enabled: tauriRuntimeAvailable });
   const {
     errorMessage: chromiumDownloadErrorMessage,
     isError: isChromiumDownloadError,
@@ -172,7 +177,6 @@ export function AppFooter() {
       : status?.chromiumPath.exists
         ? 'danger'
         : 'muted';
-  const tauriRuntimeAvailable = isTauriRuntime();
   const needsChromiumDownload = Boolean(
     tauriRuntimeAvailable &&
     status &&
@@ -201,6 +205,45 @@ export function AppFooter() {
     chromiumDownloadLabel,
     chromiumDownloadValue,
   );
+
+  if (!tauriRuntimeAvailable) {
+    return (
+      <footer className="border-border/60 bg-muted/40 text-muted-foreground flex h-5 shrink-0 items-center gap-1 border-t px-1.5 text-[0.6875rem] leading-none">
+        <button
+          type="button"
+          className="text-foreground hover:bg-accent inline-flex h-full items-center gap-1 rounded-sm px-1 font-medium transition-colors"
+          onClick={() =>
+            requireDesktopApp({
+              title: '在 App 中查看本机状态',
+              description:
+                '本机 API、Chromium 和数据目录状态只能由 One Browser App 读取。',
+            })
+          }
+        >
+          <StatusDot tone="muted" label="Web" />
+          {appVersion}
+        </button>
+        <button
+          type="button"
+          className="text-foreground hover:bg-accent inline-flex h-full items-center gap-1 rounded-sm px-1 font-medium transition-colors"
+          onClick={() =>
+            requireDesktopApp({
+              title: '在 App 中选择节点',
+              description:
+                '节点测速与本机线路切换需要 One Browser App 的网络能力。',
+            })
+          }
+        >
+          <HugeiconsIcon
+            icon={ServerStack03Icon}
+            strokeWidth={2}
+            className="size-2.5"
+          />
+          选择节点
+        </button>
+      </footer>
+    );
+  }
 
   async function openExternalUrl(url: string | null) {
     if (!url || openingTarget) {
@@ -248,12 +291,12 @@ export function AppFooter() {
   }
 
   return (
-    <footer className="flex h-5 shrink-0 items-center border-t border-border/60 bg-muted/40 px-1.5 text-[0.6875rem] leading-none text-muted-foreground">
+    <footer className="border-border/60 bg-muted/40 text-muted-foreground flex h-5 shrink-0 items-center border-t px-1.5 text-[0.6875rem] leading-none">
       <HoverCard openDelay={120} closeDelay={120}>
         <HoverCardTrigger asChild>
           <button
             type="button"
-            className="inline-flex h-full items-center gap-1 rounded-sm px-1 font-medium text-foreground transition-colors hover:bg-accent"
+            className="text-foreground hover:bg-accent inline-flex h-full items-center gap-1 rounded-sm px-1 font-medium transition-colors"
           >
             <StatusDot tone={apiStatusTone} label={apiStatusLabel} />
             {appVersion}

@@ -4,8 +4,8 @@ import type {
   ChromiumDownloadTarget,
 } from '@/features/browser/contracts';
 import { readInjectedAppStatus } from '@/features/browser/status/api';
-import { desktopInvoke, isTauriRuntime } from '@/platform/desktop';
-import { http } from '@/platform/http';
+import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
+import { http } from '@/lib/http';
 
 export const DESKTOP_APP_DOWNLOAD_URL = 'https://browser.aicbe.com';
 

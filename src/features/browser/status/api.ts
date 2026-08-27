@@ -9,8 +9,8 @@ import {
   DesktopApiError,
   desktopInvoke,
   isTauriRuntime,
-} from '@/platform/desktop';
-import { http } from '@/platform/http';
+} from '@/lib/desktop';
+import { http } from '@/lib/http';
 
 export interface ChromiumDownloadManifest {
   platform: string;

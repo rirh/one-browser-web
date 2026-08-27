@@ -4,7 +4,7 @@ import type {
   OpenProfileProgressStep,
   RuntimeProfile,
 } from '@/features/browser/contracts';
-import { desktopInvoke } from '@/platform/desktop';
+import { desktopInvoke } from '@/lib/desktop';
 import type { QueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 

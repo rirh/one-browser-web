@@ -1,4 +1,4 @@
-import { DesktopApiError } from '@/platform/desktop';
+import { DesktopApiError } from '@/lib/desktop';
 import { toast } from 'sonner';
 
 const fallbackMessage = '桌面命令执行失败';

@@ -15,6 +15,7 @@ import type {
   ProxyType,
 } from '@/features/browser/contracts';
 import { toBrowserErrorMessage } from '@/features/browser/errors';
+import { useDesktopAppGate } from '@/lib/desktop/app-gate';
 import {
   ProxyEditor,
   type ProxyEditorSubmitValue,
@@ -59,6 +60,7 @@ export function RemoteProxyEditorDialog({
     checkResult: ProxyCheckResult | null,
   ) => void;
 }) {
+  const { requireDesktopApp } = useDesktopAppGate();
   const record = state?.mode === 'edit' ? state.record : null;
   const formId = 'remote-proxy-editor-form';
   const [checkResult, setCheckResult] = React.useState<ProxyCheckResult | null>(
@@ -68,6 +70,14 @@ export function RemoteProxyEditorDialog({
   const proxy = React.useMemo(() => remoteProxyToProxyConfig(record), [record]);
 
   async function checkProxy(request: CheckProxyRequest) {
+    if (
+      !requireDesktopApp({
+        title: '在 App 中检测代理',
+        description: '代理检测需要使用 One Browser App 的本机网络与出口线路。',
+      })
+    ) {
+      return;
+    }
     setIsChecking(true);
     setCheckResult(null);
 
@@ -94,6 +104,16 @@ export function RemoteProxyEditorDialog({
   async function submit(value: ProxyEditorSubmitValue) {
     if (!teamId) {
       toast.error('请选择团队');
+      return;
+    }
+
+    if (
+      !requireDesktopApp({
+        title: '在 App 中保存并检测代理',
+        description:
+          '保存前需要通过本机网络检测代理，请在 One Browser App 中继续。',
+      })
+    ) {
       return;
     }
 

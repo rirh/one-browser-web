@@ -1,4 +1,4 @@
-import { HttpError } from '@/platform/http';
+import { HttpError } from '@/lib/http';
 
 import { uploadBrowserAssetPart } from './api/client';
 import type { BrowserAssetCompletePayload } from './types';

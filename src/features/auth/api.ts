@@ -1,5 +1,5 @@
-import { desktopInvoke, isTauriRuntime } from '@/platform/desktop';
-import { http } from '@/platform/http';
+import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
+import { http } from '@/lib/http';
 
 import type { AuthPermissions, CurrentUser, TeamInvite } from './types';
 

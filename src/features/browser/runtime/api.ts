@@ -6,7 +6,7 @@ import type {
   RuntimeProfile,
   UpdateTunnelRouteRequest,
 } from '@/features/browser/contracts';
-import { desktopInvoke } from '@/platform/desktop';
+import { desktopInvoke } from '@/lib/desktop';
 
 export function listRuntime() {
   return desktopInvoke<RuntimeProfile[]>('list_runtime');

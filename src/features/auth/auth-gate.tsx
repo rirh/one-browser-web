@@ -13,8 +13,8 @@ import {
 import type { AuthPermissions, CurrentUser } from '@/features/auth/types';
 import { useDefaultAppWindowSize } from '@/features/auth/use-app-window-size';
 import { useAuthDeepLinks } from '@/features/auth/use-auth-deep-links';
-import { isTauriRuntime } from '@/platform/desktop';
-import { expireStoredAuthSession } from '@/platform/http';
+import { isTauriRuntime } from '@/lib/desktop';
+import { expireStoredAuthSession } from '@/lib/http';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as React from 'react';
 

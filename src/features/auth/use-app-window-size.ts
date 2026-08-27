@@ -1,4 +1,4 @@
-import { desktopInvoke, isTauriRuntime } from '@/platform/desktop';
+import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
 import * as React from 'react';
 
 const DEFAULT_APP_WINDOW_SIZE = {

@@ -1,7 +1,15 @@
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -15,13 +23,24 @@ import {
 } from '@/features/auth/permissions';
 import type { AuthRoute } from '@/features/auth/types';
 import { cn } from '@/lib/utils';
-import { http } from '@/platform/http';
+import { http } from '@/lib/http';
 import {
+  Agreement01Icon,
+  ArrowRight01Icon,
+  CalendarClockIcon,
+  ClipboardIcon,
+  Clock01Icon,
   DashboardBrowsingIcon,
+  DashboardSquare01Icon,
+  Globe02Icon,
   Key01Icon,
+  Notification01Icon,
   PackageOpenIcon,
   Route02Icon,
+  ServerStack01Icon,
+  ServerStack03Icon,
   ShieldUserIcon,
+  UserCheck01Icon,
   UserGroupIcon,
   UserMultipleIcon,
 } from '@hugeicons/core-free-icons';
@@ -42,6 +61,12 @@ type NavItem = {
   title: string;
 };
 
+type NavGroup = {
+  id: number;
+  items: NavItem[];
+  title?: string;
+};
+
 const navItemByAuthPath: Record<string, Omit<NavItem, 'title'>> = {
   '/browser/environment': {
     href: '/',
@@ -59,18 +84,42 @@ const navItemByAuthPath: Record<string, Omit<NavItem, 'title'>> = {
     href: '/members',
     icon: UserMultipleIcon,
   },
-  '/browser/role': {
-    href: '/roles',
-    icon: ShieldUserIcon,
-  },
-  '/browser/permission': {
-    href: '/permissions',
-    icon: Key01Icon,
-  },
   '/browser/assets': {
     href: '/versions',
     icon: PackageOpenIcon,
   },
+};
+
+const navIconBySeedKey: Record<string, typeof DashboardBrowsingIcon> = {
+  'agreement-01': Agreement01Icon,
+  handshake: Agreement01Icon,
+  'calendar-clock': CalendarClockIcon,
+  clipboard: ClipboardIcon,
+  'clipboard-list': ClipboardIcon,
+  'clock-01': Clock01Icon,
+  'file-clock': Clock01Icon,
+  'dashboard-square-01': DashboardSquare01Icon,
+  'layout-dashboard': DashboardSquare01Icon,
+  'globe-02': Globe02Icon,
+  globe: Globe02Icon,
+  'key-01': Key01Icon,
+  key: Key01Icon,
+  'key-round': Key01Icon,
+  'notification-01': Notification01Icon,
+  bell: Notification01Icon,
+  'package-open': PackageOpenIcon,
+  'route-02': Route02Icon,
+  network: Route02Icon,
+  'server-stack-01': ServerStack01Icon,
+  'server-cog': ServerStack01Icon,
+  'server-stack-03': ServerStack03Icon,
+  'shield-user': ShieldUserIcon,
+  shield: ShieldUserIcon,
+  'user-check-01': UserCheck01Icon,
+  'user-round-check': UserCheck01Icon,
+  'user-multiple': UserMultipleIcon,
+  users: UserMultipleIcon,
+  'users-round': UserMultipleIcon,
 };
 
 function isActivePath(pathname: string, href: string) {
@@ -87,8 +136,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const queryClient = useQueryClient();
   const { access, user } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
-  const navItems = React.useMemo(
-    () => buildNavItems(access.routes),
+  const navGroups = React.useMemo(
+    () => buildNavGroups(access.routes),
     [access.routes],
   );
   const showTeamShortcuts =
@@ -126,12 +175,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <AppTeamSwitcher access={access} />
         </SidebarHeader>
       ) : null}
-      <SidebarContent className="px-2 py-2">
-        <SidebarMenu>
-          {navItems.map((item) => (
-            <SidebarNavItem key={item.href} item={item} pathname={pathname} />
-          ))}
-        </SidebarMenu>
+      <SidebarContent className="py-1">
+        {navGroups.map((group) => (
+          <SidebarNavGroup key={group.id} group={group} pathname={pathname} />
+        ))}
       </SidebarContent>
       <SidebarFooter>
         <AppNavUser
@@ -141,6 +188,48 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         />
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+function SidebarNavGroup({
+  group,
+  pathname,
+}: {
+  group: NavGroup;
+  pathname: string;
+}) {
+  const items = (
+    <SidebarGroupContent>
+      <SidebarMenu>
+        {group.items.map((item) => (
+          <SidebarNavItem key={item.href} item={item} pathname={pathname} />
+        ))}
+      </SidebarMenu>
+    </SidebarGroupContent>
+  );
+
+  if (!group.title) {
+    return <SidebarGroup>{items}</SidebarGroup>;
+  }
+
+  return (
+    <Collapsible className="group/collapsible" defaultOpen>
+      <SidebarGroup>
+        <SidebarGroupLabel asChild className="h-7">
+          <CollapsibleTrigger className="w-full cursor-pointer justify-between gap-2 text-left">
+            <span className="min-w-0 flex-1 truncate text-left">
+              {group.title}
+            </span>
+            <HugeiconsIcon
+              icon={ArrowRight01Icon}
+              strokeWidth={2}
+              className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90"
+            />
+          </CollapsibleTrigger>
+        </SidebarGroupLabel>
+        <CollapsibleContent>{items}</CollapsibleContent>
+      </SidebarGroup>
+    </Collapsible>
   );
 }
 
@@ -160,7 +249,7 @@ function SidebarNavItem({
         className={cn(
           '[&_svg]:size-3.5',
           active &&
-            'bg-sidebar-primary/10 font-medium text-sidebar-primary hover:bg-sidebar-primary/15 hover:text-sidebar-primary',
+            'bg-sidebar-primary/10 text-sidebar-primary hover:bg-sidebar-primary/15 hover:text-sidebar-primary font-medium',
         )}
         tooltip={item.title}
       >
@@ -177,23 +266,48 @@ function SidebarNavItem({
   );
 }
 
-function buildNavItems(routes: AuthRoute[] | undefined): NavItem[] {
-  const items: NavItem[] = [];
+function buildNavGroups(routes: AuthRoute[] | undefined): NavGroup[] {
   const seenPaths = new Set<string>();
 
-  function collect(route: AuthRoute) {
-    const item = navItemByAuthPath[route.path];
-    if (!route.hidden && item && !seenPaths.has(route.path)) {
+  return (routes ?? []).flatMap((route) => {
+    const items = collectNavItems(route, seenPaths);
+    if (!items.length) {
+      return [];
+    }
+
+    return [
+      {
+        id: route.id,
+        items,
+        ...(route.menu_type === 'M' ? { title: route.meta.title } : {}),
+      },
+    ];
+  });
+}
+
+function collectNavItems(route: AuthRoute, seenPaths: Set<string>): NavItem[] {
+  const items: NavItem[] = [];
+  if (route.menu_type === 'C') {
+    const configuredItem = navItemByAuthPath[route.path];
+    const item = {
+      href: configuredItem?.href ?? route.path,
+      icon:
+        navIconBySeedKey[route.meta.icon.trim().toLowerCase()] ??
+        configuredItem?.icon ??
+        DashboardBrowsingIcon,
+    };
+    if (!route.hidden && !seenPaths.has(route.path)) {
       seenPaths.add(route.path);
       items.push({
         ...item,
         title: route.meta.title,
       });
     }
-
-    route.children?.forEach(collect);
   }
 
-  routes?.forEach(collect);
+  route.children?.forEach((child) => {
+    items.push(...collectNavItems(child, seenPaths));
+  });
+
   return items;
 }

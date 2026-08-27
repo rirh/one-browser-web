@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
-import { copyTextToClipboard } from '@/platform/clipboard';
+import { copyTextToClipboard } from '@/lib/clipboard';
 import {
   Alert01Icon,
   ArrowLeft01Icon,

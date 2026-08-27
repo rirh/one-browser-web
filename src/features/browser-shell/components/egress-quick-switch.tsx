@@ -19,7 +19,7 @@ import type {
 } from '@/features/browser/egress/types';
 import { useUpdateSettingsMutation } from '@/features/browser/settings/queries';
 import { cn } from '@/lib/utils';
-import { desktopInvoke, isTauriRuntime } from '@/platform/desktop';
+import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
 import { ServerStack03Icon, Tick02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { type ReactNode, useEffect, useMemo } from 'react';

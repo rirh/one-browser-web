@@ -40,7 +40,8 @@ import {
 import type { CurrentUser } from '@/features/auth/types';
 import { type Locale } from '@/i18n';
 import { useI18n } from '@/i18n/provider';
-import { reloadClient } from '@/platform/desktop/reload-client';
+import { reloadClient } from '@/lib/desktop/reload-client';
+import { useDesktopAppGate } from '@/lib/desktop/app-gate';
 import {
   EllipsisVerticalIcon,
   LanguageCircleIcon,
@@ -91,6 +92,7 @@ export function AppNavUser({
 }) {
   const { isMobile } = useSidebar();
   const { locale, setLocale } = useI18n();
+  const { requireDesktopApp } = useDesktopAppGate();
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
@@ -164,6 +166,15 @@ export function AppNavUser({
                   onSelect={(event) => {
                     event.preventDefault();
                     setMenuOpen(false);
+                    if (
+                      !requireDesktopApp({
+                        title: '在 App 中打开客户端设置',
+                        description:
+                          '客户端设置会修改本机浏览器、节点与系统能力，请在 One Browser App 中继续。',
+                      })
+                    ) {
+                      return;
+                    }
                     setSettingsOpen(true);
                   }}
                 >
@@ -204,7 +215,21 @@ export function AppNavUser({
                     </DropdownMenuRadioGroup>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
-                <DropdownMenuItem onSelect={reloadClient}>
+                <DropdownMenuItem
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    setMenuOpen(false);
+                    if (
+                      requireDesktopApp({
+                        title: '在 App 中重载客户端',
+                        description:
+                          '重载客户端需要 One Browser App 的本机运行环境。',
+                      })
+                    ) {
+                      reloadClient();
+                    }
+                  }}
+                >
                   <HugeiconsIcon icon={Refresh01Icon} strokeWidth={2} />
                   重载客户端
                 </DropdownMenuItem>

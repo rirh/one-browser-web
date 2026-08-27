@@ -1,5 +1,5 @@
 import { getSettings } from '@/features/browser/settings/api';
-import { isTauriRuntime } from '@/platform/desktop';
+import { isTauriRuntime } from '@/lib/desktop';
 
 import { listEgressLines, probeEgressLines } from './api';
 import type {

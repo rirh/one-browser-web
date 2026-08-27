@@ -1,5 +1,5 @@
-import { desktopInvoke } from '@/platform/desktop';
-import { http } from '@/platform/http';
+import { desktopInvoke } from '@/lib/desktop';
+import { http } from '@/lib/http';
 
 import type {
   EgressLinesPayload,

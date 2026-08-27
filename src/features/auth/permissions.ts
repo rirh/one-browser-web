@@ -17,6 +17,13 @@ export function hasPermission(
     return true;
   }
 
+  if (
+    !isBrowserPermission(permission) &&
+    hasPermissionCode(access.permissions, permission)
+  ) {
+    return true;
+  }
+
   if (hasPermissionCode(access.global_permissions, permission)) {
     return true;
   }
@@ -41,6 +48,13 @@ export function hasButtonPermission(
     return false;
   }
   if (access.is_super_admin) {
+    return true;
+  }
+
+  if (
+    !isBrowserPermission(permission) &&
+    hasPermissionCode(access.buttons, permission)
+  ) {
     return true;
   }
 
@@ -133,6 +147,10 @@ function hasPermissionCode(codes: string[] | undefined, permission: string) {
   return Boolean(
     codes?.includes(ALL_PERMISSION) || codes?.includes(permission),
   );
+}
+
+function isBrowserPermission(permission: string) {
+  return permission.startsWith('browser:');
 }
 
 function getTeamPermissionScope(

@@ -1,4 +1,4 @@
-import { DesktopApiError } from '@/platform/desktop';
+import { DesktopApiError } from '@/lib/desktop';
 
 import type {
   CreateProfileRequest,

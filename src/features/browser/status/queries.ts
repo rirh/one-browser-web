@@ -10,7 +10,7 @@ import {
   readInjectedAppStatus,
 } from './api';
 
-export function useAppStatusQuery() {
+export function useAppStatusQuery(options?: { enabled?: boolean }) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -41,5 +41,6 @@ export function useAppStatusQuery() {
   return useQuery({
     queryKey: browserQueryKeys.status(),
     queryFn: getAppStatus,
+    enabled: options?.enabled,
   });
 }

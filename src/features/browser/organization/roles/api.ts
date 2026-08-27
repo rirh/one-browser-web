@@ -1,4 +1,4 @@
-import { http } from '@/platform/http';
+import { http } from '@/lib/http';
 
 import type {
   RemoteBatchDeleteResult,
