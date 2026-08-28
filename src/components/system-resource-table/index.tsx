@@ -9,6 +9,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import {
   type ColumnDef,
+  type PaginationState,
   type VisibilityState,
   flexRender,
   getCoreRowModel,
@@ -32,32 +33,75 @@ import { ResourceToolbar } from './resource-toolbar';
 
 export function SystemResourceTable({
   config,
+  renderCell,
+  renderRowActions,
+  toolbarActions,
 }: {
   config: SystemResourceConfig;
+  renderCell?: (
+    field: string,
+    value: unknown,
+    record: SystemRecord,
+  ) => React.ReactNode | undefined;
+  renderRowActions?: (record: SystemRecord) => React.ReactNode;
+  toolbarActions?: React.ReactNode;
 }) {
   const [search, setSearch] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState<StatusFilter>('all');
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 15,
+  });
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
+  const deferredSearch = React.useDeferredValue(search.trim());
+  const serverParams = config.serverPagination
+    ? {
+        page: pagination.pageIndex + 1,
+        pageSize: pagination.pageSize,
+        search: deferredSearch,
+        status: statusFilter,
+      }
+    : undefined;
   const query = useQuery({
-    queryKey: ['system-resource', config.endpoint],
-    queryFn: () => listSystemResources(config),
+    queryKey: ['system-resource', config.endpoint, serverParams],
+    queryFn: () => listSystemResources(config, serverParams),
+    placeholderData: config.serverPagination
+      ? (previousData) => previousData
+      : undefined,
   });
   const columns = React.useMemo<ColumnDef<SystemRecord>[]>(
-    () =>
-      config.columns.map((field) => ({
+    () => [
+      ...config.columns.map<ColumnDef<SystemRecord>>((field) => ({
         accessorKey: field,
         header: fieldLabels[field] ?? field,
         cell: ({ getValue, row }) =>
+          renderCell?.(field, getValue(), row.original) ??
           renderResourceCell(field, getValue(), row.original),
         meta: { label: fieldLabels[field] ?? field },
       })),
-    [config.columns],
+      ...(renderRowActions
+        ? [
+            {
+              id: 'actions',
+              header: '操作',
+              cell: ({ row }) => renderRowActions(row.original),
+              enableHiding: false,
+            } satisfies ColumnDef<SystemRecord>,
+          ]
+        : []),
+    ],
+    [config.columns, renderCell, renderRowActions],
   );
   const records = React.useMemo(
-    () => filterByStatus(query.data ?? [], statusFilter),
-    [query.data, statusFilter],
+    () =>
+      config.serverPagination
+        ? (query.data?.list ?? [])
+        : filterByStatus(query.data?.list ?? [], statusFilter),
+    [config.serverPagination, query.data?.list, statusFilter],
   );
+  const total = query.data?.total ?? 0;
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: records,
     columns,
@@ -65,23 +109,46 @@ export function SystemResourceTable({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    state: { columnVisibility, globalFilter: search },
+    state: {
+      columnVisibility,
+      globalFilter: config.serverPagination ? '' : search,
+      pagination,
+    },
     onColumnVisibilityChange: setColumnVisibility,
     onGlobalFilterChange: setSearch,
-    initialState: { pagination: { pageSize: 15 } },
+    onPaginationChange: setPagination,
+    manualPagination: config.serverPagination,
+    rowCount: config.serverPagination ? total : undefined,
   });
+  const updateSearch = (value: string) => {
+    setSearch(value);
+    if (config.serverPagination) {
+      setPagination((current) => ({ ...current, pageIndex: 0 }));
+    }
+  };
+  const updateStatusFilter = (value: StatusFilter) => {
+    setStatusFilter(value);
+    if (config.serverPagination) {
+      setPagination((current) => ({ ...current, pageIndex: 0 }));
+    }
+  };
   return (
     <section className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden">
       <ResourceToolbar
-        hasStatus={(query.data ?? []).some((record) => 'status' in record)}
+        hasStatus={
+          config.serverPagination
+            ? config.columns.includes('status')
+            : records.some((record) => 'status' in record)
+        }
         isFetching={query.isFetching}
         onRefresh={() => void query.refetch()}
         search={search}
-        setSearch={setSearch}
+        setSearch={updateSearch}
         statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
+        setStatusFilter={updateStatusFilter}
         table={table}
         title={config.title}
+        actions={toolbarActions}
       />
       <div className="min-h-0 flex-1 overflow-auto">
         {query.isLoading ? (
@@ -123,7 +190,10 @@ export function SystemResourceTable({
           </Table>
         )}
       </div>
-      <ResourceFooter table={table} />
+      <ResourceFooter
+        table={table}
+        total={config.serverPagination ? total : undefined}
+      />
     </section>
   );
 }

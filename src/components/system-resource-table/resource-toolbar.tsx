@@ -40,6 +40,7 @@ export function ResourceToolbar({
   setStatusFilter,
   table,
   title,
+  actions,
 }: {
   hasStatus: boolean;
   isFetching: boolean;
@@ -50,6 +51,7 @@ export function ResourceToolbar({
   setStatusFilter: (value: StatusFilter) => void;
   table: Table<SystemRecord>;
   title: string;
+  actions?: React.ReactNode;
 }) {
   return (
     <div className="bg-muted/40 flex shrink-0 flex-col gap-2 border-b px-3 py-2 sm:flex-row sm:items-center sm:justify-between lg:px-4">
@@ -74,6 +76,7 @@ export function ResourceToolbar({
         </InputGroup>
       </div>
       <div className="flex items-center justify-end gap-2">
+        {actions}
         <Button
           type="button"
           size="sm"

@@ -21,7 +21,7 @@ export function Providers({ children }: React.PropsWithChildren) {
               <TooltipProvider>{children}</TooltipProvider>
               <BuildInfo />
               <AppUpdateChecker />
-              <Toaster position="bottom-right" richColors />
+              <Toaster richColors />
             </AppearancePreferencesProvider>
           </ThemeColorProvider>
         </ThemeProvider>

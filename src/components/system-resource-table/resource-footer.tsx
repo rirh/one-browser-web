@@ -2,8 +2,14 @@ import { Button } from '@/components/ui/button';
 import type { Table } from '@tanstack/react-table';
 import type { SystemRecord } from './types';
 
-export function ResourceFooter({ table }: { table: Table<SystemRecord> }) {
-  const total = table.getFilteredRowModel().rows.length;
+export function ResourceFooter({
+  table,
+  total: serverTotal,
+}: {
+  table: Table<SystemRecord>;
+  total?: number;
+}) {
+  const total = serverTotal ?? table.getFilteredRowModel().rows.length;
   if (!total) return null;
   return (
     <div className="bg-muted/30 flex h-10 shrink-0 items-center justify-between gap-2 border-t px-3">

@@ -49,6 +49,7 @@ import {
   useUpdateRemoteTeamRoleMutation,
 } from './queries';
 import type { RemoteTeamRolePayload, RemoteTeamRoleResource } from './types';
+import type { RemoteMemberPermissionOptionResource } from './types';
 
 type RoleDialogState =
   | { mode: 'create' }
@@ -149,6 +150,15 @@ export function RemoteRolesPage() {
   const permissionsQuery = useRemoteTeamRolePermissionsQuery(
     selectedTeamId,
     canListRoles,
+  );
+  const createPermissionOptions = React.useMemo(
+    () =>
+      filterPermissionOptionsForCurrentUser(
+        permissionsQuery.data ?? [],
+        access,
+        selectedTeamId,
+      ),
+    [access, permissionsQuery.data, selectedTeamId],
   );
   const createMutation = useCreateRemoteTeamRoleMutation();
   const updateMutation = useUpdateRemoteTeamRoleMutation();
@@ -296,7 +306,7 @@ export function RemoteRolesPage() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-card">
+    <div className="bg-card flex min-h-0 flex-1 flex-col">
       <BrowserTableToolbar
         filters={
           <BrowserTableFilterTabs
@@ -380,7 +390,11 @@ export function RemoteRolesPage() {
           record={dialogState.mode === 'edit' ? dialogState.record : undefined}
           teamId={selectedTeamId}
           teamName={selectedTeam?.team_name ?? `团队 ${selectedTeamId}`}
-          permissionOptions={permissionsQuery.data ?? []}
+          permissionOptions={
+            dialogState.mode === 'create'
+              ? createPermissionOptions
+              : (permissionsQuery.data ?? [])
+          }
           isLoadingPermissions={permissionsQuery.isLoading}
           hasPermissionError={permissionsQuery.isError}
           onRetryPermissions={() => void permissionsQuery.refetch()}
@@ -419,4 +433,36 @@ export function RemoteRolesPage() {
       />
     </div>
   );
+}
+
+function filterPermissionOptionsForCurrentUser(
+  options: RemoteMemberPermissionOptionResource[],
+  access: ReturnType<typeof useAuth>['access'],
+  teamId: number | null,
+) {
+  if (!teamId || access.is_super_admin) {
+    return options;
+  }
+
+  const optionById = new Map(options.map((option) => [option.menu_id, option]));
+  const includedIds = new Set(
+    options
+      .filter(
+        (option) =>
+          option.permission_code &&
+          hasPermission(access, option.permission_code, teamId),
+      )
+      .map((option) => option.menu_id),
+  );
+
+  for (const option of options) {
+    if (!includedIds.has(option.menu_id)) continue;
+    let parentId = option.parent_id;
+    while (parentId) {
+      includedIds.add(parentId);
+      parentId = optionById.get(parentId)?.parent_id ?? null;
+    }
+  }
+
+  return options.filter((option) => includedIds.has(option.menu_id));
 }

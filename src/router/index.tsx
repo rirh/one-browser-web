@@ -26,7 +26,6 @@ const SystemNoticePage = lazy(() => import('@/views/system/notice'));
 const OperationLogPage = lazy(() => import('@/views/system/log/operation'));
 const LoginLogPage = lazy(() => import('@/views/system/log/login'));
 const HealthPage = lazy(() => import('@/views/monitor/health'));
-const OnlinePage = lazy(() => import('@/views/monitor/online'));
 const JobPage = lazy(() => import('@/views/monitor/job'));
 
 export function AppRouter() {
@@ -65,10 +64,6 @@ export function AppRouter() {
           <Route
             path="/monitor/health"
             element={<DashboardPage page={<HealthPage />} />}
-          />
-          <Route
-            path="/monitor/online"
-            element={<DashboardPage page={<OnlinePage />} />}
           />
           <Route
             path="/monitor/job"
