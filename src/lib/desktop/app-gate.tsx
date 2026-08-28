@@ -13,7 +13,7 @@ import { BrowserIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import * as React from 'react';
 
-const desktopAppDeepLink = 'one-browser://open';
+export const DESKTOP_APP_DEEP_LINK = 'one-browser://open';
 
 type DesktopAppRequest = {
   description?: string;
@@ -49,7 +49,7 @@ export function DesktopAppGateProvider({ children }: React.PropsWithChildren) {
 
   function openDesktopApp() {
     setRequest(null);
-    window.location.assign(desktopAppDeepLink);
+    launchDesktopApp();
   }
 
   return (
@@ -97,6 +97,10 @@ export function DesktopAppGateProvider({ children }: React.PropsWithChildren) {
       </ResponsiveDialog>
     </DesktopAppGateContext.Provider>
   );
+}
+
+export function launchDesktopApp() {
+  window.location.assign(DESKTOP_APP_DEEP_LINK);
 }
 
 export function useDesktopAppGate() {

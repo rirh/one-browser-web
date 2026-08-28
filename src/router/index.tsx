@@ -2,6 +2,7 @@ import { WorkspaceLoadingSkeleton } from '@/components/loading-skeleton';
 import { AccountSettingsLayout } from '@/features/account/profile/account-settings-layout';
 import { AuthGate } from '@/features/auth/auth-gate';
 import { DashboardShell } from '@/features/browser-shell/dashboard-shell';
+import { isTauriRuntime } from '@/lib/desktop';
 import { AppErrorBoundary } from '@/views/error/error-boundary';
 import NotFound from '@/views/error/not-found';
 import { lazy, Suspense } from 'react';
@@ -10,6 +11,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 const LoginPage = lazy(() => import('@/views/auth/login'));
 const CallbackPage = lazy(() => import('@/views/auth/callback'));
 const TeamInvitePage = lazy(() => import('@/views/auth/team-invite'));
+const DownloadPage = lazy(() => import('@/views/download'));
 const DashboardOverviewPage = lazy(() => import('@/views/dashboard'));
 const EnvironmentsPage = lazy(() => import('@/views/browser/environments'));
 const ProxiesPage = lazy(() => import('@/views/browser/proxies'));
@@ -39,8 +41,9 @@ export function AppRouter() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/callback" element={<CallbackPage />} />
           <Route path="/team-invite" element={<TeamInvitePage />} />
+          <Route path="/download" element={<DownloadPage />} />
           <Route path="/index" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<DefaultEntryRedirect />} />
           <Route
             path="/dashboard"
             element={<DashboardPage page={<DashboardOverviewPage />} />}
@@ -129,6 +132,12 @@ export function AppRouter() {
         </Routes>
       </Suspense>
     </AppErrorBoundary>
+  );
+}
+
+function DefaultEntryRedirect() {
+  return (
+    <Navigate replace to={isTauriRuntime() ? '/dashboard' : '/download'} />
   );
 }
 

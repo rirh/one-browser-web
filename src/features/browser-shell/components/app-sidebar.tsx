@@ -54,6 +54,7 @@ import { usePathname, useRouter } from '@/router/compat';
 
 import { AppNavUser } from './app-nav-user';
 import { AppTeamSwitcher } from './app-team-switcher';
+import { WebDesktopActions } from './web-desktop-actions';
 
 type NavItem = {
   href: string;
@@ -185,6 +186,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarFooter>
+        <WebDesktopActions />
         <AppNavUser
           user={user}
           isLoggingOut={isLoggingOut}
