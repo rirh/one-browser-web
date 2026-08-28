@@ -1,6 +1,7 @@
 import { EChartsChart } from '@/components/echarts-chart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/components/theme/runtime';
+import { cn } from '@/lib/utils';
 import type { EChartsCoreOption } from 'echarts/core';
 import * as React from 'react';
 
@@ -36,33 +37,33 @@ export function ResourceDistributionChart({
   const option = React.useMemo<EChartsCoreOption>(
     () => ({
       color: COLORS,
-      grid: { left: 12, right: 24, top: 8, bottom: 8, containLabel: true },
+      grid: { left: 12, right: 12, top: 24, bottom: 8, containLabel: true },
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       xAxis: {
+        type: 'category',
+        data: data.map((item) => item.label),
+        axisTick: { show: false },
+        axisLine: { lineStyle: { color: palette.grid } },
+        axisLabel: { color: palette.muted, interval: 0 },
+      },
+      yAxis: {
         type: 'value',
         minInterval: 1,
         splitLine: { lineStyle: { color: palette.grid } },
         axisLabel: { color: palette.muted },
       },
-      yAxis: {
-        type: 'category',
-        data: data.map((item) => item.label),
-        axisTick: { show: false },
-        axisLine: { show: false },
-        axisLabel: { color: palette.text },
-      },
       series: [
         {
           type: 'bar',
-          data: data.map((item, index) => ({
+          data: data.map((item) => ({
             value: item.value,
             itemStyle: {
-              color: COLORS[index % COLORS.length],
+              color: palette.primary,
               borderRadius: 4,
             },
           })),
-          barMaxWidth: 24,
-          label: { show: true, position: 'right', color: palette.text },
+          barMaxWidth: 36,
+          label: { show: true, position: 'top', color: palette.text },
         },
       ],
     }),
@@ -73,7 +74,7 @@ export function ResourceDistributionChart({
     <ChartCard title="资源规模">
       <EChartsChart
         option={option}
-        className="h-64 w-full cursor-pointer"
+        className="h-52 w-full cursor-pointer"
         onItemClick={(label) => {
           const href = hrefByLabel.get(label);
           if (href) onNavigate(href);
@@ -115,7 +116,7 @@ export function StatusPieChart({
 
   return (
     <ChartCard title={title}>
-      <EChartsChart option={option} className="h-64 w-full" />
+      <EChartsChart option={option} className="h-52 w-full" />
     </ChartCard>
   );
 }
@@ -131,7 +132,7 @@ export function ActivityChart({ data }: { data: DashboardActivityPoint[] }) {
       ].filter((item) =>
         data.some(
           (point) =>
-            point[item.key as keyof DashboardActivityPoint] !== undefined,
+            Number(point[item.key as keyof DashboardActivityPoint] ?? 0) > 0,
         ),
       ),
     [data],
@@ -171,7 +172,7 @@ export function ActivityChart({ data }: { data: DashboardActivityPoint[] }) {
 
   return (
     <ChartCard title="最近 7 天新增趋势" className="lg:col-span-2">
-      <EChartsChart option={option} className="h-72 w-full" />
+      <EChartsChart option={option} className="h-56 w-full" />
     </ChartCard>
   );
 }
@@ -186,11 +187,17 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <Card className={className}>
+    <Card
+      size="sm"
+      className={cn(
+        'bg-card border-0 shadow-none ring-0',
+        className,
+      )}
+    >
       <CardHeader className="pb-0">
         <CardTitle className="text-sm">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="pt-2">{children}</CardContent>
+      <CardContent className="pt-1">{children}</CardContent>
     </Card>
   );
 }
@@ -198,10 +205,27 @@ function ChartCard({
 function useChartPalette() {
   const { resolvedTheme } = useTheme();
   return React.useMemo(
-    () =>
-      resolvedTheme === 'dark'
-        ? { text: '#e2e8f0', muted: '#94a3b8', grid: '#334155' }
-        : { text: '#0f172a', muted: '#64748b', grid: '#e2e8f0' },
+    () => {
+      const primary =
+        typeof window === 'undefined'
+          ? '#2563eb'
+          : getComputedStyle(document.documentElement)
+              .getPropertyValue('--primary')
+              .trim() || '#2563eb';
+      return resolvedTheme === 'dark'
+        ? {
+            text: '#e2e8f0',
+            muted: '#94a3b8',
+            grid: '#334155',
+            primary,
+          }
+        : {
+            text: '#0f172a',
+            muted: '#64748b',
+            grid: '#e2e8f0',
+            primary,
+          };
+    },
     [resolvedTheme],
   );
 }

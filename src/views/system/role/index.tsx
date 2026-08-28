@@ -303,7 +303,7 @@ function RoleEditorDialog({
     );
   }
 
-  const permissionOptions = filterOptionsForCurrentUser(
+  const permissionOptions = markAssignableOptions(
     mergePermissionOptions(
       (menusQuery.data ?? [])
         .filter((menu) => menu.permission_scope === 'S')
@@ -632,31 +632,6 @@ function RoleField({
   );
 }
 
-function filterOptionsForCurrentUser(
-  options: PermissionOption[],
-  access: ReturnType<typeof useAuth>['access'],
-) {
-  if (access.is_super_admin) return options;
-  const optionById = new Map(options.map((option) => [option.id, option]));
-  const includedIds = new Set(
-    options
-      .filter(
-        (option) =>
-          option.permissionCode && hasPermission(access, option.permissionCode),
-      )
-      .map((option) => option.id),
-  );
-  for (const option of options) {
-    if (!includedIds.has(option.id)) continue;
-    let parentId = option.parentId;
-    while (parentId) {
-      includedIds.add(parentId);
-      parentId = optionById.get(parentId)?.parentId ?? null;
-    }
-  }
-  return options.filter((option) => includedIds.has(option.id));
-}
-
 function buildTree(options: PermissionOption[]) {
   const nodes = new Map<number, PermissionNode>();
   const roots: PermissionNode[] = [];
@@ -676,6 +651,37 @@ function buildTree(options: PermissionOption[]) {
   };
   sort(roots);
   return roots;
+}
+
+function markAssignableOptions(
+  options: PermissionOption[],
+  access: ReturnType<typeof useAuth>['access'],
+) {
+  if (access.is_super_admin) {
+    return options.map((option) => ({ ...option, assignable: true }));
+  }
+
+  const routeIds = new Set<number>();
+  const collectRouteIds = (routes: typeof access.routes) => {
+    routes.forEach((route) => {
+      routeIds.add(route.id);
+      collectRouteIds(route.children ?? []);
+    });
+  };
+  collectRouteIds(access.routes);
+
+  return options.map((option) => {
+    if (option.source === 'app') return option;
+    return {
+      ...option,
+      assignable:
+        routeIds.has(option.id) ||
+        Boolean(
+          option.permissionCode &&
+            hasPermission(access, option.permissionCode),
+        ),
+    };
+  });
 }
 
 function collectAssignableIds(node: PermissionNode): number[] {

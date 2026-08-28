@@ -25,22 +25,11 @@ import type { AuthRoute } from '@/features/auth/types';
 import { cn } from '@/lib/utils';
 import { http } from '@/lib/http';
 import {
-  Agreement01Icon,
   ArrowRight01Icon,
-  CalendarClockIcon,
-  ClipboardIcon,
-  Clock01Icon,
   DashboardBrowsingIcon,
   DashboardSquare01Icon,
-  Globe02Icon,
-  Key01Icon,
-  Notification01Icon,
   PackageOpenIcon,
   Route02Icon,
-  ServerStack01Icon,
-  ServerStack03Icon,
-  ShieldUserIcon,
-  UserCheck01Icon,
   UserGroupIcon,
   UserMultipleIcon,
 } from '@hugeicons/core-free-icons';
@@ -51,6 +40,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { usePathname, useRouter } from '@/router/compat';
+import { resolveRouteIcon } from '@/features/browser-shell/route-icons';
 
 import { AppNavUser } from './app-nav-user';
 import { AppTeamSwitcher } from './app-team-switcher';
@@ -97,38 +87,6 @@ const navItemByAuthPath: Record<string, Omit<NavItem, 'title'>> = {
     href: '/versions',
     icon: PackageOpenIcon,
   },
-};
-
-const navIconBySeedKey: Record<string, typeof DashboardBrowsingIcon> = {
-  'agreement-01': Agreement01Icon,
-  handshake: Agreement01Icon,
-  'calendar-clock': CalendarClockIcon,
-  clipboard: ClipboardIcon,
-  'clipboard-list': ClipboardIcon,
-  'clock-01': Clock01Icon,
-  'file-clock': Clock01Icon,
-  'dashboard-square-01': DashboardSquare01Icon,
-  'layout-dashboard': DashboardSquare01Icon,
-  'globe-02': Globe02Icon,
-  globe: Globe02Icon,
-  'key-01': Key01Icon,
-  key: Key01Icon,
-  'key-round': Key01Icon,
-  'notification-01': Notification01Icon,
-  bell: Notification01Icon,
-  'package-open': PackageOpenIcon,
-  'route-02': Route02Icon,
-  network: Route02Icon,
-  'server-stack-01': ServerStack01Icon,
-  'server-cog': ServerStack01Icon,
-  'server-stack-03': ServerStack03Icon,
-  'shield-user': ShieldUserIcon,
-  shield: ShieldUserIcon,
-  'user-check-01': UserCheck01Icon,
-  'user-round-check': UserCheck01Icon,
-  'user-multiple': UserMultipleIcon,
-  users: UserMultipleIcon,
-  'users-round': UserMultipleIcon,
 };
 
 function isActivePath(pathname: string, href: string) {
@@ -297,10 +255,10 @@ function collectNavItems(route: AuthRoute, seenPaths: Set<string>): NavItem[] {
     const configuredItem = navItemByAuthPath[route.path];
     const item = {
       href: configuredItem?.href ?? route.path,
-      icon:
-        navIconBySeedKey[route.meta.icon.trim().toLowerCase()] ??
-        configuredItem?.icon ??
-        DashboardBrowsingIcon,
+      icon: resolveRouteIcon(
+        route.meta.icon,
+        configuredItem?.icon ?? DashboardBrowsingIcon,
+      ),
     };
     if (!route.hidden && !seenPaths.has(route.path)) {
       seenPaths.add(route.path);

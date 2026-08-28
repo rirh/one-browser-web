@@ -7,6 +7,7 @@ import {
   completeOidcLogin,
   getCurrentUser,
 } from '@/features/auth/api';
+import { requestDownloadPrompt } from '@/features/app-download/session';
 import { useEffect, useRef, useState } from 'react';
 
 type CallbackState =
@@ -65,6 +66,7 @@ export function CallbackPage() {
           return;
         }
 
+        requestDownloadPrompt();
         window.location.replace(normalizeReturnTo(result.returnTo));
       })
       .catch((callbackError: unknown) => {

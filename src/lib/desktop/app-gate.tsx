@@ -8,12 +8,10 @@ import {
   ResponsiveDialogTitle,
 } from '@/components/responsive-dialog';
 import { DialogActionButton } from '@/components/ui/dialog-action-button';
+import { authorizeDesktopHandoff } from '@/features/auth/api';
 import { isTauriRuntime } from '@/lib/desktop/client';
-import { BrowserIcon } from '@hugeicons/core-free-icons';
-import { HugeiconsIcon } from '@hugeicons/react';
 import * as React from 'react';
-
-export const DESKTOP_APP_DEEP_LINK = 'one-browser://open';
+import { toast } from 'sonner';
 
 type DesktopAppRequest = {
   description?: string;
@@ -49,7 +47,7 @@ export function DesktopAppGateProvider({ children }: React.PropsWithChildren) {
 
   function openDesktopApp() {
     setRequest(null);
-    launchDesktopApp();
+    void launchDesktopApp();
   }
 
   return (
@@ -74,7 +72,11 @@ export function DesktopAppGateProvider({ children }: React.PropsWithChildren) {
           </ResponsiveDialogHeader>
           <ResponsiveDialogBody className="flex items-start gap-3 py-4">
             <div className="bg-primary/10 text-primary ring-primary/15 flex size-10 shrink-0 items-center justify-center rounded-lg ring-1">
-              <HugeiconsIcon icon={BrowserIcon} strokeWidth={2} />
+              <img
+                src="/pwa-512x512.png"
+                alt=""
+                className="size-4 rounded-sm"
+              />
             </div>
             <p className="text-muted-foreground pt-0.5 text-sm/6">
               {request?.description ??
@@ -99,8 +101,35 @@ export function DesktopAppGateProvider({ children }: React.PropsWithChildren) {
   );
 }
 
-export function launchDesktopApp() {
-  window.location.assign(DESKTOP_APP_DEEP_LINK);
+export async function launchDesktopApp() {
+  try {
+    const authorization = await authorizeDesktopHandoff();
+    const deepLink = validateDesktopAuthDeepLink(authorization.callback_url);
+    if (import.meta.env.DEV) {
+      console.info('[desktop-deep-link]', deepLink);
+    }
+    window.location.assign(deepLink);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : '无法创建 App 登录链接';
+    console.error('[desktop-deep-link] authorization failed', message);
+    toast.error(message);
+  }
+}
+
+function validateDesktopAuthDeepLink(value: string) {
+  const url = new URL(value);
+  if (
+    url.protocol !== 'one-browser:' ||
+    url.hostname !== 'auth' ||
+    url.pathname !== '/callback' ||
+    !url.searchParams.get('access_token') ||
+    !url.searchParams.get('refresh_token') ||
+    !url.searchParams.get('api_url')
+  ) {
+    throw new Error('App 登录链接无效');
+  }
+  return url.toString();
 }
 
 export function useDesktopAppGate() {

@@ -10,7 +10,11 @@ import {
   useRefreshEgressLinesMutation,
 } from '@/features/browser/egress/queries';
 import {
+  AUTO_EGRESS_VALUE,
+  MANUAL_EGRESS_PREFIX,
   chooseRecommendedLine,
+  egressSelectionPatch,
+  egressSelectionValue,
   isSelectableLine,
 } from '@/features/browser/egress/selection';
 import type {
@@ -26,9 +30,6 @@ import { toast } from 'sonner';
 
 import { useUpdateSettingsMutation } from './queries';
 
-const AUTO_VALUE = 'mode:auto';
-const MANUAL_PREFIX = 'manual:';
-
 export function DefaultEgressSettings({ settings }: { settings: AppSettings }) {
   const { locale } = useI18n();
   const snapshotQuery = useEgressLineSnapshotQuery();
@@ -39,10 +40,7 @@ export function DefaultEgressSettings({ settings }: { settings: AppSettings }) {
   const probes = snapshot?.probes ?? [];
   const probesById = new Map(probes.map((probe) => [probe.egressId, probe]));
   const recommended = chooseRecommendedLine(lines, probes);
-  const selectionValue =
-    settings.egressSelectionMode === 'manual' && settings.preferredEgressId
-      ? `${MANUAL_PREFIX}${settings.preferredEgressId}`
-      : AUTO_VALUE;
+  const selectionValue = egressSelectionValue(settings);
   const selectedLineMissing =
     snapshotQuery.isSuccess &&
     settings.egressSelectionMode === 'manual' &&
@@ -51,21 +49,8 @@ export function DefaultEgressSettings({ settings }: { settings: AppSettings }) {
   const isRefreshing = snapshotQuery.isFetching || refreshMutation.isPending;
 
   function saveSelection(value: string) {
-    const patch =
-      value === AUTO_VALUE
-        ? {
-            egressSelectionMode: 'auto' as const,
-            preferredEgressId: null,
-          }
-        : {
-            egressSelectionMode: 'manual' as const,
-            preferredEgressId: value.startsWith(MANUAL_PREFIX)
-              ? value.slice(MANUAL_PREFIX.length)
-              : null,
-          };
-    if (patch.egressSelectionMode === 'manual' && !patch.preferredEgressId) {
-      return;
-    }
+    const patch = egressSelectionPatch(value);
+    if (!patch) return;
 
     updateSettingsMutation.mutate(patch, {
       onSuccess: () => toast.success('默认线路已更新'),
@@ -91,7 +76,7 @@ export function DefaultEgressSettings({ settings }: { settings: AppSettings }) {
         >
           <LineChoice
             id="egress-line-auto"
-            value={AUTO_VALUE}
+            value={AUTO_EGRESS_VALUE}
             title="自动选择"
             description={recommendedDescription(
               recommended,
@@ -113,7 +98,7 @@ export function DefaultEgressSettings({ settings }: { settings: AppSettings }) {
             <LineChoice
               key={line.egress_id}
               id={`egress-line-${line.egress_id}`}
-              value={`${MANUAL_PREFIX}${line.egress_id}`}
+              value={`${MANUAL_EGRESS_PREFIX}${line.egress_id}`}
               title={line.display_name || line.egress_id}
               description={lineDescription(
                 line,
@@ -137,7 +122,7 @@ export function DefaultEgressSettings({ settings }: { settings: AppSettings }) {
           {selectedLineMissing ? (
             <LineChoice
               id="egress-line-missing"
-              value={`${MANUAL_PREFIX}${settings.preferredEgressId}`}
+              value={`${MANUAL_EGRESS_PREFIX}${settings.preferredEgressId}`}
               title={settings.preferredEgressId ?? '已选择线路'}
               description="该线路已不在服务器列表中；设置已保留，启动时将明确报错。"
               disabled

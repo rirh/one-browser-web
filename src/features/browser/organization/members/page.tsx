@@ -32,6 +32,7 @@ import {
 import { useMemberColumns } from './components/member-columns';
 import { MemberEnvironmentAuthorizationDialog } from './components/member-environment-authorization-dialog';
 import {
+  MemberDisableDialog,
   MemberRemovalDialog,
   NoMemberPermissionState,
 } from './components/member-page-states';
@@ -88,6 +89,8 @@ export function RemoteMembersPage() {
     React.useState<RemoteMemberResource | null>(null);
   const [removeTarget, setRemoveTarget] =
     React.useState<RemoteMemberResource | null>(null);
+  const [disableTarget, setDisableTarget] =
+    React.useState<RemoteMemberResource | null>(null);
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [statusFilter, setStatusFilter] =
@@ -118,8 +121,12 @@ export function RemoteMembersPage() {
     Boolean(selectedTeam?.is_owner) &&
     hasButtonPermission(access, 'browser:member:remove', selectedTeam?.team_id);
   const invite = useMemberInvite({ access, teams, selectedTeamId });
-  const toggleMemberStatus = React.useCallback(
+  const updateMemberStatus = React.useCallback(
     (record: RemoteMemberResource, status: RemoteStatusFlag) => {
+      if (record.user_id === user.user_id) {
+        toast.error('不能修改自己的成员状态');
+        return;
+      }
       if (
         !hasButtonPermission(access, 'browser:member:status', record.team_id)
       ) {
@@ -135,11 +142,24 @@ export function RemoteMembersPage() {
         {
           onSuccess: () => {
             toast.success(status === '0' ? '成员已启用' : '成员已停用');
+            if (status === '1') {
+              setDisableTarget(null);
+            }
           },
         },
       );
     },
-    [access, statusMutation],
+    [access, statusMutation, user.user_id],
+  );
+  const requestMemberStatusChange = React.useCallback(
+    (record: RemoteMemberResource, status: RemoteStatusFlag) => {
+      if (status === '1') {
+        setDisableTarget(record);
+        return;
+      }
+      updateMemberStatus(record, status);
+    },
+    [updateMemberStatus],
   );
   const isCurrentUserMember = React.useCallback(
     (record: RemoteMemberResource) => record.user_id === user.user_id,
@@ -188,7 +208,7 @@ export function RemoteMembersPage() {
     isRemovingMember: removeMutation.isPending,
     isCurrentUser: isCurrentUserMember,
     canConfigureAccess: canConfigureMemberAccess,
-    onStatusChange: toggleMemberStatus,
+    onStatusChange: requestMemberStatusChange,
     onAssignRoles: openMemberRoles,
     onAuthorizeEnvironments: openMemberEnvironments,
     onRemoveMember: setRemoveTarget,
@@ -403,6 +423,20 @@ export function RemoteMembersPage() {
           }
         }}
         onConfirm={removeMember}
+      />
+      <MemberDisableDialog
+        target={disableTarget}
+        isSaving={statusMutation.isPending}
+        onOpenChange={(open) => {
+          if (!open && !statusMutation.isPending) {
+            setDisableTarget(null);
+          }
+        }}
+        onConfirm={() => {
+          if (disableTarget) {
+            updateMemberStatus(disableTarget, '1');
+          }
+        }}
       />
     </div>
   );

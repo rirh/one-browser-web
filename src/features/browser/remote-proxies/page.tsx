@@ -220,7 +220,13 @@ export function RemoteProxiesPage() {
                   onPointerLeave={scheduleCloseCreateMenu}
                 >
                   <DropdownMenuTrigger asChild>
-                    <Button size="sm">
+                    <Button
+                      size="sm"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        openCreateDialog();
+                      }}
+                    >
                       <HugeiconsIcon
                         icon={Add01Icon}
                         strokeWidth={2}

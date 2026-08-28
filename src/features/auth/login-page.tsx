@@ -8,6 +8,7 @@ import {
   readAuthSessionStatus,
 } from '@/features/auth/session';
 import { isUnauthorizedAuthError } from '@/features/auth/auth-errors';
+import { requestDownloadPrompt } from '@/features/app-download/session';
 import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
 import { Door01Icon, Globe02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -149,8 +150,11 @@ export function LoginPage({ authManaged = false }: LoginPageProps) {
 
   const applyAuthSession = React.useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ['auth'] });
+    if (!isDesktop) {
+      requestDownloadPrompt();
+    }
     router.replace(safeRedirectTo);
-  }, [queryClient, router, safeRedirectTo]);
+  }, [isDesktop, queryClient, router, safeRedirectTo]);
 
   useAuthDeepLinks(applyAuthSession, !authManaged && isDesktop);
 

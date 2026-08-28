@@ -18,6 +18,16 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
+import { Button } from '@/components/ui/button';
+import {
+  ResponsiveDialog,
+  ResponsiveDialogBody,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogFooter,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from '@/components/responsive-dialog';
 import { Delete02Icon, ShieldUserIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 
@@ -89,5 +99,53 @@ export function MemberRemovalDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+export function MemberDisableDialog({
+  target,
+  isSaving,
+  onOpenChange,
+  onConfirm,
+}: {
+  target: RemoteMemberResource | null;
+  isSaving: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <ResponsiveDialog open={Boolean(target)} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent className="sm:max-w-md">
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle>确认停用成员</ResponsiveDialogTitle>
+          <ResponsiveDialogDescription>
+            停用后，该成员将无法继续使用当前团队资源。
+          </ResponsiveDialogDescription>
+        </ResponsiveDialogHeader>
+        <ResponsiveDialogBody>
+          <p className="text-sm">
+            确定要停用成员「{target?.display_name ?? ''}」吗？
+          </p>
+        </ResponsiveDialogBody>
+        <ResponsiveDialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSaving}
+            onClick={() => onOpenChange(false)}
+          >
+            取消
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={isSaving || !target}
+            onClick={onConfirm}
+          >
+            {isSaving ? '停用中…' : '确认停用'}
+          </Button>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

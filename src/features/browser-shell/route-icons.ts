@@ -1,0 +1,57 @@
+import {
+  Agreement01Icon,
+  CalendarClockIcon,
+  ClipboardIcon,
+  Clock01Icon,
+  DashboardBrowsingIcon,
+  DashboardSquare01Icon,
+  Globe02Icon,
+  Key01Icon,
+  Notification01Icon,
+  PackageOpenIcon,
+  Route02Icon,
+  ServerStack01Icon,
+  ServerStack03Icon,
+  ShieldUserIcon,
+  UserCheck01Icon,
+  UserMultipleIcon,
+} from '@hugeicons/core-free-icons';
+
+const routeIconBySeedKey: Record<string, typeof DashboardBrowsingIcon> = {
+  'agreement-01': Agreement01Icon,
+  handshake: Agreement01Icon,
+  'calendar-clock': CalendarClockIcon,
+  clipboard: ClipboardIcon,
+  'clipboard-list': ClipboardIcon,
+  'clock-01': Clock01Icon,
+  'file-clock': Clock01Icon,
+  'dashboard-square-01': DashboardSquare01Icon,
+  'layout-dashboard': DashboardSquare01Icon,
+  'globe-02': Globe02Icon,
+  globe: Globe02Icon,
+  'key-01': Key01Icon,
+  key: Key01Icon,
+  'key-round': Key01Icon,
+  'notification-01': Notification01Icon,
+  bell: Notification01Icon,
+  'package-open': PackageOpenIcon,
+  'route-02': Route02Icon,
+  network: Route02Icon,
+  'server-stack-01': ServerStack01Icon,
+  'server-cog': ServerStack01Icon,
+  'server-stack-03': ServerStack03Icon,
+  'shield-user': ShieldUserIcon,
+  shield: ShieldUserIcon,
+  'user-check-01': UserCheck01Icon,
+  'user-round-check': UserCheck01Icon,
+  'user-multiple': UserMultipleIcon,
+  users: UserMultipleIcon,
+  'users-round': UserMultipleIcon,
+};
+
+export function resolveRouteIcon(
+  icon: string | null | undefined,
+  fallback = DashboardBrowsingIcon,
+) {
+  return routeIconBySeedKey[icon?.trim().toLowerCase() ?? ''] ?? fallback;
+}

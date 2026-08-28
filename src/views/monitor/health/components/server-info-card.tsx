@@ -29,7 +29,7 @@ export function ServerInfoCard({
   ];
 
   return (
-    <Card className="dark:border-border/40 h-full border-none shadow-none">
+    <Card className="h-full border-0 shadow-none ring-0">
       <CardHeader className="space-y-2">
         <CardTitle className="flex items-center gap-2 text-lg font-semibold">
           <MonitorSmartphone className="text-muted-foreground size-5" />

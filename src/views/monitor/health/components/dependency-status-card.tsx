@@ -20,7 +20,7 @@ export function DependencyStatusCard({ status }: { status: HealthSnapshot }) {
   ] as const;
 
   return (
-    <Card className="dark:border-border/40 border-none shadow-none">
+    <Card className="border-0 shadow-none ring-0">
       <CardHeader className="space-y-2">
         <CardTitle className="flex items-center gap-2 text-lg font-semibold">
           <Database className="text-muted-foreground size-5" />
@@ -36,7 +36,7 @@ export function DependencyStatusCard({ status }: { status: HealthSnapshot }) {
           return (
             <div
               key={label}
-              className="border-border/60 bg-muted/10 dark:border-border/30 rounded-2xl border p-4"
+              className="bg-muted/10 rounded-2xl p-4"
             >
               <InfoRow
                 label={label}

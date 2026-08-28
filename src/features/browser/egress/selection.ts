@@ -1,3 +1,7 @@
+import type {
+  AppSettings,
+  UpdateSettingsRequest,
+} from '@/features/browser/contracts';
 import { getSettings } from '@/features/browser/settings/api';
 import { isTauriRuntime } from '@/lib/desktop';
 
@@ -10,12 +14,45 @@ import type {
 } from './types';
 
 export const EGRESS_PROBE_CACHE_TTL_MS = 2 * 60 * 1000;
+export const AUTO_EGRESS_VALUE = 'mode:auto';
+export const MANUAL_EGRESS_PREFIX = 'manual:';
 const EGRESS_LATENCY_TOLERANCE_MS = 50;
 const EGRESS_LOAD_BAND_PERCENT = 10;
 
 let cachedSnapshot:
   | { signature: string; expiresAt: number; snapshot: EgressLineSnapshot }
   | undefined;
+
+export function egressSelectionValue(
+  settings:
+    | Pick<AppSettings, 'egressSelectionMode' | 'preferredEgressId'>
+    | undefined,
+) {
+  return settings?.egressSelectionMode === 'manual' && settings.preferredEgressId
+    ? `${MANUAL_EGRESS_PREFIX}${settings.preferredEgressId}`
+    : AUTO_EGRESS_VALUE;
+}
+
+export function egressSelectionPatch(
+  value: string,
+): Pick<
+  UpdateSettingsRequest,
+  'egressSelectionMode' | 'preferredEgressId'
+> | null {
+  if (value === AUTO_EGRESS_VALUE) {
+    return {
+      egressSelectionMode: 'auto',
+      preferredEgressId: null,
+    };
+  }
+  if (!value.startsWith(MANUAL_EGRESS_PREFIX)) return null;
+  const preferredEgressId = value.slice(MANUAL_EGRESS_PREFIX.length);
+  if (!preferredEgressId) return null;
+  return {
+    egressSelectionMode: 'manual',
+    preferredEgressId,
+  };
+}
 
 export async function loadEgressLineSnapshot(options?: { force?: boolean }) {
   const lines = await listEgressLines();

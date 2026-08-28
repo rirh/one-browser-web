@@ -40,7 +40,7 @@ export function QuickStatCard({
 
   return (
     <div
-      className={`border-border/60 bg-card/80 dark:border-border/30 relative overflow-hidden rounded-2xl border px-4 py-4 ${className ?? ''}`}
+      className={`bg-card/80 relative overflow-hidden rounded-2xl px-4 py-4 shadow-none ${className ?? ''}`}
     >
       <div
         aria-hidden

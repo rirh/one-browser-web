@@ -72,7 +72,7 @@ export default function HealthPage() {
   );
 
   return (
-    <main className="min-h-0 flex-1 overflow-auto p-3 lg:p-4">
+    <main className="bg-muted min-h-0 flex-1 overflow-auto p-3 lg:p-4">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="sr-only">
@@ -117,7 +117,7 @@ export default function HealthPage() {
         </div>
 
         {!stream.isConnected && stream.error ? (
-          <Card className="border-destructive/40 bg-destructive/10 text-destructive">
+          <Card className="bg-destructive/10 text-destructive border-0 shadow-none ring-0">
             <CardHeader className="space-y-1">
               <CardTitle className="text-lg">实时流连接异常</CardTitle>
               <CardDescription className="text-destructive/80">

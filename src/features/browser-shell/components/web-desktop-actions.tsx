@@ -12,14 +12,27 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { AppDownloadCard } from '@/features/app-download/download-card';
+import { consumeDownloadPrompt } from '@/features/app-download/session';
 import { isTauriRuntime } from '@/lib/desktop';
 import { launchDesktopApp } from '@/lib/desktop/app-gate';
-import { BrowserIcon, Download01Icon } from '@hugeicons/core-free-icons';
+import { usePathname } from '@/router/compat';
+import { Download01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import * as React from 'react';
 
 export function WebDesktopActions() {
   const [downloadOpen, setDownloadOpen] = React.useState(false);
+  const pathname = usePathname();
+
+  React.useEffect(() => {
+    if (
+      !isTauriRuntime() &&
+      pathname === '/dashboard' &&
+      consumeDownloadPrompt()
+    ) {
+      setDownloadOpen(true);
+    }
+  }, [pathname]);
 
   if (isTauriRuntime()) return null;
 
@@ -49,10 +62,14 @@ export function WebDesktopActions() {
           <SidebarMenuButton
             size="lg"
             tooltip="打开 One Browser"
-            onClick={launchDesktopApp}
+            onClick={() => void launchDesktopApp()}
           >
             <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
-              <HugeiconsIcon icon={BrowserIcon} strokeWidth={2} />
+              <img
+                src="/pwa-512x512.png"
+                alt=""
+                className="size-5 rounded-sm"
+              />
             </span>
             <span className="grid min-w-0 flex-1 gap-1 text-left leading-none">
               <span className="truncate text-[0.8125rem] font-medium">

@@ -111,7 +111,7 @@ export function ProcessInfoCard({
   ];
 
   return (
-    <Card className="dark:border-border/40 h-full border-none shadow-none">
+    <Card className="h-full border-0 shadow-none ring-0">
       <CardHeader className="space-y-2">
         <CardTitle className="flex items-center gap-2 text-lg font-semibold">
           <ServerCog className="text-muted-foreground size-5" />
@@ -122,7 +122,7 @@ export function ProcessInfoCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 sm:flex sm:gap-2">
-        <div className="border-border/60 bg-muted/10 dark:border-border/30 min-w-[300px] rounded-2xl border p-4">
+        <div className="bg-muted/10 min-w-[300px] rounded-2xl p-4">
           <p className="text-muted-foreground text-xs tracking-wide uppercase">
             部署信息
           </p>
@@ -138,7 +138,7 @@ export function ProcessInfoCard({
             ))}
           </div>
         </div>
-        <div className="border-border/60 dark:border-border/30 flex-1 rounded-2xl border p-4">
+        <div className="flex-1 rounded-2xl p-4">
           <p className="text-muted-foreground text-xs tracking-wide uppercase">
             运行指标
           </p>

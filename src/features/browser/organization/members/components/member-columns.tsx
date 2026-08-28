@@ -92,15 +92,19 @@ export function useMemberColumns({
       {
         accessorKey: 'status',
         header: '状态',
-        cell: ({ row }) => (
-          <MemberStatusCell
-            label="成员状态"
-            status={row.original.status}
-            canChange={canChangeStatus}
-            disabled={!canChangeStatus || isStatusPending}
-            onChange={(status) => onStatusChange(row.original, status)}
-          />
-        ),
+        cell: ({ row }) => {
+          const currentUser = isCurrentUser(row.original);
+          return (
+            <MemberStatusCell
+              label="成员状态"
+              status={row.original.status}
+              canChange={canChangeStatus}
+              disabled={!canChangeStatus || isStatusPending || currentUser}
+              title={currentUser ? '不能修改自己的成员状态' : undefined}
+              onChange={(status) => onStatusChange(row.original, status)}
+            />
+          );
+        },
       },
       {
         accessorKey: 'last_active_at',
@@ -166,12 +170,14 @@ function MemberStatusCell({
   status,
   canChange,
   disabled,
+  title,
   onChange,
 }: {
   label: string;
   status: RemoteStatusFlag;
   canChange: boolean;
   disabled: boolean;
+  title?: string;
   onChange: (status: RemoteStatusFlag) => void;
 }) {
   const checked = status === '0';
@@ -187,6 +193,7 @@ function MemberStatusCell({
       size="sm"
       checked={checked}
       disabled={disabled}
+      title={title}
       aria-label={label}
       onCheckedChange={(nextChecked) => onChange(nextChecked ? '0' : '1')}
     />

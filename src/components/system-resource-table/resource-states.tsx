@@ -4,26 +4,10 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from '@/components/ui/empty';
-import { Skeleton } from '@/components/ui/skeleton';
+import { TableLoadingSkeleton } from '@/components/loading-skeleton';
 
 export function ResourceTableSkeleton({ columns }: { columns: number }) {
-  return (
-    <div className="flex flex-col gap-2 p-3">
-      {Array.from({ length: 8 }, (_, row) => (
-        <div
-          key={row}
-          className="grid gap-2"
-          style={{
-            gridTemplateColumns: `repeat(${columns}, minmax(7rem, 1fr))`,
-          }}
-        >
-          {Array.from({ length: columns }, (_, column) => (
-            <Skeleton key={column} className="h-7 w-full" />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
+  return <TableLoadingSkeleton columnCount={columns} />;
 }
 
 export function ResourceError({ error }: { error: unknown }) {

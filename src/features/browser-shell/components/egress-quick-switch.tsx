@@ -10,7 +10,11 @@ import {
   useRefreshEgressLinesMutation,
 } from '@/features/browser/egress/queries';
 import {
+  AUTO_EGRESS_VALUE,
+  MANUAL_EGRESS_PREFIX,
   chooseRecommendedLine,
+  egressSelectionPatch,
+  egressSelectionValue,
   isSelectableLine,
 } from '@/features/browser/egress/selection';
 import type {
@@ -25,8 +29,6 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { type ReactNode, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 
-const AUTO_EGRESS_VALUE = 'mode:auto';
-const MANUAL_EGRESS_PREFIX = 'manual:';
 const FAST_LATENCY_MS = 100;
 const ACCEPTABLE_LATENCY_MS = 250;
 const EMPTY_EGRESS_LINES: RemoteEgressLine[] = [];
@@ -49,10 +51,7 @@ export function EgressQuickSwitch({
   );
   const recommended = chooseRecommendedLine(lines, probes);
   const recommendedEgressId = recommended?.egress_id ?? null;
-  const selectedValue =
-    settings?.egressSelectionMode === 'manual' && settings.preferredEgressId
-      ? `${MANUAL_EGRESS_PREFIX}${settings.preferredEgressId}`
-      : AUTO_EGRESS_VALUE;
+  const selectedValue = egressSelectionValue(settings);
   const activeLine =
     settings?.egressSelectionMode === 'manual'
       ? lines.find((line) => line.egress_id === settings.preferredEgressId)
@@ -85,21 +84,8 @@ export function EgressQuickSwitch({
   }, [probesById, recommendedEgressId, settings, snapshot]);
 
   function saveSelection(value: string) {
-    const patch =
-      value === AUTO_EGRESS_VALUE
-        ? {
-            egressSelectionMode: 'auto' as const,
-            preferredEgressId: null,
-          }
-        : {
-            egressSelectionMode: 'manual' as const,
-            preferredEgressId: value.startsWith(MANUAL_EGRESS_PREFIX)
-              ? value.slice(MANUAL_EGRESS_PREFIX.length)
-              : null,
-          };
-    if (patch.egressSelectionMode === 'manual' && !patch.preferredEgressId) {
-      return;
-    }
+    const patch = egressSelectionPatch(value);
+    if (!patch) return;
 
     updateSettingsMutation.mutate(patch, {
       onSuccess: () => toast.success('默认节点已切换'),
