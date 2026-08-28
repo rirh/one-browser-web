@@ -1,4 +1,5 @@
 import { AnimatedSegmentedTabs } from '@/components/ui/animated-segmented-tabs';
+import { RefreshButton } from '@/components/refresh-button';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -15,7 +16,6 @@ import {
 } from '@/components/ui/input-group';
 import {
   ArrowDown01Icon,
-  Refresh01Icon,
   Search01Icon,
   SlidersHorizontalIcon,
 } from '@hugeicons/core-free-icons';
@@ -44,7 +44,7 @@ export function ResourceToolbar({
 }: {
   hasStatus: boolean;
   isFetching: boolean;
-  onRefresh: () => void;
+  onRefresh: () => void | Promise<{ isError?: boolean }>;
   search: string;
   setSearch: (value: string) => void;
   statusFilter: StatusFilter;
@@ -77,22 +77,12 @@ export function ResourceToolbar({
       </div>
       <div className="flex items-center justify-end gap-2">
         {actions}
-        <Button
-          type="button"
+        <RefreshButton
           size="sm"
           variant="outline"
-          disabled={isFetching}
-          aria-busy={isFetching || undefined}
-          onClick={onRefresh}
-        >
-          <HugeiconsIcon
-            icon={Refresh01Icon}
-            strokeWidth={2}
-            data-icon="inline-start"
-            className={isFetching ? 'animate-spin' : undefined}
-          />
-          刷新
-        </Button>
+          isRefreshing={isFetching}
+          onRefresh={onRefresh}
+        />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button type="button" size="sm" variant="outline">

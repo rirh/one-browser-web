@@ -37,6 +37,7 @@ import {
   DefaultUserAvatar,
   getDefaultUserAvatarSeed,
 } from '@/features/account/avatar';
+import { openOneUserPasswordPage } from '@/features/account/one-user-account';
 import type { CurrentUser } from '@/features/auth/types';
 import { type Locale } from '@/i18n';
 import { useI18n } from '@/i18n/provider';
@@ -56,6 +57,7 @@ import {
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Link } from 'react-router-dom';
 import * as React from 'react';
+import { toast } from 'sonner';
 
 const SettingsDialog = React.lazy(() =>
   import('@/features/browser/settings/page').then((module) => ({
@@ -70,14 +72,16 @@ const accountMenuItems = [
     icon: UserIcon,
   },
   {
-    label: '安全管理',
-    href: '/account/password',
+    label: '修改密码',
+    href: 'one-user-password',
     icon: Shield01Icon,
+    external: true,
   },
   {
     label: '邀请好友',
     href: '/account/invite',
     icon: UserAdd01Icon,
+    external: false,
   },
 ] as const;
 
@@ -150,14 +154,34 @@ export function AppNavUser({
             >
               <DropdownMenuGroup>
                 <DropdownMenuLabel>账户</DropdownMenuLabel>
-                {accountMenuItems.map((item) => (
-                  <DropdownMenuItem key={item.href} asChild>
-                    <Link to={item.href}>
+                {accountMenuItems.map((item) =>
+                  'external' in item && item.external ? (
+                    <DropdownMenuItem
+                      key={item.href}
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        setMenuOpen(false);
+                        void openOneUserPasswordPage().catch((error) =>
+                          toast.error(
+                            error instanceof Error
+                              ? error.message
+                              : '无法打开 One User 修改密码页面',
+                          ),
+                        );
+                      }}
+                    >
                       <HugeiconsIcon icon={item.icon} strokeWidth={2} />
                       {item.label}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem key={item.href} asChild>
+                      <Link to={item.href}>
+                        <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+                        {item.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ),
+                )}
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>

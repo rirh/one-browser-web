@@ -6,7 +6,7 @@ export const commonMessages = {
   团队管理: 'Team management',
   成员管理: 'Member management',
   个人信息: 'Profile',
-  安全管理: 'Security',
+  修改密码: 'Change password',
   邀请好友: 'Invite friends',
   账户: 'Account',
   账号设置: 'Account settings',

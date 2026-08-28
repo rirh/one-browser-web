@@ -17,7 +17,9 @@ const MembersPage = lazy(() => import('@/views/browser/members'));
 const VersionsPage = lazy(() => import('@/views/browser/versions'));
 const SettingsPage = lazy(() => import('@/views/browser/settings'));
 const AccountProfilePage = lazy(() => import('@/views/account/profile'));
-const AccountPasswordPage = lazy(() => import('@/views/account/password'));
+const AccountPasswordPage = lazy(
+  () => import('@/views/account/password/redirect'),
+);
 const AccountInvitePage = lazy(() => import('@/views/account/invite'));
 const SystemUserPage = lazy(() => import('@/views/system/user'));
 const SystemRolePage = lazy(() => import('@/views/system/role'));
@@ -111,7 +113,7 @@ export function AppRouter() {
           />
           <Route
             path="/account/password"
-            element={<AccountPage page={<AccountPasswordPage />} />}
+            element={<DashboardPage page={<AccountPasswordPage />} />}
           />
           <Route
             path="/account/invite"

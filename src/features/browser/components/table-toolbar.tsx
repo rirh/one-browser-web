@@ -2,16 +2,14 @@ import {
   AnimatedSegmentedTabs,
   type AnimatedSegmentedTabsOption,
 } from '@/components/ui/animated-segmented-tabs';
-import { Button } from '@/components/ui/button';
+import { RefreshButton } from '@/components/refresh-button';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from '@/components/ui/input-group';
-import { Spinner } from '@/components/ui/spinner';
-import { refreshWithSuccessToast } from '@/features/browser/refresh';
 import { cn } from '@/lib/utils';
-import { Refresh01Icon, Search01Icon } from '@hugeicons/core-free-icons';
+import { Search01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import * as React from 'react';
 
@@ -33,7 +31,7 @@ export function BrowserTableToolbar({
   actions,
 }: BrowserTableToolbarProps) {
   return (
-    <div className="flex shrink-0 flex-col gap-1.5 border-b bg-muted/40 px-3 py-2 sm:flex-row sm:items-center sm:justify-between lg:px-4">
+    <div className="bg-muted/40 flex shrink-0 flex-col gap-1.5 border-b px-3 py-2 sm:flex-row sm:items-center sm:justify-between lg:px-4">
       <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center">
         {filters}
       </div>
@@ -113,24 +111,12 @@ export function BrowserTableRefreshButton({
   successMessage,
 }: BrowserTableRefreshButtonProps) {
   return (
-    <Button
-      type="button"
+    <RefreshButton
       variant="outline"
       size="sm"
-      disabled={isRefreshing}
-      aria-busy={isRefreshing || undefined}
-      onClick={() => void refreshWithSuccessToast(onRefresh, successMessage)}
-    >
-      {isRefreshing ? (
-        <Spinner data-icon="inline-start" />
-      ) : (
-        <HugeiconsIcon
-          icon={Refresh01Icon}
-          strokeWidth={2}
-          data-icon="inline-start"
-        />
-      )}
-      刷新
-    </Button>
+      isRefreshing={isRefreshing}
+      onRefresh={onRefresh}
+      successMessage={successMessage}
+    />
   );
 }

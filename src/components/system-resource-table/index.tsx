@@ -141,7 +141,7 @@ export function SystemResourceTable({
             : records.some((record) => 'status' in record)
         }
         isFetching={query.isFetching}
-        onRefresh={() => void query.refetch()}
+        onRefresh={query.refetch}
         search={search}
         setSearch={updateSearch}
         statusFilter={statusFilter}

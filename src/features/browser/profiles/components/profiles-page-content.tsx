@@ -4,7 +4,6 @@ import type {
   OpenProfileProgressStep,
   ProfileListItem,
 } from '@/features/browser/contracts';
-import { refreshWithSuccessToast } from '@/features/browser/refresh';
 import { cn } from '@/lib/utils';
 import { Cancel01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -351,14 +350,15 @@ export function ProfilesPageContent({ search }: { search: string }) {
   });
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col overflow-hidden bg-card">
+    <section className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden">
       <ProfilesPageHeader
         onCreate={() => openProfileEditor(null)}
-        onRefresh={() => void refreshWithSuccessToast(profilesQuery.refetch)}
+        isRefreshing={profilesQuery.isFetching}
+        onRefresh={profilesQuery.refetch}
       />
       {groupFilters.length ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-border/60 px-4 py-2">
-          <span className="text-xs text-muted-foreground">分组</span>
+        <div className="border-border/60 flex shrink-0 flex-wrap items-center gap-2 border-b px-4 py-2">
+          <span className="text-muted-foreground text-xs">分组</span>
           {groupFilters.map((group) => (
             <Badge
               key={group.value}

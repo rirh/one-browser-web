@@ -1,11 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { RefreshButton } from '@/components/refresh-button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { ProfilesPage } from '@/features/browser/profiles/page';
 import { ProxiesPage } from '@/features/browser/proxies/page';
-import { refreshWithSuccessToast } from '@/features/browser/refresh';
 import { RuntimePage } from '@/features/browser/runtime/page';
 import { SettingsPage } from '@/features/browser/settings/page';
 import { resolveChromiumDisplay } from '@/features/browser/status/chromium-display';
@@ -15,7 +15,6 @@ import {
   BrowserIcon,
   Globe02Icon,
   Moon02Icon,
-  Refresh01Icon,
   Search01Icon,
   ServerStack01Icon,
   Settings02Icon,
@@ -63,15 +62,15 @@ export function AppShell() {
   );
 
   return (
-    <div className="flex min-h-dvh bg-background text-foreground">
-      <aside className="hidden w-60 shrink-0 border-r bg-muted/20 md:flex md:flex-col">
+    <div className="bg-background text-foreground flex min-h-dvh">
+      <aside className="bg-muted/20 hidden w-60 shrink-0 border-r md:flex md:flex-col">
         <div className="flex h-14 items-center gap-2 px-4">
-          <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">
             <HugeiconsIcon icon={BrowserIcon} strokeWidth={2} />
           </div>
           <div className="min-w-0">
             <div className="truncate text-sm font-medium">有个浏览器</div>
-            <div className="truncate text-xs text-muted-foreground">
+            <div className="text-muted-foreground truncate text-xs">
               团队协作指纹浏览器
             </div>
           </div>
@@ -103,7 +102,7 @@ export function AppShell() {
             </div>
             <div className="min-w-0">
               <h1 className="truncate text-sm font-medium">{activeLabel}</h1>
-              <p className="truncate text-xs text-muted-foreground">
+              <p className="text-muted-foreground truncate text-xs">
                 {status?.appDataDir ?? '桌面运行时将在 Tauri 中连接'}
               </p>
             </div>
@@ -113,7 +112,7 @@ export function AppShell() {
               <HugeiconsIcon
                 icon={Search01Icon}
                 strokeWidth={2}
-                className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="text-muted-foreground pointer-events-none absolute top-1/2 left-2 -translate-y-1/2"
               />
               <Input
                 value={globalSearch}
@@ -141,14 +140,15 @@ export function AppShell() {
             <Badge variant={chromium.variant} title={chromium.title}>
               Chromium {chromium.badge}
             </Badge>
-            <Button
+            <RefreshButton
               variant="outline"
               size="icon"
-              onClick={() => void refreshWithSuccessToast(statusQuery.refetch)}
+              iconOnly
+              isRefreshing={statusQuery.isFetching}
+              onRefresh={statusQuery.refetch}
               aria-label="刷新状态"
-            >
-              <HugeiconsIcon icon={Refresh01Icon} strokeWidth={2} />
-            </Button>
+              successMessage="应用状态已刷新"
+            />
             <Button
               variant="outline"
               size="icon"

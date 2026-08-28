@@ -1,4 +1,5 @@
 import { AnimatedSegmentedTabs } from '@/components/ui/animated-segmented-tabs';
+import { openOneUserPasswordPage } from '@/features/account/one-user-account';
 import {
   Shield01Icon,
   UserAdd01Icon,
@@ -6,6 +7,7 @@ import {
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { usePathname, useRouter } from '@/router/compat';
+import { toast } from 'sonner';
 
 const accountRoutes = [
   {
@@ -32,13 +34,13 @@ const accountRoutes = [
           strokeWidth={2}
           data-icon="inline-start"
         />
-        安全管理
+        修改密码
       </>
     ),
     value: 'password',
-    href: '/account/password',
-    title: '安全管理',
-    description: '修改当前账号的登录密码，保存后请使用新密码登录。',
+    href: 'one-user-password',
+    title: '修改密码',
+    description: '前往 One User 修改当前身份账号的登录密码。',
   },
   {
     label: (
@@ -65,17 +67,15 @@ export function AccountSettingsLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const activeTab = pathname.startsWith('/account/password')
-    ? 'password'
-    : pathname.startsWith('/account/invite')
-      ? 'invite'
-      : 'profile';
+  const activeTab = pathname.startsWith('/account/invite')
+    ? 'invite'
+    : 'profile';
   const activeRoute =
     accountRoutes.find((route) => route.value === activeTab) ??
     accountRoutes[0];
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col overflow-auto bg-muted/35 p-3 lg:p-4">
+    <section className="bg-muted/35 flex min-h-0 flex-1 flex-col overflow-auto p-3 lg:p-4">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
         <AnimatedSegmentedTabs
           label="账号设置"
@@ -83,7 +83,15 @@ export function AccountSettingsLayout({
           options={accountRoutes}
           onValueChange={(value) => {
             const route = accountRoutes.find((item) => item.value === value);
-            if (route) {
+            if (route?.value === 'password') {
+              void openOneUserPasswordPage().catch((error) =>
+                toast.error(
+                  error instanceof Error
+                    ? error.message
+                    : '无法打开 One User 修改密码页面',
+                ),
+              );
+            } else if (route) {
               router.push(route.href);
             }
           }}
@@ -93,7 +101,7 @@ export function AccountSettingsLayout({
           <h1 className="text-base font-semibold tracking-normal">
             {activeRoute.title}
           </h1>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {activeRoute.description}
           </p>
         </header>

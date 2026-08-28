@@ -1,6 +1,6 @@
 import { TableLoadingSkeleton } from '@/components/loading-skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { RefreshButton } from '@/components/refresh-button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Empty,
@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/table';
 import type { ProxyConfig, ProxyListItem } from '@/features/browser/contracts';
 import { cn } from '@/lib/utils';
-import { Refresh01Icon, Route02Icon } from '@hugeicons/core-free-icons';
+import { Route02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
   type ColumnDef,
@@ -72,7 +72,7 @@ interface ProxyTableProps {
   columnVisibility?: VisibilityState;
   onColumnVisibilityChange?: OnChangeFn<VisibilityState>;
   showHeaderRefresh?: boolean;
-  onRefresh: () => void;
+  onRefresh: () => void | Promise<{ isError?: boolean }>;
   onCheck: (proxyId: string) => void;
   onCheckMany: (proxyIds: string[]) => void;
   onEdit: (proxyId: string) => void;
@@ -189,7 +189,7 @@ export function ProxyTable({
         cell: ({ row }) => (
           <Badge
             variant="outline"
-            className="h-5 rounded-md bg-muted/40 px-2 text-xs font-medium text-muted-foreground"
+            className="bg-muted/40 text-muted-foreground h-5 rounded-md px-2 text-xs font-medium"
           >
             {proxyTypeLabel(row.original.type)}
           </Badge>
@@ -217,7 +217,7 @@ export function ProxyTable({
         accessorKey: 'profileCount',
         header: '环境',
         cell: ({ row }) => (
-          <span className="tabular-nums text-muted-foreground">
+          <span className="text-muted-foreground tabular-nums">
             {row.original.profileCount}
           </span>
         ),
@@ -239,15 +239,14 @@ export function ProxyTable({
         header: showHeaderRefresh
           ? () => (
               <div className="flex justify-end">
-                <Button
-                  type="button"
+                <RefreshButton
                   variant="ghost"
                   size="icon-sm"
+                  iconOnly
                   aria-label="刷新代理列表"
-                  onClick={onRefresh}
-                >
-                  <HugeiconsIcon icon={Refresh01Icon} strokeWidth={2} />
-                </Button>
+                  onRefresh={onRefresh}
+                  successMessage="代理列表已刷新"
+                />
               </div>
             )
           : '',
@@ -317,7 +316,7 @@ export function ProxyTable({
 
   if (isLoading) {
     return (
-      <div className="min-h-0 flex-1 overflow-auto bg-card">
+      <div className="bg-card min-h-0 flex-1 overflow-auto">
         <TableLoadingSkeleton
           columnCount={table.getVisibleLeafColumns().length}
         />
@@ -340,10 +339,10 @@ export function ProxyTable({
   }
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-card">
+    <div className="bg-card relative flex min-h-0 flex-1 flex-col overflow-hidden">
       <div className="min-h-0 flex-1 overflow-auto">
         <Table className="min-w-[900px]">
-          <TableHeader className="sticky top-0 z-20 bg-muted/45 backdrop-blur-xl">
+          <TableHeader className="bg-muted/45 sticky top-0 z-20 backdrop-blur-xl">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
@@ -360,7 +359,7 @@ export function ProxyTable({
                       header.id === 'profileCount' && 'min-w-20',
                       header.id === 'remark' && 'min-w-32',
                       header.id === 'actions' &&
-                        'sticky right-0 z-30 w-10 border-l bg-muted/95 pr-2 text-right',
+                        'bg-muted/95 sticky right-0 z-30 w-10 border-l pr-2 text-right',
                     )}
                   >
                     {header.isPlaceholder
@@ -388,7 +387,7 @@ export function ProxyTable({
                       'h-11 px-2 py-1.5',
                       cell.column.id === 'select' && 'pl-2',
                       cell.column.id === 'actions' &&
-                        'sticky right-0 z-10 border-l bg-card pr-2 text-right group-data-[state=selected]/row:bg-muted group-hover/row:bg-muted/50',
+                        'bg-card group-data-[state=selected]/row:bg-muted group-hover/row:bg-muted/50 sticky right-0 z-10 border-l pr-2 text-right',
                     )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -400,7 +399,7 @@ export function ProxyTable({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between border-t px-3 py-2 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-between border-t px-3 py-2 text-xs">
         <span>共 {data.length} 个代理</span>
         <div className="flex items-center gap-4">
           <span>每页 {data.length}</span>

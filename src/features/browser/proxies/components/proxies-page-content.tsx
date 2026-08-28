@@ -30,7 +30,6 @@ import {
   ProxyTable,
   checkProxy as checkProxyApi,
 } from '@/features/browser/proxy-core';
-import { refreshWithSuccessToast } from '@/features/browser/refresh';
 import { cn } from '@/lib/utils';
 import {
   Add01Icon,
@@ -315,8 +314,8 @@ export function ProxiesPageContent({ search }: { search: string }) {
   ]);
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col overflow-hidden bg-card">
-      <div className="flex shrink-0 items-center justify-between gap-4 border-b border-border/60 px-4 py-2">
+    <section className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="border-border/60 flex shrink-0 items-center justify-between gap-4 border-b px-4 py-2">
         <div className="min-w-0">
           <h1 className="truncate text-sm font-medium">代理</h1>
         </div>
@@ -448,7 +447,7 @@ export function ProxiesPageContent({ search }: { search: string }) {
         isDuplicating={duplicateProxyMutation.isPending}
         updatingProxyId={updateProxyMutation.variables?.proxyId ?? null}
         checkingProxyIds={checkingProxyIds}
-        onRefresh={() => void refreshWithSuccessToast(proxiesQuery.refetch)}
+        onRefresh={proxiesQuery.refetch}
         onCheck={checkProxy}
         onCheckMany={checkManyProxies}
         onEdit={openEditDialog}

@@ -11,11 +11,6 @@ export type UpdateCurrentUserProfilePayload = {
   avatar: string;
 };
 
-export type ChangeCurrentUserPasswordPayload = {
-  old_password: string;
-  new_password: string;
-};
-
 export type UserInviteFriend = {
   user_id: number;
   user_name: string;
@@ -236,12 +231,6 @@ export async function uploadCurrentUserAvatar(file: File) {
     formData,
   );
   return response.data.user;
-}
-
-export function changeCurrentUserPassword(
-  payload: ChangeCurrentUserPasswordPayload,
-) {
-  return http.put<void>('/auth/password', payload);
 }
 
 export async function getCurrentUserInvite() {

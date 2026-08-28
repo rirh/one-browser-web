@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { RefreshButton } from '@/components/refresh-button';
 import {
   Card,
   CardAction,
@@ -8,8 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import type { RuntimeProfile } from '@/features/browser/contracts';
-import { refreshWithSuccessToast } from '@/features/browser/refresh';
-import { Refresh01Icon, StopIcon } from '@hugeicons/core-free-icons';
+import { StopIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
@@ -45,7 +45,7 @@ export function RuntimePage() {
             <span className="truncate font-medium">
               {row.original.profileId}
             </span>
-            <span className="truncate text-muted-foreground">
+            <span className="text-muted-foreground truncate">
               {row.original.userDataDir}
             </span>
           </div>
@@ -121,17 +121,12 @@ export function RuntimePage() {
           <CardTitle>运行中</CardTitle>
           <CardDescription>查看并关闭当前活动的浏览器窗口。</CardDescription>
           <CardAction className="flex items-center gap-2">
-            <Button
+            <RefreshButton
               variant="outline"
-              onClick={() => void refreshWithSuccessToast(runtimeQuery.refetch)}
-            >
-              <HugeiconsIcon
-                icon={Refresh01Icon}
-                strokeWidth={2}
-                data-icon="inline-start"
-              />
-              刷新
-            </Button>
+              isRefreshing={runtimeQuery.isFetching}
+              onRefresh={runtimeQuery.refetch}
+              successMessage="运行状态已刷新"
+            />
             <Button
               variant="destructive"
               onClick={() => closeAllProfilesMutation.mutate()}

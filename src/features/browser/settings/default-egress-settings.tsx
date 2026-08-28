@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { RefreshButton } from '@/components/refresh-button';
 import { FieldDescription, FieldGroup } from '@/components/ui/field';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,7 +19,7 @@ import type {
 } from '@/features/browser/egress/types';
 import { type Locale, translateText } from '@/i18n';
 import { useI18n } from '@/i18n/provider';
-import { AlertCircleIcon, Refresh01Icon } from '@hugeicons/core-free-icons';
+import { AlertCircleIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Zap } from 'lucide-react';
 import { toast } from 'sonner';
@@ -72,27 +72,19 @@ export function DefaultEgressSettings({ settings }: { settings: AppSettings }) {
     });
   }
 
-  function refreshLines() {
-    refreshMutation.mutate(undefined, {
-      onError: (error) => {
-        toast.error(error instanceof Error ? error.message : '线路测速失败');
-      },
-    });
-  }
-
   return (
     <div className="flex min-h-full flex-col">
       <section className="mb-5">
-        <h3 className="mb-1 text-[12px] font-medium tracking-wide text-muted-foreground uppercase">
+        <h3 className="text-muted-foreground mb-1 text-[12px] font-medium tracking-wide uppercase">
           默认线路
         </h3>
-        <p className="mb-2 text-[12px] leading-relaxed font-normal text-muted-foreground">
+        <p className="text-muted-foreground mb-2 text-[12px] leading-relaxed font-normal">
           仅影响新打开的浏览器环境；已运行或已绑定的环境不会自动切换，避免出口
           IP 漂移。
         </p>
 
         <RadioGroup
-          className="gap-0 overflow-hidden rounded-lg border bg-card divide-y divide-border"
+          className="bg-card divide-border gap-0 divide-y overflow-hidden rounded-lg border"
           value={selectionValue}
           onValueChange={saveSelection}
           disabled={updateSettingsMutation.isPending}
@@ -109,7 +101,7 @@ export function DefaultEgressSettings({ settings }: { settings: AppSettings }) {
             badge={
               <Badge
                 variant="outline"
-                className="h-auto gap-0.5 border-transparent bg-foreground/10 px-1.5 py-0.5 text-[11px] font-medium text-foreground [&>svg]:size-3!"
+                className="bg-foreground/10 text-foreground h-auto gap-0.5 border-transparent px-1.5 py-0.5 text-[11px] font-medium [&>svg]:size-3!"
               >
                 <Zap aria-hidden="true" />
                 推荐
@@ -173,7 +165,7 @@ export function DefaultEgressSettings({ settings }: { settings: AppSettings }) {
         ) : null}
       </section>
 
-      <div className="-mx-4 -mb-4 mt-auto flex flex-wrap items-center justify-between gap-3 border-t bg-background px-4 py-3 md:-mx-6 md:-mb-5 md:px-6">
+      <div className="bg-background -mx-4 mt-auto -mb-4 flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 md:-mx-6 md:-mb-5 md:px-6">
         <FieldDescription className="text-[12px] leading-relaxed font-normal">
           {snapshot?.testedAt
             ? localizedPrefix(
@@ -183,21 +175,15 @@ export function DefaultEgressSettings({ settings }: { settings: AppSettings }) {
               )
             : '尚未完成本机数据面测速'}
         </FieldDescription>
-        <Button
-          type="button"
+        <RefreshButton
           size="sm"
           variant="outline"
           className="h-7 px-2.5 text-[12px] font-medium"
-          disabled={isRefreshing}
-          onClick={refreshLines}
-        >
-          <HugeiconsIcon
-            icon={Refresh01Icon}
-            strokeWidth={2}
-            data-icon="inline-start"
-          />
-          {isRefreshing ? '测速中' : '重新测速'}
-        </Button>
+          isRefreshing={isRefreshing}
+          label={isRefreshing ? '测速中' : '重新测速'}
+          onRefresh={() => refreshMutation.mutateAsync()}
+          successMessage="线路测速已完成"
+        />
       </div>
     </div>
   );
@@ -225,21 +211,21 @@ function LineChoice({
       htmlFor={id}
       data-disabled={disabled || undefined}
       data-slot="egress-line-choice"
-      className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-muted/50 data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50"
+      className="hover:bg-muted/50 flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50"
     >
       <RadioGroupItem
         id={id}
         value={value}
         disabled={disabled}
-        className="disabled:opacity-100 data-checked:border-foreground data-checked:bg-foreground dark:data-checked:bg-foreground"
+        className="data-checked:border-foreground data-checked:bg-foreground dark:data-checked:bg-foreground disabled:opacity-100"
       />
       <span className="flex min-w-0 flex-1 items-center gap-2">
-        <span className="truncate text-[14px] font-normal text-foreground">
+        <span className="text-foreground truncate text-[14px] font-normal">
           {title}
         </span>
         {badge}
       </span>
-      <span className="shrink-0 text-[12px] leading-relaxed font-normal text-muted-foreground">
+      <span className="text-muted-foreground shrink-0 text-[12px] leading-relaxed font-normal">
         {[detail, description].filter(Boolean).join(' · ')}
       </span>
     </label>
