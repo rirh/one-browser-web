@@ -68,8 +68,16 @@ type NavGroup = {
 };
 
 const navItemByAuthPath: Record<string, Omit<NavItem, 'title'>> = {
+  '/index': {
+    href: '/dashboard',
+    icon: DashboardSquare01Icon,
+  },
+  '/dashboard': {
+    href: '/dashboard',
+    icon: DashboardSquare01Icon,
+  },
   '/browser/environment': {
-    href: '/',
+    href: '/environments',
     icon: DashboardBrowsingIcon,
   },
   '/browser/proxy': {
@@ -123,10 +131,6 @@ const navIconBySeedKey: Record<string, typeof DashboardBrowsingIcon> = {
 };
 
 function isActivePath(pathname: string, href: string) {
-  if (href === '/') {
-    return pathname === '/';
-  }
-
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 

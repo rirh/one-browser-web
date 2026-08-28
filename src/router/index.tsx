@@ -10,6 +10,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 const LoginPage = lazy(() => import('@/views/auth/login'));
 const CallbackPage = lazy(() => import('@/views/auth/callback'));
 const TeamInvitePage = lazy(() => import('@/views/auth/team-invite'));
+const DashboardOverviewPage = lazy(() => import('@/views/dashboard'));
 const EnvironmentsPage = lazy(() => import('@/views/browser/environments'));
 const ProxiesPage = lazy(() => import('@/views/browser/proxies'));
 const TeamsPage = lazy(() => import('@/views/browser/teams'));
@@ -38,7 +39,12 @@ export function AppRouter() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/callback" element={<CallbackPage />} />
           <Route path="/team-invite" element={<TeamInvitePage />} />
-          <Route path="/index" element={<Navigate to="/" replace />} />
+          <Route path="/index" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route
+            path="/dashboard"
+            element={<DashboardPage page={<DashboardOverviewPage />} />}
+          />
           <Route
             path="/system/user"
             element={<DashboardPage page={<SystemUserPage />} />}
@@ -72,7 +78,7 @@ export function AppRouter() {
             element={<DashboardPage page={<JobPage />} />}
           />
           <Route
-            path="/"
+            path="/environments"
             element={<DashboardPage page={<EnvironmentsPage />} />}
           />
           <Route
