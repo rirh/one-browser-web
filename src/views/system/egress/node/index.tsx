@@ -57,6 +57,8 @@ import {
   Delete02Icon,
   Edit02Icon,
   MoreHorizontalIcon,
+  PauseIcon,
+  PlayIcon,
   ServerStack03Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -403,7 +405,7 @@ function NodeActions({
               修改名称
             </DropdownMenuItem>
           ) : null}
-          {canCreate ? (
+          {canCreate && (node.lifecycle === 'pending' || !node.online) ? (
             <DropdownMenuItem disabled={disabled} onSelect={onEnroll}>
               <HugeiconsIcon icon={ServerStack03Icon} strokeWidth={2} />
               {node.lifecycle === 'pending' ? '重新生成命令' : '重新接入'}
@@ -414,6 +416,10 @@ function NodeActions({
               disabled={disabled}
               onSelect={() => onStatus(node.draining ? 'enabled' : 'draining')}
             >
+              <HugeiconsIcon
+                icon={node.draining ? PlayIcon : PauseIcon}
+                strokeWidth={2}
+              />
               {node.draining ? '恢复接入' : '开始排空'}
             </DropdownMenuItem>
           ) : null}
