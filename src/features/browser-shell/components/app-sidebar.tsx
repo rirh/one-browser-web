@@ -138,7 +138,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <AppTeamSwitcher access={access} />
         </SidebarHeader>
       ) : null}
-      <SidebarContent className="py-1">
+      <SidebarContent className="py-0.5">
         {navGroups.map((group) => (
           <SidebarNavGroup key={group.id} group={group} pathname={pathname} />
         ))}
@@ -164,7 +164,7 @@ function SidebarNavGroup({
 }) {
   const items = (
     <SidebarGroupContent>
-      <SidebarMenu>
+      <SidebarMenu className="gap-0.5">
         {group.items.map((item) => (
           <SidebarNavItem key={item.href} item={item} pathname={pathname} />
         ))}
@@ -173,13 +173,13 @@ function SidebarNavGroup({
   );
 
   if (!group.title) {
-    return <SidebarGroup>{items}</SidebarGroup>;
+    return <SidebarGroup className="py-0.5">{items}</SidebarGroup>;
   }
 
   return (
     <Collapsible className="group/collapsible" defaultOpen>
-      <SidebarGroup>
-        <SidebarGroupLabel asChild className="h-7">
+      <SidebarGroup className="py-0.5">
+        <SidebarGroupLabel asChild className="h-6">
           <CollapsibleTrigger className="w-full cursor-pointer justify-between gap-2 text-left">
             <span className="min-w-0 flex-1 truncate text-left">
               {group.title}
@@ -210,8 +210,9 @@ function SidebarNavItem({
     <SidebarMenuItem>
       <SidebarMenuButton
         asChild
+        size="sm"
         className={cn(
-          '[&_svg]:size-3.5',
+          'gap-1.5 [&_svg]:size-3.5',
           active &&
             'bg-sidebar-primary/10 text-sidebar-primary hover:bg-sidebar-primary/15 hover:text-sidebar-primary font-medium',
         )}
