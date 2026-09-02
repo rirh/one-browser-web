@@ -92,6 +92,7 @@ export function RoleDialog({
     () =>
       permissionOptions.flatMap((option) =>
         option.permission_code &&
+        option.assignable !== false &&
         (option.status === '0' ||
           initiallyGrantedPermissions.has(option.permission_code))
           ? [option.permission_code]
@@ -328,8 +329,8 @@ export function RoleDialog({
               </Field>
             </FieldGroup>
 
-            <section className="shrink-0 overflow-hidden rounded-lg border border-border/70 bg-background">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-border/70 bg-muted/25 px-2.5 py-1.5 text-[0.6875rem]">
+            <section className="border-border/70 bg-background shrink-0 overflow-hidden rounded-lg border">
+              <div className="border-border/70 bg-muted/25 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b px-2.5 py-1.5 text-[0.6875rem]">
                 <TreeControl
                   label="展开/折叠"
                   checked={allExpanded}
@@ -370,7 +371,7 @@ export function RoleDialog({
                   {isLoadingPermissions ? (
                     <PermissionTreeSkeleton />
                   ) : hasPermissionError ? (
-                    <div className="flex flex-col items-center gap-3 px-3 py-10 text-center text-xs text-destructive">
+                    <div className="text-destructive flex flex-col items-center gap-3 px-3 py-10 text-center text-xs">
                       <span>权限加载失败</span>
                       <Button
                         type="button"
@@ -397,7 +398,7 @@ export function RoleDialog({
                       />
                     ))
                   ) : (
-                    <div className="px-3 py-10 text-center text-xs text-muted-foreground">
+                    <div className="text-muted-foreground px-3 py-10 text-center text-xs">
                       暂无权限，请先在权限资源中添加浏览器菜单与按钮。
                     </div>
                   )}

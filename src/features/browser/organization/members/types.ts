@@ -41,6 +41,7 @@ export interface RemoteMemberPermissionOptionResource {
   menu_type: string;
   order_num: number;
   status: RemoteStatusFlag;
+  assignable?: boolean;
 }
 
 export interface RemoteMemberEnvironmentOptionResource {

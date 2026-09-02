@@ -116,24 +116,22 @@ export function AppNavUser({
         <SidebarMenuItem>
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild>
-              <SidebarMenuButton
-                size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              >
+              <SidebarMenuButton className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground h-10 gap-2 px-2 py-1">
                 <UserAvatar
                   avatar={avatar}
                   avatarSeed={avatarSeed}
                   displayName={displayName}
+                  size="sm"
                 />
-                <div className="grid min-w-0 flex-1 text-left leading-tight">
+                <div className="grid min-w-0 flex-1 gap-0.5 text-left leading-none">
                   <span
-                    className="block truncate font-medium"
+                    className="block truncate text-xs leading-4 font-medium"
                     title={displayName}
                   >
                     {displayName}
                   </span>
                   <span
-                    className="text-muted-foreground block truncate text-[0.6875rem]"
+                    className="text-muted-foreground block truncate text-[0.625rem] leading-3"
                     title={email}
                   >
                     {email}
@@ -142,7 +140,7 @@ export function AppNavUser({
                 <HugeiconsIcon
                   icon={EllipsisVerticalIcon}
                   strokeWidth={2}
-                  className="shrink-0"
+                  className="size-3.5 shrink-0"
                 />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
@@ -328,7 +326,7 @@ function UserAvatar({
   avatar: string;
   avatarSeed: string;
   displayName: string;
-  size?: 'default' | 'lg';
+  size?: 'default' | 'sm' | 'lg';
 }) {
   return (
     <Avatar className="rounded-full" size={size}>

@@ -35,6 +35,14 @@ export async function listRemoteTeamRolePermissions(teamId: number) {
   return response.data;
 }
 
+export async function getRemoteTeamRole(roleId: number, teamId: number) {
+  const response = await http.get<RemoteTeamRoleResource>(
+    `${rolePath}/${roleId}`,
+    { team_id: teamId },
+  );
+  return response.data;
+}
+
 export async function createRemoteTeamRole(payload: RemoteTeamRolePayload) {
   const response = await http.post<
     RemoteTeamRoleResource,

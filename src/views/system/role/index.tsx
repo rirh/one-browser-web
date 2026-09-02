@@ -30,14 +30,26 @@ import {
   hasPermission,
 } from '@/features/auth/permissions';
 import { toBrowserErrorMessage } from '@/features/browser/errors';
+import {
+  getRemoteTeamRole,
+  listRemoteTeamRolePermissions,
+  updateRemoteTeamRole,
+} from '@/features/browser/organization/roles/api';
+import { RoleDialog as TeamRoleDialog } from '@/features/browser/organization/roles/components/role-dialog';
+import { remoteRoleQueryKeys } from '@/features/browser/organization/roles/query-keys';
+import type { RemoteTeamRolePayload } from '@/features/browser/organization/roles/types';
 import { formatDateTimeTitle, formatDisplayDateTime } from '@/lib/date-time';
 import { http } from '@/lib/http';
 import { cn } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Add01Icon,
+  ArrowDown01Icon,
+  ArrowRight01Icon,
   Delete02Icon,
   Edit02Icon,
+  ListChevronsDownUpIcon,
+  ListTreeIcon,
   MoreHorizontalIcon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -48,11 +60,13 @@ type StatusFlag = '0' | '1';
 
 type RoleResource = {
   role_id: number;
+  team_id: number | null;
   role_name: string;
   role_key: string;
   role_sort: number;
   data_scope: string;
   status: StatusFlag;
+  system_role: boolean;
   protected: boolean;
   created_at: string;
   remark: string | null;
@@ -95,6 +109,10 @@ type PermissionOption = {
 type PermissionNode = PermissionOption & { children: PermissionNode[] };
 type RolePermissions = { menu_ids: number[]; app_permission_ids: number[] };
 type PageResponse<T> = { list: T[]; total: number };
+type RoleEditorState =
+  | { mode: 'create' }
+  | { mode: 'edit'; role: RoleResource }
+  | { mode: 'edit-team'; role: RoleResource };
 
 const ROLES_QUERY_KEY = ['system-resource', '/system/roles'] as const;
 
@@ -105,10 +123,11 @@ export default function RolePage() {
   const canUpdate = hasButtonPermission(access, 'system:role:update');
   const canDelete = hasButtonPermission(access, 'system:role:delete');
   const canUpdateStatus = hasButtonPermission(access, 'system:role:status');
-  const [editor, setEditor] = React.useState<
-    { mode: 'create' } | { mode: 'edit'; role: RoleResource } | null
-  >(null);
+  const [editor, setEditor] = React.useState<RoleEditorState | null>(null);
   const [deletingRole, setDeletingRole] = React.useState<RoleResource | null>(
+    null,
+  );
+  const [disablingRole, setDisablingRole] = React.useState<RoleResource | null>(
     null,
   );
 
@@ -119,10 +138,18 @@ export default function RolePage() {
     }: {
       role: RoleResource;
       status: StatusFlag;
-    }) => updateRole(role, { status }),
+    }) => updateRoleStatus(role, status),
     onSuccess: async (_, variables) => {
-      await queryClient.invalidateQueries({ queryKey: ROLES_QUERY_KEY });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ROLES_QUERY_KEY }),
+        queryClient.invalidateQueries({
+          queryKey: remoteRoleQueryKeys.roles(),
+        }),
+      ]);
       toast.success(variables.status === '0' ? '角色已启用' : '角色已停用');
+      if (variables.status === '1') {
+        setDisablingRole(null);
+      }
     },
     onError: (error) => toast.error(toBrowserErrorMessage(error)),
   });
@@ -139,13 +166,30 @@ export default function RolePage() {
               role.protected || !canUpdateStatus || statusMutation.isPending
             }
             aria-label={`${role.role_name}角色状态`}
-            onCheckedChange={(checked) =>
-              statusMutation.mutate({
-                role,
-                status: checked ? '0' : '1',
-              })
-            }
+            onCheckedChange={(checked) => {
+              if (checked) {
+                statusMutation.mutate({ role, status: '0' });
+              } else {
+                setDisablingRole(role);
+              }
+            }}
           />
+        );
+      }
+      if (field === 'data_scope') {
+        return (
+          <Badge variant="outline">
+            {role.system_role || role.data_scope === '1'
+              ? '全部数据'
+              : '仅本人'}
+          </Badge>
+        );
+      }
+      if (field === 'permissions') {
+        return (
+          <Badge variant="outline">
+            {role.system_role ? '全部权限' : '按角色配置'}
+          </Badge>
         );
       }
       if (field === 'created_at') {
@@ -182,13 +226,18 @@ export default function RolePage() {
             <DropdownMenuGroup>
               {canUpdate ? (
                 <DropdownMenuItem
-                  onSelect={() => setEditor({ mode: 'edit', role })}
+                  onSelect={() =>
+                    setEditor({
+                      mode: role.team_id === null ? 'edit' : 'edit-team',
+                      role,
+                    })
+                  }
                 >
                   <HugeiconsIcon icon={Edit02Icon} strokeWidth={2} />
                   编辑角色
                 </DropdownMenuItem>
               ) : null}
-              {canDelete ? (
+              {canDelete && role.team_id === null ? (
                 <DropdownMenuItem
                   variant="destructive"
                   onSelect={() => setDeletingRole(role)}
@@ -213,7 +262,14 @@ export default function RolePage() {
           description: '管理系统角色及其 Web、App 权限。',
           endpoint: '/system/roles',
           serverPagination: true,
-          columns: ['role_name', 'role_key', 'status', 'created_at'],
+          columns: [
+            'role_name',
+            'role_key',
+            'data_scope',
+            'permissions',
+            'status',
+            'created_at',
+          ],
         }}
         renderCell={renderCell}
         renderRowActions={canUpdate || canDelete ? renderRowActions : undefined}
@@ -231,7 +287,12 @@ export default function RolePage() {
         }
       />
 
-      {editor ? (
+      {editor?.mode === 'edit-team' ? (
+        <TeamRoleEditorDialog
+          role={editor.role}
+          onClose={() => setEditor(null)}
+        />
+      ) : editor ? (
         <RoleEditorDialog
           state={editor}
           access={access}
@@ -242,7 +303,98 @@ export default function RolePage() {
         role={deletingRole}
         onClose={() => setDeletingRole(null)}
       />
+      <DisableRoleDialog
+        role={disablingRole}
+        isPending={statusMutation.isPending}
+        onClose={() => setDisablingRole(null)}
+        onConfirm={() => {
+          if (disablingRole) {
+            statusMutation.mutate({ role: disablingRole, status: '1' });
+          }
+        }}
+      />
     </>
+  );
+}
+
+function TeamRoleEditorDialog({
+  role,
+  onClose,
+}: {
+  role: RoleResource;
+  onClose: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const teamId = role.team_id ?? 0;
+  const roleQuery = useQuery({
+    queryKey: [...remoteRoleQueryKeys.roles(), 'detail', teamId, role.role_id],
+    queryFn: () => getRemoteTeamRole(role.role_id, teamId),
+    enabled: teamId > 0,
+  });
+  const permissionsQuery = useQuery({
+    queryKey: remoteRoleQueryKeys.permissions(teamId),
+    queryFn: () => listRemoteTeamRolePermissions(teamId),
+    enabled: teamId > 0,
+  });
+  const mutation = useMutation({
+    mutationFn: (payload: RemoteTeamRolePayload) =>
+      updateRemoteTeamRole(role.role_id, payload),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ROLES_QUERY_KEY }),
+        queryClient.invalidateQueries({
+          queryKey: remoteRoleQueryKeys.roles(),
+        }),
+      ]);
+      toast.success('角色已更新');
+      onClose();
+    },
+    onError: (error) => toast.error(toBrowserErrorMessage(error)),
+  });
+
+  if (roleQuery.isLoading || roleQuery.isError) {
+    return (
+      <ResponsiveDialog open onOpenChange={(open) => !open && onClose()}>
+        <ResponsiveDialogContent className="sm:max-w-lg">
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>编辑角色</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>
+              加载团队角色和权限范围。
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
+          <ResponsiveDialogBody>
+            <p
+              className={cn(
+                'text-sm',
+                roleQuery.isError
+                  ? 'text-destructive'
+                  : 'text-muted-foreground',
+              )}
+            >
+              {roleQuery.isError
+                ? toBrowserErrorMessage(roleQuery.error)
+                : '正在加载角色…'}
+            </p>
+          </ResponsiveDialogBody>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
+    );
+  }
+
+  return (
+    <TeamRoleDialog
+      mode="edit"
+      record={roleQuery.data}
+      teamId={teamId}
+      teamName={`团队 ${teamId}`}
+      permissionOptions={permissionsQuery.data ?? []}
+      isLoadingPermissions={permissionsQuery.isLoading}
+      hasPermissionError={permissionsQuery.isError}
+      onRetryPermissions={() => void permissionsQuery.refetch()}
+      isSaving={mutation.isPending}
+      onOpenChange={(open) => !open && !mutation.isPending && onClose()}
+      onSubmit={(payload) => mutation.mutate(payload)}
+    />
   );
 }
 
@@ -458,6 +610,10 @@ function PermissionTreePanel({
   onChange: React.Dispatch<React.SetStateAction<Set<number>>>;
 }) {
   const tree = React.useMemo(() => buildTree(options), [options]);
+  const expandableIds = React.useMemo(() => collectExpandableIds(tree), [tree]);
+  const [expandedIds, setExpandedIds] = React.useState(
+    () => new Set(expandableIds),
+  );
   const assignableIds = React.useMemo(
     () =>
       options.filter((option) => option.assignable).map((option) => option.id),
@@ -466,20 +622,41 @@ function PermissionTreePanel({
   const allSelected =
     assignableIds.length > 0 &&
     assignableIds.every((id) => selectedIds.has(id));
+  const allExpanded =
+    expandableIds.length > 0 &&
+    expandableIds.every((id) => expandedIds.has(id));
 
   return (
     <div className="bg-background overflow-hidden rounded-lg border">
       <div className="flex items-center justify-between border-b px-3 py-2">
         <span className="text-sm font-medium">{title}</span>
-        <label className="text-muted-foreground flex items-center gap-2 text-xs">
-          <Checkbox
-            checked={allSelected}
-            onCheckedChange={(checked) =>
-              onChange(checked ? new Set(assignableIds) : new Set())
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!expandableIds.length}
+            onClick={() =>
+              setExpandedIds(allExpanded ? new Set() : new Set(expandableIds))
             }
-          />
-          全选
-        </label>
+          >
+            <HugeiconsIcon
+              icon={allExpanded ? ListChevronsDownUpIcon : ListTreeIcon}
+              strokeWidth={2}
+              data-icon="inline-start"
+            />
+            {allExpanded ? '全部收起' : '全部展开'}
+          </Button>
+          <label className="text-muted-foreground flex items-center gap-2 text-xs">
+            <Checkbox
+              checked={allSelected}
+              onCheckedChange={(checked) =>
+                onChange(checked ? new Set(assignableIds) : new Set())
+              }
+            />
+            全选
+          </label>
+        </div>
       </div>
       <ScrollArea className="h-64">
         <div className="p-2">
@@ -491,6 +668,15 @@ function PermissionTreePanel({
                 depth={0}
                 selectedIds={selectedIds}
                 onChange={onChange}
+                expandedIds={expandedIds}
+                onToggleExpanded={(id) =>
+                  setExpandedIds((current) => {
+                    const next = new Set(current);
+                    if (next.has(id)) next.delete(id);
+                    else next.add(id);
+                    return next;
+                  })
+                }
               />
             ))
           ) : (
@@ -509,12 +695,19 @@ function PermissionNodeRow({
   depth,
   selectedIds,
   onChange,
+  expandedIds,
+  onToggleExpanded,
 }: {
   node: PermissionNode;
   depth: number;
   selectedIds: Set<number>;
   onChange: React.Dispatch<React.SetStateAction<Set<number>>>;
+  expandedIds: Set<number>;
+  onToggleExpanded: (id: number) => void;
 }) {
+  const hasChildren = node.children.length > 0;
+  const expanded = expandedIds.has(node.id);
+  const inputId = React.useId();
   const descendantIds = collectAssignableIds(node);
   const selectedCount = descendantIds.filter((id) =>
     selectedIds.has(id),
@@ -528,45 +721,110 @@ function PermissionNodeRow({
 
   return (
     <div>
-      <label
-        className="hover:bg-muted/70 flex min-h-8 items-center gap-2 rounded-md px-2 text-xs"
-        style={{ paddingLeft: 8 + depth * 16 }}
+      <div
+        className="hover:bg-muted/70 flex min-h-8 items-center gap-1.5 rounded-md pr-2 text-xs"
+        style={{ paddingLeft: 4 + depth * 16 }}
       >
-        <Checkbox
-          checked={checked}
-          disabled={!descendantIds.length}
-          onCheckedChange={(value) =>
-            onChange((current) => {
-              const next = new Set(current);
-              descendantIds.forEach((id) =>
-                value === true ? next.add(id) : next.delete(id),
-              );
-              return next;
-            })
-          }
-        />
-        <span
-          className={cn(
-            'truncate',
-            node.status === '1' && 'text-muted-foreground',
-          )}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          disabled={!hasChildren}
+          aria-label={expanded ? '收起权限节点' : '展开权限节点'}
+          onClick={() => onToggleExpanded(node.id)}
         >
-          {node.name}
-        </span>
-        <Badge variant="outline" className="h-4 px-1.5">
-          {permissionTypeLabel(node.type)}
-        </Badge>
-      </label>
-      {node.children.map((child) => (
-        <PermissionNodeRow
-          key={child.id}
-          node={child}
-          depth={depth + 1}
-          selectedIds={selectedIds}
-          onChange={onChange}
-        />
-      ))}
+          {hasChildren ? (
+            <HugeiconsIcon
+              icon={expanded ? ArrowDown01Icon : ArrowRight01Icon}
+              strokeWidth={2}
+            />
+          ) : null}
+        </Button>
+        <label
+          htmlFor={inputId}
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2"
+        >
+          <Checkbox
+            id={inputId}
+            checked={checked}
+            disabled={!descendantIds.length}
+            onCheckedChange={(value) =>
+              onChange((current) => {
+                const next = new Set(current);
+                descendantIds.forEach((id) =>
+                  value === true ? next.add(id) : next.delete(id),
+                );
+                return next;
+              })
+            }
+          />
+          <span
+            className={cn(
+              'truncate',
+              node.status === '1' && 'text-muted-foreground',
+            )}
+          >
+            {node.name}
+          </span>
+          <Badge variant="outline" className="h-4 px-1.5">
+            {permissionTypeLabel(node.type)}
+          </Badge>
+        </label>
+      </div>
+      {hasChildren && expanded
+        ? node.children.map((child) => (
+            <PermissionNodeRow
+              key={child.id}
+              node={child}
+              depth={depth + 1}
+              selectedIds={selectedIds}
+              onChange={onChange}
+              expandedIds={expandedIds}
+              onToggleExpanded={onToggleExpanded}
+            />
+          ))
+        : null}
     </div>
+  );
+}
+
+function DisableRoleDialog({
+  role,
+  isPending,
+  onClose,
+  onConfirm,
+}: {
+  role: RoleResource | null;
+  isPending: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <ResponsiveDialog
+      open={Boolean(role)}
+      onOpenChange={(open) => !open && !isPending && onClose()}
+    >
+      <ResponsiveDialogContent className="sm:max-w-md">
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle>确认停用角色</ResponsiveDialogTitle>
+          <ResponsiveDialogDescription>
+            {`停用后，已分配“${role?.role_name ?? '该角色'}”的用户或成员将不再通过该角色获得相应权限。是否继续？`}
+          </ResponsiveDialogDescription>
+        </ResponsiveDialogHeader>
+        <ResponsiveDialogFooter>
+          <Button variant="outline" disabled={isPending} onClick={onClose}>
+            取消
+          </Button>
+          <Button
+            variant="destructive"
+            disabled={isPending || !role}
+            onClick={onConfirm}
+          >
+            {isPending ? '停用中…' : '确认停用'}
+          </Button>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }
 
@@ -677,8 +935,7 @@ function markAssignableOptions(
       assignable:
         routeIds.has(option.id) ||
         Boolean(
-          option.permissionCode &&
-            hasPermission(access, option.permissionCode),
+          option.permissionCode && hasPermission(access, option.permissionCode),
         ),
     };
   });
@@ -689,6 +946,13 @@ function collectAssignableIds(node: PermissionNode): number[] {
     ...(node.assignable ? [node.id] : []),
     ...node.children.flatMap(collectAssignableIds),
   ];
+}
+
+function collectExpandableIds(nodes: PermissionNode[]): number[] {
+  return nodes.flatMap((node) => [
+    ...(node.children.length ? [node.id] : []),
+    ...collectExpandableIds(node.children),
+  ]);
 }
 
 function menuOption(menu: MenuResource): PermissionOption {
@@ -788,6 +1052,25 @@ async function updateRole(
     data_scope: role.data_scope,
     status: values.status ?? role.status,
     remark: values.remark ?? role.remark,
+  });
+}
+
+async function updateRoleStatus(role: RoleResource, status: StatusFlag) {
+  if (role.team_id === null) {
+    await updateRole(role, { status });
+    return;
+  }
+
+  const teamRole = await getRemoteTeamRole(role.role_id, role.team_id);
+  await updateRemoteTeamRole(role.role_id, {
+    team_id: teamRole.team_id,
+    role_name: teamRole.role_name,
+    role_key: teamRole.role_key,
+    role_sort: teamRole.role_sort,
+    status,
+    remark: teamRole.remark ?? '',
+    menus: teamRole.menus,
+    permissions: teamRole.permissions,
   });
 }
 

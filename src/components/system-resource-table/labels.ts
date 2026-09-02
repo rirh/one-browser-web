@@ -36,6 +36,7 @@ export const fieldLabels: Record<string, string> = {
   operated_at: '操作时间',
   os: '系统',
   path: '路由',
+  permissions: '权限',
   perms: '权限标识',
   postgres: 'PostgreSQL',
   public_endpoint: '公网入口',

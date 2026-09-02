@@ -10,7 +10,7 @@ export function ResourceFooter({
   total?: number;
 }) {
   const total = serverTotal ?? table.getFilteredRowModel().rows.length;
-  if (!total) return null;
+  if (!total || table.getPageCount() <= 1) return null;
   return (
     <div className="bg-muted/30 flex h-10 shrink-0 items-center justify-between gap-2 border-t px-3">
       <span className="text-muted-foreground text-xs">共 {total} 条</span>
