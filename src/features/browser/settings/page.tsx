@@ -1,4 +1,4 @@
-import { FormLoadingSkeleton } from '@/components/loading-skeleton';
+import { LoadingState } from '@/components/loading-state';
 import {
   ResponsiveDialog,
   ResponsiveDialogBody,
@@ -66,7 +66,7 @@ function SettingsPanel() {
   const [section, setSection] = useState<SettingsSectionId>('general');
 
   if (!settingsQuery.data) {
-    return <FormLoadingSkeleton />;
+    return <LoadingState label="设置加载中..." />;
   }
 
   return (

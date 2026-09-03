@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
+import { LoadingState } from '@/components/loading-state';
 import {
   Empty,
   EmptyDescription,
@@ -6,7 +7,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
-import { Skeleton } from '@/components/ui/skeleton';
 import { UserGroupIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 
@@ -16,9 +16,11 @@ export function InviteLoadingState() {
       size="sm"
       className="overflow-visible bg-transparent p-0 shadow-none ring-0 data-[size=sm]:py-0"
     >
-      <CardContent className="flex flex-col gap-3 p-0 group-data-[size=sm]/card:px-0">
-        <Skeleton className="h-36 rounded-lg" />
-        <Skeleton className="h-60 rounded-lg" />
+      <CardContent className="p-0 group-data-[size=sm]/card:px-0">
+        <LoadingState
+          className="bg-background min-h-56 rounded-lg"
+          label="邀请信息加载中..."
+        />
       </CardContent>
     </Card>
   );

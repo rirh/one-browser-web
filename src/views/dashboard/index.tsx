@@ -1,11 +1,11 @@
 import { RefreshButton } from '@/components/refresh-button';
+import { LoadingState } from '@/components/loading-state';
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
 } from '@/components/ui/empty';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/features/auth/auth-gate';
 import { hasPermission } from '@/features/auth/permissions';
 import type { AuthRoute } from '@/features/auth/types';
@@ -54,7 +54,7 @@ const ROUTE_ALIASES: Record<string, string> = {
 };
 
 export default function DashboardOverviewPage() {
-  const { access, user } = useAuth();
+  const { access } = useAuth();
   const router = useRouter();
   const canView = hasPermission(access, DASHBOARD_PERMISSION);
   const quickLinks = flattenAuthorizedRoutes(access.routes);
@@ -68,7 +68,6 @@ export default function DashboardOverviewPage() {
     return <Navigate replace to={quickLinks[0]?.href ?? '/account/profile'} />;
   }
 
-  const displayName = user.nick_name || user.user_name;
   const data = query.data;
   const visibleMetrics = data?.metrics.filter(hasMetricValues) ?? [];
   const resourceData =
@@ -85,54 +84,39 @@ export default function DashboardOverviewPage() {
   );
 
   return (
-    <section className="bg-muted flex min-h-0 flex-1 flex-col overflow-auto">
-      <div className="mx-auto flex w-full max-w-[96rem] flex-col gap-3 p-3 lg:p-4">
-        <div className="flex flex-col gap-3 px-1 py-1">
-          <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="text-lg font-semibold">
-                工作台
-              </h1>
-              <p className="text-muted-foreground mt-0.5 text-xs">
-                {displayName ? `欢迎回来，${displayName}` : '查看资源与最近动态'}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {data ? (
-                <span
-                  className="text-muted-foreground text-xs"
-                  title={formatDateTimeTitle(data.generated_at)}
-                >
-                  更新于 {formatDisplayDateTime(data.generated_at)}
-                </span>
-              ) : null}
-              <RefreshButton
-                size="sm"
-                variant="ghost"
-                isRefreshing={query.isFetching}
-                onRefresh={query.refetch}
-                successMessage="Dashboard 已刷新"
-              />
-            </div>
-          </header>
-
-          {query.isLoading ? (
-            <div className="flex flex-wrap gap-2">
-              {Array.from({ length: 4 }, (_, index) => (
-                <Skeleton key={index} className="h-14 w-48 rounded-xl" />
-              ))}
-            </div>
-          ) : visibleMetrics.length ? (
-            <div className="flex flex-wrap gap-2">
-              {visibleMetrics.map((metric) => (
-                <MetricCard key={metric.key} metric={metric} />
-              ))}
-            </div>
+    <section className="bg-muted/30 flex min-h-0 flex-1 flex-col overflow-auto">
+      <div className="mx-auto flex w-full max-w-[96rem] flex-col gap-3 p-3 lg:gap-4 lg:p-4">
+        <div className="flex items-center justify-end gap-2 px-1">
+          {data ? (
+            <span
+              className="text-muted-foreground text-xs"
+              title={formatDateTimeTitle(data.generated_at)}
+            >
+              更新于 {formatDisplayDateTime(data.generated_at)}
+            </span>
           ) : null}
+          <RefreshButton
+            size="sm"
+            variant="outline"
+            isRefreshing={query.isFetching}
+            onRefresh={query.refetch}
+            successMessage="工作台已刷新"
+          />
         </div>
 
+        {!query.isLoading && visibleMetrics.length ? (
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
+            {visibleMetrics.map((metric) => (
+              <MetricCard key={metric.key} metric={metric} />
+            ))}
+          </div>
+        ) : null}
+
         {query.isLoading ? (
-          <DashboardSkeleton />
+          <LoadingState
+            className="bg-card min-h-64 rounded-xl"
+            label="工作台加载中..."
+          />
         ) : query.isError ? (
           <Empty className="bg-card min-h-64 border-0">
             <EmptyHeader>
@@ -143,7 +127,7 @@ export default function DashboardOverviewPage() {
         ) : data ? (
           <>
             {hasChartScope ? (
-              <div className="grid gap-2 lg:grid-cols-2">
+              <div className="grid gap-3 lg:grid-cols-2">
                 {resourceData.length ? (
                   <ResourceDistributionChart
                     data={resourceData}
@@ -164,38 +148,33 @@ export default function DashboardOverviewPage() {
             ) : null}
 
             {quickLinks.length ? (
-              <section className="flex flex-col gap-2 py-1">
-              <div className="px-1">
-                <h2 className="text-sm font-semibold">快捷入口</h2>
-                <p className="text-muted-foreground mt-0.5 text-xs">
-                  进入当前账号可访问的功能。
-                </p>
-              </div>
-              <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {quickLinks.map((item) => (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    className="group bg-card hover:bg-muted flex min-w-0 items-center gap-2 rounded-xl px-3 py-2.5 transition-colors"
-                  >
-                    <div className="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground flex size-6 shrink-0 items-center justify-center rounded-md transition-colors">
+              <section className="flex flex-col gap-2">
+                <h2 className="px-1 text-sm font-semibold">快捷入口</h2>
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {quickLinks.map((item) => (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      className="group border-border/60 bg-card hover:border-primary/25 hover:bg-card flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-2.5 shadow-xs transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:shadow-sm"
+                    >
+                      <div className="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground flex size-7 shrink-0 items-center justify-center rounded-lg transition-colors">
+                        <HugeiconsIcon
+                          icon={item.icon}
+                          strokeWidth={2}
+                          className="size-3.5"
+                        />
+                      </div>
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                        {item.title}
+                      </span>
                       <HugeiconsIcon
-                        icon={item.icon}
+                        icon={ArrowRight01Icon}
                         strokeWidth={2}
-                        className="size-3.5"
+                        className="text-muted-foreground group-hover:text-primary size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5"
                       />
-                    </div>
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                      {item.title}
-                    </span>
-                    <HugeiconsIcon
-                      icon={ArrowRight01Icon}
-                      strokeWidth={2}
-                      className="text-muted-foreground group-hover:text-primary size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5"
-                    />
-                  </Link>
-                ))}
-              </div>
+                    </Link>
+                  ))}
+                </div>
               </section>
             ) : null}
           </>
@@ -212,40 +191,21 @@ function MetricCard({ metric }: { metric: DashboardMetric }) {
   return (
     <Link
       to={metric.href}
-      className="group hover:bg-background flex min-w-44 items-center gap-2 rounded-xl px-2.5 py-2 transition-colors"
+      className="group border-border/60 bg-card hover:border-primary/25 flex min-w-0 items-center gap-2.5 rounded-xl border p-3 shadow-xs transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:shadow-sm"
     >
-      <div className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-lg">
+      <div className="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-lg">
         <HugeiconsIcon icon={Icon} strokeWidth={2} className="size-4" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="flex items-baseline gap-2">
-          <p className="text-muted-foreground truncate text-xs">{metric.title}</p>
-          <p className="text-base font-semibold tabular-nums">
-            {metric.value}
-          </p>
-        </div>
+        <p className="text-muted-foreground truncate text-xs">{metric.title}</p>
+        <p className="text-lg leading-6 font-semibold tabular-nums">
+          {metric.value}
+        </p>
         <p className="text-muted-foreground/80 truncate text-[0.6875rem]">
           {metric.secondary_label} {metric.secondary_value}
         </p>
       </div>
     </Link>
-  );
-}
-
-function DashboardSkeleton() {
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-        {Array.from({ length: 6 }, (_, index) => (
-          <Skeleton key={index} className="h-20 rounded-lg" />
-        ))}
-      </div>
-      <div className="grid gap-2 lg:grid-cols-2">
-        <Skeleton className="h-64 rounded-lg" />
-        <Skeleton className="h-64 rounded-lg" />
-        <Skeleton className="h-64 rounded-lg lg:col-span-2" />
-      </div>
-    </div>
   );
 }
 

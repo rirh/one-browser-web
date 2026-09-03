@@ -24,8 +24,8 @@ import type {
 } from '../types';
 import {
   PermissionTreeItem,
+  PermissionTreeLoading,
   type PermissionTreeNode,
-  PermissionTreeSkeleton,
   TreeControl,
   buildNodeMap,
   buildParentMap,
@@ -369,7 +369,7 @@ export function RoleDialog({
               <ScrollArea className="h-[min(19rem,42vh)]">
                 <div className="p-1.5">
                   {isLoadingPermissions ? (
-                    <PermissionTreeSkeleton />
+                    <PermissionTreeLoading />
                   ) : hasPermissionError ? (
                     <div className="text-destructive flex flex-col items-center gap-3 px-3 py-10 text-center text-xs">
                       <span>权限加载失败</span>

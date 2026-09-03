@@ -351,28 +351,25 @@ export function BrowserAssetsPageContent() {
             onRowSelectionChange={setRowSelection}
             columnVisibility={columnVisibility}
             onColumnVisibilityChange={setColumnVisibility}
-            tableClassName="text-sm"
           />
         )}
       </div>
 
-      {totalAssets > 0 ? (
-        <BrowserAssetsPagination
-          pageIndex={pageIndex}
-          pageSize={pageSize}
-          totalRows={totalAssets}
-          isUpdating={assetsQuery.isFetching}
-          onPageIndexChange={(value) => {
-            setPageIndex(value);
-            setRowSelection({});
-          }}
-          onPageSizeChange={(value) => {
-            setPageSize(value);
-            setPageIndex(0);
-            setRowSelection({});
-          }}
-        />
-      ) : null}
+      <BrowserAssetsPagination
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        totalRows={totalAssets}
+        isUpdating={assetsQuery.isFetching}
+        onPageIndexChange={(value) => {
+          setPageIndex(value);
+          setRowSelection({});
+        }}
+        onPageSizeChange={(value) => {
+          setPageSize(value);
+          setPageIndex(0);
+          setRowSelection({});
+        }}
+      />
 
       {selectedAssets.length ? (
         <AssetBulkActions

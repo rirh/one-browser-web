@@ -189,10 +189,7 @@ function ChartCard({
   return (
     <Card
       size="sm"
-      className={cn(
-        'bg-card border-0 shadow-none ring-0',
-        className,
-      )}
+      className={cn('border-border/60 bg-card shadow-xs', className)}
     >
       <CardHeader className="pb-0">
         <CardTitle className="text-sm">{title}</CardTitle>

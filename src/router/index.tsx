@@ -1,12 +1,20 @@
-import { WorkspaceLoadingSkeleton } from '@/components/loading-skeleton';
+import { LoadingState } from '@/components/loading-state';
+import { RouteProgress } from '@/components/route-progress';
 import { SweepShine } from '@/components/ui/sweep-shine';
 import { AccountSettingsLayout } from '@/features/account/profile/account-settings-layout';
 import { AuthGate } from '@/features/auth/auth-gate';
 import { DashboardShell } from '@/features/browser-shell/dashboard-shell';
 import { AppErrorBoundary } from '@/views/error/error-boundary';
 import NotFound from '@/views/error/not-found';
-import { lazy, Suspense } from 'react';
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { lazy, Suspense, useDeferredValue } from 'react';
+import {
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useOutlet,
+} from 'react-router-dom';
 
 const LoginPage = lazy(() => import('@/views/auth/login'));
 const CallbackPage = lazy(() => import('@/views/auth/callback'));
@@ -36,7 +44,14 @@ const JobPage = lazy(() => import('@/views/monitor/job'));
 export function AppRouter() {
   return (
     <AppErrorBoundary>
-      <Suspense fallback={<WorkspaceLoadingSkeleton />}>
+      <Suspense
+        fallback={
+          <LoadingState
+            className="bg-background min-h-dvh"
+            label="正在加载工作区..."
+          />
+        }
+      >
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/callback" element={<CallbackPage />} />
@@ -86,12 +101,16 @@ export function AppRouter() {
 }
 
 function DashboardLayout() {
+  const location = useLocation();
+  const outlet = useOutlet();
+  const deferredLocationKey = useDeferredValue(location.key);
+  const deferredOutlet = useDeferredValue(outlet);
+
   return (
     <AuthGate>
       <DashboardShell>
-        <Suspense fallback={<RouteLoading />}>
-          <Outlet />
-        </Suspense>
+        <RouteProgress active={location.key !== deferredLocationKey} />
+        <Suspense fallback={<RouteLoading />}>{deferredOutlet}</Suspense>
       </DashboardShell>
     </AuthGate>
   );

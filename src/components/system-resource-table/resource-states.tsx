@@ -4,10 +4,10 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from '@/components/ui/empty';
-import { TableLoadingSkeleton } from '@/components/loading-skeleton';
+import { LoadingState } from '@/components/loading-state';
 
-export function ResourceTableSkeleton({ columns }: { columns: number }) {
-  return <TableLoadingSkeleton columnCount={columns} />;
+export function ResourceTableLoading() {
+  return <LoadingState label="数据加载中..." />;
 }
 
 export function ResourceError({ error }: { error: unknown }) {

@@ -101,7 +101,7 @@ export function BrowserTableSearchField({
 
 type BrowserTableRefreshButtonProps = {
   isRefreshing: boolean;
-  onRefresh: () => Promise<{ isError: boolean }>;
+  onRefresh: () => unknown | Promise<unknown>;
   successMessage: string;
 };
 

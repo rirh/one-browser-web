@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Skeleton } from '@/components/ui/skeleton';
+import { SweepShine } from '@/components/ui/sweep-shine';
 import { cn } from '@/lib/utils';
 import { ArrowDown01Icon, ArrowRight01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -151,20 +151,14 @@ export function PermissionTreeItem({
   );
 }
 
-export function PermissionTreeSkeleton() {
+export function PermissionTreeLoading() {
   return (
-    <div className="space-y-1 py-1">
-      {Array.from({ length: 7 }, (_, index) => (
-        <div
-          key={index}
-          className="flex h-7 items-center gap-2 px-2"
-          style={{ paddingLeft: 8 + (index % 3) * 16 }}
-        >
-          <Skeleton className="size-4" />
-          <Skeleton className="size-3.5" />
-          <Skeleton className="h-3.5 w-28" />
-        </div>
-      ))}
+    <div
+      role="status"
+      aria-label="权限加载中"
+      className="text-muted-foreground flex min-h-40 items-center justify-center text-xs"
+    >
+      <SweepShine>权限加载中...</SweepShine>
     </div>
   );
 }

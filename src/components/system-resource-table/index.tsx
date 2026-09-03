@@ -27,7 +27,7 @@ import { ResourceFooter } from './resource-footer';
 import {
   ResourceEmpty,
   ResourceError,
-  ResourceTableSkeleton,
+  ResourceTableLoading,
 } from './resource-states';
 import { ResourceToolbar } from './resource-toolbar';
 
@@ -152,7 +152,7 @@ export function SystemResourceTable({
       />
       <div className="min-h-0 flex-1 overflow-auto">
         {query.isLoading ? (
-          <ResourceTableSkeleton columns={columns.length} />
+          <ResourceTableLoading />
         ) : query.isError ? (
           <ResourceError error={query.error} />
         ) : table.getRowModel().rows.length === 0 ? (

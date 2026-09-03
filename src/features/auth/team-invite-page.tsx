@@ -1,4 +1,5 @@
 import { ThemeToggleButton } from '@/components/theme/theme-toggle-button';
+import { LoadingState } from '@/components/loading-state';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +13,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import {
   AUTH_TOKENS_CHANGED_EVENT,
@@ -223,7 +223,10 @@ export function TeamInvitePage() {
           ) : null}
 
           {inviteQuery.isLoading ? (
-            <InviteSkeleton />
+            <LoadingState
+              className="min-h-28 bg-transparent py-6"
+              label="邀请信息加载中..."
+            />
           ) : inviteQuery.isError ? (
             <Alert variant="destructive">
               <AlertDescription>
@@ -344,17 +347,6 @@ function InviteSummary({ invite }: { invite: TeamInvite }) {
           value={formatDateTime(invite.expires_at)}
         />
       </dl>
-    </div>
-  );
-}
-
-function InviteSkeleton() {
-  return (
-    <div className="flex flex-col gap-2">
-      <Skeleton className="h-5 w-2/3" />
-      <Skeleton className="h-4 w-full" />
-      <Skeleton className="h-4 w-4/5" />
-      <Skeleton className="h-4 w-3/5" />
     </div>
   );
 }

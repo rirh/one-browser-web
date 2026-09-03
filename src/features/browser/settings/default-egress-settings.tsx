@@ -1,9 +1,9 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { RefreshButton } from '@/components/refresh-button';
-import { FieldDescription, FieldGroup } from '@/components/ui/field';
+import { FieldDescription } from '@/components/ui/field';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Skeleton } from '@/components/ui/skeleton';
+import { SweepShine } from '@/components/ui/sweep-shine';
 import type { AppSettings } from '@/features/browser/contracts';
 import {
   useEgressLineSnapshotQuery,
@@ -138,7 +138,15 @@ export function DefaultEgressSettings({ settings }: { settings: AppSettings }) {
           ) : null}
         </RadioGroup>
 
-        {snapshotQuery.isLoading ? <LineSkeletons /> : null}
+        {snapshotQuery.isLoading ? (
+          <div
+            role="status"
+            aria-label="线路加载中"
+            className="text-muted-foreground flex items-center justify-center px-3 py-5 text-xs"
+          >
+            <SweepShine>线路加载中...</SweepShine>
+          </div>
+        ) : null}
         {snapshotQuery.isError ? (
           <Alert variant="destructive">
             <HugeiconsIcon icon={AlertCircleIcon} strokeWidth={2} />
@@ -214,19 +222,6 @@ function LineChoice({
         {[detail, description].filter(Boolean).join(' · ')}
       </span>
     </label>
-  );
-}
-
-function LineSkeletons() {
-  return (
-    <FieldGroup className="gap-1.5" aria-label="正在加载线路">
-      {[0, 1].map((index) => (
-        <div key={index} className="flex items-center gap-2 px-2.5 py-1.5">
-          <Skeleton className="size-4 rounded-full" />
-          <Skeleton className="h-4 w-64 max-w-[75%]" />
-        </div>
-      ))}
-    </FieldGroup>
   );
 }
 

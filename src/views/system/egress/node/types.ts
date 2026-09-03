@@ -25,11 +25,36 @@ export type EgressNodeResource = {
   active_streams: number;
   max_connections: number;
   max_streams: number;
+  runtime_version: string;
+  self_upgrade: boolean;
+  upgrade: EgressUpgradeResource | null;
   load_percent: number | null;
   heartbeat_at: string | null;
   enrollment_expires_at: string | null;
   claimed_at: string | null;
   connected_at: string | null;
+};
+
+export type EgressUpgradeResource = {
+  upgrade_id: string;
+  target_version: string;
+  status: 'pending' | 'accepted' | 'running' | 'succeeded' | 'failed';
+  message: string;
+};
+
+export type EgressReleaseStatus = {
+  latest_version: string;
+  available_versions: string[];
+};
+
+export type EgressBatchUpgradeResult = {
+  queued: number;
+  skipped: number;
+  targets: Array<{
+    egress_id: string;
+    status: 'queued' | 'skipped';
+    message: string;
+  }>;
 };
 
 export type EgressNodePage = {

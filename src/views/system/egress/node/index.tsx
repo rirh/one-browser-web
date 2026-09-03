@@ -10,6 +10,8 @@ import {
 import { CopyButton } from '@/components/ui/copy-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { TablePagination } from '@/components/table-pagination';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,7 +65,11 @@ import {
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ColumnDef, VisibilityState } from '@tanstack/react-table';
+import type {
+  ColumnDef,
+  RowSelectionState,
+  VisibilityState,
+} from '@tanstack/react-table';
 import * as React from 'react';
 import { toast } from 'sonner';
 
@@ -71,17 +77,22 @@ import {
   cancelEgressEnrollment,
   createEgressEnrollment,
   deleteEgressNode,
+  getEgressReleaseStatus,
   listEgressNodes,
   updateEgressNode,
   updateEgressNodeStatus,
 } from './api';
+import { NodeBulkActions } from './node-bulk-actions';
 import type {
   CreateEgressEnrollmentResult,
   EgressNodeResource,
   EgressNodeStatus,
+  EgressUpgradeResource,
 } from './types';
 
 const QUERY_KEY = ['system', 'egress-nodes'] as const;
+const RELEASE_QUERY_KEY = ['system', 'egress-releases'] as const;
+const PAGE_SIZE_OPTIONS = [15, 30, 50] as const;
 const STATUS_OPTIONS: Array<{ value: 'all' | EgressNodeStatus; label: string }> = [
   { value: 'all', label: '全部状态' },
   { value: 'pending', label: '待接入' },
@@ -109,22 +120,39 @@ export default function EgressNodePage() {
   const canDelete = hasButtonPermission(access, 'system:egress:delete');
   const [keyword, setKeyword] = React.useState('');
   const [status, setStatus] = React.useState<'all' | EgressNodeStatus>('all');
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(15);
   const [editor, setEditor] = React.useState<EditorState | null>(null);
   const [deleteTarget, setDeleteTarget] =
     React.useState<EgressNodeResource | null>(null);
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const deferredKeyword = React.useDeferredValue(keyword.trim());
   const query = useQuery({
-    queryKey: [...QUERY_KEY, deferredKeyword, status],
+    queryKey: [...QUERY_KEY, deferredKeyword, status, page, pageSize],
     queryFn: () =>
       listEgressNodes({
         keyword: deferredKeyword || undefined,
         status: status === 'all' ? undefined : status,
+        page,
+        page_size: pageSize,
       }),
     enabled: canList,
     refetchInterval: isTauriRuntime() ? 3_000 : false,
   });
+  const releaseQuery = useQuery({
+    queryKey: RELEASE_QUERY_KEY,
+    queryFn: getEgressReleaseStatus,
+    enabled: canList && canUpdate,
+    staleTime: 5 * 60 * 1000,
+  });
+  const nodes = React.useMemo(() => query.data?.list ?? [], [query.data?.list]);
+  const total = query.data?.total ?? 0;
+  const selectedNodes = React.useMemo(
+    () => nodes.filter((node) => rowSelection[node.egress_id]),
+    [nodes, rowSelection],
+  );
 
   React.useEffect(() => {
     if (!canList || isTauriRuntime()) return;
@@ -164,6 +192,44 @@ export default function EgressNodePage() {
   });
   const columns = React.useMemo<ColumnDef<EgressNodeResource>[]>(
     () => [
+      ...(canUpdate
+        ? [
+            {
+              id: 'select',
+              header: ({ table }) => (
+                <Checkbox
+                  aria-label="选择全部节点"
+                  checked={
+                    table.getIsAllRowsSelected()
+                      ? true
+                      : table.getIsSomeRowsSelected()
+                        ? 'indeterminate'
+                        : false
+                  }
+                  onCheckedChange={(checked) =>
+                    table.toggleAllRowsSelected(Boolean(checked))
+                  }
+                />
+              ),
+              cell: ({ row }) => (
+                <Checkbox
+                  aria-label={`选择节点 ${row.original.display_name}`}
+                  checked={row.getIsSelected()}
+                  onCheckedChange={(checked) =>
+                    row.toggleSelected(Boolean(checked))
+                  }
+                />
+              ),
+              enableHiding: false,
+              enableSorting: false,
+              meta: {
+                headerClassName: 'sticky left-0 z-30 bg-muted/95',
+                cellClassName:
+                  'sticky left-0 z-20 bg-card group-data-[state=selected]/row:bg-muted group-hover/row:bg-muted/50',
+              },
+            } satisfies ColumnDef<EgressNodeResource>,
+          ]
+        : []),
       {
         accessorKey: 'display_name',
         header: '节点',
@@ -176,6 +242,12 @@ export default function EgressNodePage() {
           </div>
         ),
         meta: { label: '节点' },
+      },
+      {
+        id: 'runtime',
+        header: '版本',
+        cell: ({ row }) => <NodeRuntime node={row.original} />,
+        meta: { label: '版本' },
       },
       {
         accessorKey: 'public_endpoint',
@@ -274,9 +346,20 @@ export default function EgressNodePage() {
               placeholder="搜索节点名称、ID、域名"
               ariaLabel="搜索节点"
               className="w-56"
-              onValueChange={setKeyword}
+              onValueChange={(value) => {
+                setKeyword(value);
+                setPage(1);
+                setRowSelection({});
+              }}
             />
-            <Select value={status} onValueChange={(value) => setStatus(value as typeof status)}>
+            <Select
+              value={status}
+              onValueChange={(value) => {
+                setStatus(value as typeof status);
+                setPage(1);
+                setRowSelection({});
+              }}
+            >
               <SelectTrigger size="sm" className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -324,17 +407,51 @@ export default function EgressNodePage() {
         ) : (
           <BrowserDataTable
             columns={columns}
-            data={query.data?.list ?? []}
+            data={nodes}
             emptyTitle="暂无节点"
             emptyDescription="新增节点后，复制安装命令到目标服务器执行。"
             getRowId={(node) => node.egress_id}
             isLoading={query.isLoading}
             density="compact"
+            enableRowSelection={canUpdate}
+            rowSelection={rowSelection}
+            onRowSelectionChange={setRowSelection}
             columnVisibility={columnVisibility}
             onColumnVisibilityChange={setColumnVisibility}
           />
         )}
       </div>
+
+      <TablePagination
+        currentPage={page}
+        pageSize={pageSize}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        total={total}
+        isUpdating={query.isFetching && !query.isLoading}
+        onPageChange={(nextPage) => {
+          setPage(nextPage);
+          setRowSelection({});
+        }}
+        onPageSizeChange={(nextPageSize) => {
+          setPageSize(nextPageSize);
+          setPage(1);
+          setRowSelection({});
+        }}
+      />
+
+      {canUpdate ? (
+        <NodeBulkActions
+          nodes={selectedNodes}
+          releaseStatus={releaseQuery.data}
+          releaseLoading={releaseQuery.isLoading}
+          onSelectionChange={(egressIds) =>
+            setRowSelection(
+              Object.fromEntries(egressIds.map((egressId) => [egressId, true])),
+            )
+          }
+          onUpdated={() => queryClient.invalidateQueries({ queryKey: QUERY_KEY })}
+        />
+      ) : null}
 
       <NodeEditorDialog
         state={editor}
@@ -353,6 +470,50 @@ export default function EgressNodePage() {
       />
     </section>
   );
+}
+
+function NodeRuntime({ node }: { node: EgressNodeResource }) {
+  const upgrade = node.upgrade;
+  if (node.lifecycle === 'pending') {
+    return <span className="text-muted-foreground">待安装</span>;
+  }
+  return (
+    <div className="flex min-w-28 flex-col gap-0.5">
+      <span className="font-mono tabular-nums">
+        {node.runtime_version || '未知版本'}
+      </span>
+      {upgrade ? (
+        <span
+          className={
+            upgrade.status === 'failed'
+              ? 'text-destructive text-[0.625rem]'
+              : 'text-muted-foreground text-[0.625rem]'
+          }
+          title={upgrade.message || undefined}
+        >
+          {upgradeStatusLabel(upgrade.status)} · {upgrade.target_version}
+        </span>
+      ) : node.self_upgrade ? (
+        <span className="text-muted-foreground text-[0.625rem]">支持远程升级</span>
+      ) : (
+        <span className="text-warning text-[0.625rem]">不支持远程升级</span>
+      )}
+    </div>
+  );
+}
+
+function upgradeStatusLabel(status: EgressUpgradeResource['status']) {
+  switch (status) {
+    case 'pending':
+    case 'accepted':
+      return '等待升级';
+    case 'running':
+      return '升级中';
+    case 'succeeded':
+      return '升级成功';
+    case 'failed':
+      return '升级失败';
+  }
 }
 
 function NodeStatus({ node }: { node: EgressNodeResource }) {

@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { TablePagination } from '@/components/table-pagination';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,23 +17,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 import { copyTextToClipboard } from '@/lib/clipboard';
 import {
   Alert01Icon,
-  ArrowLeft01Icon,
-  ArrowLeftDoubleIcon,
-  ArrowRight01Icon,
-  ArrowRightDoubleIcon,
   CheckmarkCircle02Icon,
   Copy01Icon,
   Delete02Icon,
@@ -62,85 +51,16 @@ export function BrowserAssetsPagination({
   onPageIndexChange: (value: number) => void;
   onPageSizeChange: (value: number) => void;
 }) {
-  const totalPages = Math.max(Math.ceil(totalRows / pageSize), 1);
-  const firstRow = pageIndex * pageSize + 1;
-  const lastRow = Math.min((pageIndex + 1) * pageSize, totalRows);
-  const hasPreviousPage = pageIndex > 0;
-  const hasNextPage = pageIndex < totalPages - 1;
-
   return (
-    <div className="flex shrink-0 flex-col gap-2 border-t bg-muted px-3 py-2 sm:flex-row sm:items-center sm:justify-between lg:px-4">
-      <div className="flex items-center gap-2 text-sm leading-none text-muted-foreground">
-        <span>
-          {firstRow}-{lastRow} / {totalRows}
-        </span>
-        {isUpdating ? <span>更新中</span> : null}
-      </div>
-      <div className="flex items-center gap-1.5">
-        <Select
-          value={String(pageSize)}
-          onValueChange={(value) => onPageSizeChange(Number(value))}
-        >
-          <SelectTrigger size="sm" className="w-20">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {PAGE_SIZE_OPTIONS.map((value) => (
-                <SelectItem key={value} value={String(value)}>
-                  {value} 条
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon-sm"
-          disabled={!hasPreviousPage}
-          aria-label="第一页"
-          onClick={() => onPageIndexChange(0)}
-        >
-          <HugeiconsIcon icon={ArrowLeftDoubleIcon} strokeWidth={2} />
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon-sm"
-          disabled={!hasPreviousPage}
-          aria-label="上一页"
-          onClick={() => onPageIndexChange(Math.max(pageIndex - 1, 0))}
-        >
-          <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} />
-        </Button>
-        <div className="min-w-20 text-center text-sm leading-none text-muted-foreground">
-          {pageIndex + 1} / {totalPages}
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon-sm"
-          disabled={!hasNextPage}
-          aria-label="下一页"
-          onClick={() =>
-            onPageIndexChange(Math.min(pageIndex + 1, totalPages - 1))
-          }
-        >
-          <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon-sm"
-          disabled={!hasNextPage}
-          aria-label="最后一页"
-          onClick={() => onPageIndexChange(totalPages - 1)}
-        >
-          <HugeiconsIcon icon={ArrowRightDoubleIcon} strokeWidth={2} />
-        </Button>
-      </div>
-    </div>
+    <TablePagination
+      currentPage={pageIndex + 1}
+      pageSize={pageSize}
+      pageSizeOptions={PAGE_SIZE_OPTIONS}
+      total={totalRows}
+      isUpdating={isUpdating}
+      onPageChange={(page) => onPageIndexChange(page - 1)}
+      onPageSizeChange={onPageSizeChange}
+    />
   );
 }
 
@@ -232,19 +152,15 @@ export function AssetNameCell({ record }: { record: BrowserAssetResource }) {
 export function TargetCell({ record }: { record: BrowserAssetResource }) {
   return (
     <div className="flex items-center gap-1.5">
-      <Badge variant="outline" className="text-xs">
-        {record.platform}
-      </Badge>
-      <Badge variant="outline" className="text-xs">
-        {record.arch}
-      </Badge>
+      <Badge variant="outline">{record.platform}</Badge>
+      <Badge variant="outline">{record.arch}</Badge>
     </div>
   );
 }
 
 export function CurrentBadge({ active }: { active: boolean }) {
   return (
-    <Badge variant={active ? 'default' : 'outline'} className="text-xs">
+    <Badge variant={active ? 'default' : 'outline'}>
       {active ? '当前版本' : '历史版本'}
     </Badge>
   );

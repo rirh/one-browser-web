@@ -1,4 +1,5 @@
 import { AnimatedSegmentedTabs } from '@/components/ui/animated-segmented-tabs';
+import { LoadingState } from '@/components/loading-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { isTauriRuntime } from '@/lib/desktop';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -121,13 +121,10 @@ export function AppDownloadCard({
         </div>
 
         {loading ? (
-          <div className="flex items-center gap-3">
-            <div className="min-w-0 flex-1 space-y-2">
-              <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-4 w-full max-w-md" />
-            </div>
-            <Skeleton className="h-8 w-28" />
-          </div>
+          <LoadingState
+            className="min-h-20 bg-transparent py-5"
+            label="正在查询安装包..."
+          />
         ) : (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="min-w-0 flex-1">

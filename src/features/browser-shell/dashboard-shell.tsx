@@ -8,34 +8,16 @@ import * as React from 'react';
 import { AppFooter } from './components/app-footer';
 import { AppSidebar } from './components/app-sidebar';
 import { SiteHeader } from './components/site-header';
+import { BrowserShellProvider } from './browser-shell-context';
 
-interface BrowserShellContextValue {
-  search: string;
-  setSearch: (value: string) => void;
-}
-
-const BrowserShellContext =
-  React.createContext<BrowserShellContextValue | null>(null);
-
-export function useBrowserShell() {
-  const context = React.useContext(BrowserShellContext);
-
-  if (!context) {
-    throw new Error('useBrowserShell must be used within DashboardShell.');
-  }
-
-  return context;
-}
+export { useBrowserShell } from './browser-shell-context';
 
 export function DashboardShell({ children }: React.PropsWithChildren) {
-  const [search, setSearch] = React.useState('');
   const platform = useDesktopPlatform();
   const showSiteHeader = isTauriRuntime() && platform === 'macos';
 
-  const contextValue = React.useMemo(() => ({ search, setSearch }), [search]);
-
   return (
-    <BrowserShellContext.Provider value={contextValue}>
+    <BrowserShellProvider>
       <DesktopAppGateProvider>
         <SidebarProvider
           className="bg-background h-dvh flex-col"
@@ -73,6 +55,6 @@ export function DashboardShell({ children }: React.PropsWithChildren) {
           </div>
         </SidebarProvider>
       </DesktopAppGateProvider>
-    </BrowserShellContext.Provider>
+    </BrowserShellProvider>
   );
 }

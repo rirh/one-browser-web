@@ -1,5 +1,5 @@
-import { AnimatedSegmentedTabs } from '@/components/ui/animated-segmented-tabs';
-import { RefreshButton } from '@/components/refresh-button';
+import { LoadingState } from '@/components/loading-state';
+import { TablePagination } from '@/components/table-pagination';
 import {
   ResponsiveDialog,
   ResponsiveDialogBody,
@@ -18,11 +18,11 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from '@/components/ui/input-group';
-import { Skeleton } from '@/components/ui/skeleton';
+  BrowserTableFilterTabs,
+  BrowserTableRefreshButton,
+  BrowserTableSearchField,
+  BrowserTableToolbar,
+} from '@/features/browser/components/table-toolbar';
 import {
   Table,
   TableBody,
@@ -34,7 +34,7 @@ import {
 import { formatDateTimeTitle, formatDisplayDateTime } from '@/lib/date-time';
 import { http } from '@/lib/http';
 import { useQuery } from '@tanstack/react-query';
-import { FileViewIcon, Search01Icon } from '@hugeicons/core-free-icons';
+import { FileViewIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import * as React from 'react';
 
@@ -76,21 +76,14 @@ export default function LoginLogPage() {
     placeholderData: (previousData) => previousData,
   });
   const total = query.data?.total ?? 0;
-  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <>
       <section className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="bg-muted/40 flex shrink-0 flex-col gap-3 border-b px-3 py-3 lg:px-4">
-          <div>
-            <h1 className="font-heading text-base font-semibold">登录日志</h1>
-            <p className="text-muted-foreground text-xs">
-              查看用户登录结果、来源地址和登录时间。
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
-              <AnimatedSegmentedTabs
+        <BrowserTableToolbar
+          filters={
+            <>
+              <BrowserTableFilterTabs
                 label="登录结果筛选"
                 value={status}
                 options={STATUS_OPTIONS}
@@ -99,33 +92,30 @@ export default function LoginLogPage() {
                   setPage(1);
                 }}
               />
-              <InputGroup className="w-full sm:w-72">
-                <InputGroupAddon>
-                  <HugeiconsIcon icon={Search01Icon} strokeWidth={2} />
-                </InputGroupAddon>
-                <InputGroupInput
-                  value={search}
-                  placeholder="搜索登录日志"
-                  onChange={(event) => {
-                    setSearch(event.target.value);
-                    setPage(1);
-                  }}
-                />
-              </InputGroup>
-            </div>
-            <RefreshButton
-              size="sm"
-              variant="outline"
+              <BrowserTableSearchField
+                className="w-full sm:w-72"
+                value={search}
+                placeholder="搜索登录日志"
+                ariaLabel="搜索登录日志"
+                onValueChange={(value) => {
+                  setSearch(value);
+                  setPage(1);
+                }}
+              />
+            </>
+          }
+          actions={
+            <BrowserTableRefreshButton
               isRefreshing={query.isFetching}
               onRefresh={query.refetch}
               successMessage="登录日志已刷新"
             />
-          </div>
-        </div>
+          }
+        />
 
         <div className="min-h-0 flex-1 overflow-auto">
           {query.isLoading ? (
-            <LoadingState />
+            <LoadingState label="登录日志加载中..." />
           ) : query.isError ? (
             <ErrorState error={query.error} />
           ) : query.data?.list.length ? (
@@ -191,10 +181,11 @@ export default function LoginLogPage() {
           )}
         </div>
 
-        <PaginationFooter
-          page={page}
-          pageCount={pageCount}
+        <TablePagination
+          currentPage={page}
+          pageSize={PAGE_SIZE}
           total={total}
+          isUpdating={query.isFetching && !query.isLoading}
           onPageChange={setPage}
         />
       </section>
@@ -257,11 +248,7 @@ function LoginLogDetailDialog({
         </ResponsiveDialogHeader>
         <ResponsiveDialogBody>
           {query.isLoading ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {Array.from({ length: 8 }, (_, index) => (
-                <Skeleton key={index} className="h-12 w-full" />
-              ))}
-            </div>
+            <LoadingState className="min-h-48" label="日志详情加载中..." />
           ) : query.isError ? (
             <ErrorState error={query.error} />
           ) : query.data ? (
@@ -316,20 +303,6 @@ function DetailField({
   );
 }
 
-function LoadingState() {
-  return (
-    <div className="flex flex-col gap-2 p-3">
-      {Array.from({ length: 8 }, (_, row) => (
-        <div key={row} className="grid grid-cols-6 gap-2">
-          {Array.from({ length: 6 }, (_, column) => (
-            <Skeleton key={column} className="h-7 w-full" />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function ErrorState({ error }: { error: unknown }) {
   return (
     <Empty className="h-full">
@@ -351,47 +324,5 @@ function EmptyState() {
         <EmptyDescription>当前筛选条件下没有可显示的记录。</EmptyDescription>
       </EmptyHeader>
     </Empty>
-  );
-}
-
-function PaginationFooter({
-  page,
-  pageCount,
-  total,
-  onPageChange,
-}: {
-  page: number;
-  pageCount: number;
-  total: number;
-  onPageChange: (page: number) => void;
-}) {
-  if (!total) return null;
-  return (
-    <div className="bg-muted/30 flex h-10 shrink-0 items-center justify-between gap-2 border-t px-3">
-      <span className="text-muted-foreground text-xs">共 {total} 条</span>
-      {pageCount > 1 ? (
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground text-xs">
-            第 {page} / {pageCount} 页
-          </span>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page <= 1}
-            onClick={() => onPageChange(page - 1)}
-          >
-            上一页
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page >= pageCount}
-            onClick={() => onPageChange(page + 1)}
-          >
-            下一页
-          </Button>
-        </div>
-      ) : null}
-    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { TableLoadingSkeleton } from '@/components/loading-skeleton';
+import { LoadingState } from '@/components/loading-state';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -301,11 +301,7 @@ export function BrowserDataTable<TData, TValue>({
   }
 
   if (isLoading) {
-    return (
-      <TableLoadingSkeleton
-        columnCount={table.getVisibleLeafColumns().length}
-      />
-    );
+    return <LoadingState label="数据加载中..." />;
   }
 
   if (!data.length) {

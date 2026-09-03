@@ -1,4 +1,4 @@
-import { TableLoadingSkeleton } from '@/components/loading-skeleton';
+import { LoadingState } from '@/components/loading-state';
 import { Badge } from '@/components/ui/badge';
 import { RefreshButton } from '@/components/refresh-button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -317,9 +317,7 @@ export function ProxyTable({
   if (isLoading) {
     return (
       <div className="bg-card min-h-0 flex-1 overflow-auto">
-        <TableLoadingSkeleton
-          columnCount={table.getVisibleLeafColumns().length}
-        />
+        <LoadingState label="代理加载中..." />
       </div>
     );
   }
@@ -397,14 +395,6 @@ export function ProxyTable({
             ))}
           </TableBody>
         </Table>
-      </div>
-
-      <div className="text-muted-foreground flex items-center justify-between border-t px-3 py-2 text-xs">
-        <span>共 {data.length} 个代理</span>
-        <div className="flex items-center gap-4">
-          <span>每页 {data.length}</span>
-          <span>第 1 / 1 页</span>
-        </div>
       </div>
 
       {canSelectProxies && selectedProxyIds.length ? (
