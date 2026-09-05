@@ -454,6 +454,7 @@ export default function EgressNodePage() {
       ) : null}
 
       <NodeEditorDialog
+        key={editor ? editor.mode === 'create' ? 'create' : `${editor.mode}:${editor.node.egress_id}` : 'closed'}
         state={editor}
         onClose={() => setEditor(null)}
         onSaved={() => queryClient.invalidateQueries({ queryKey: QUERY_KEY })}
@@ -646,14 +647,6 @@ function NodeEditorDialog({
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : '节点保存失败'),
   });
-
-  React.useEffect(() => {
-    setDomain(node?.domain ?? '');
-    setDisplayName(node?.display_name ?? '');
-    setMaxConnections(String(node?.max_connections ?? 256));
-    setMaxStreams(String(node?.max_streams ?? 2048));
-    setResult(null);
-  }, [node, state?.mode]);
 
   return (
     <ResponsiveDialog open={Boolean(state)} onOpenChange={(open) => !open && !mutation.isPending && onClose()}>
