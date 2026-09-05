@@ -8,6 +8,7 @@ import {
   readAuthSessionStatus,
 } from '@/features/auth/session';
 import { isUnauthorizedAuthError } from '@/features/auth/auth-errors';
+import { AppDownloadCard } from '@/features/app-download/download-card';
 import { requestDownloadPrompt } from '@/features/app-download/session';
 import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
 import { Door01Icon, Globe02Icon } from '@hugeicons/core-free-icons';
@@ -35,6 +36,10 @@ type LoginPageCopy = {
   appLogoAlt: string;
   title: string;
   openAuthLogin: string;
+  webAuthLogin: string;
+  webDescription: string;
+  desktopDownload: string;
+  desktopDescription: string;
   openingAuthLogin: string;
   copyLoginLink: string;
   copyingLoginLink: string;
@@ -55,6 +60,10 @@ const LOGIN_PAGE_COPY: Record<'zh-CN' | 'en-US', LoginPageCopy> = {
     appLogoAlt: '有个浏览器',
     title: '登录有个浏览器',
     openAuthLogin: '打开网址授权登录',
+    webAuthLogin: '授权登录',
+    webDescription: '授权登录后，管理浏览器环境与团队。',
+    desktopDownload: '桌面客户端',
+    desktopDescription: '下载 One Browser，使用完整的浏览器功能。',
     openingAuthLogin: '正在打开...',
     copyLoginLink: '复制登录链接',
     copyingLoginLink: '正在复制...',
@@ -73,6 +82,10 @@ const LOGIN_PAGE_COPY: Record<'zh-CN' | 'en-US', LoginPageCopy> = {
     appLogoAlt: 'One Browser',
     title: 'Sign in to One Browser',
     openAuthLogin: 'Authorize sign-in',
+    webAuthLogin: 'Authorize sign-in',
+    webDescription: 'Sign in to manage browser environments and your team.',
+    desktopDownload: 'Desktop app',
+    desktopDescription: 'Download One Browser for the full desktop experience.',
     openingAuthLogin: 'Opening...',
     copyLoginLink: 'Copy sign-in link',
     copyingLoginLink: 'Copying...',
@@ -258,6 +271,62 @@ export function LoginPage({ authManaged = false }: LoginPageProps) {
     }
   }
 
+  if (!isDesktop) {
+    return (
+      <main className="bg-muted text-foreground flex min-h-svh w-full items-center justify-center px-4 py-10">
+        <ThemeToggleButton className="absolute top-3 right-3 z-20" />
+        <div className="flex w-full max-w-md flex-col gap-4 text-left">
+          <section className="bg-card text-card-foreground flex flex-col rounded-2xl p-6 sm:p-7">
+            <div className="flex items-center gap-3">
+              <Image
+                src={APP_LOGO_SRC}
+                alt={copy.appLogoAlt}
+                width={48}
+                height={48}
+                priority
+                className="size-12 rounded-xl select-none"
+                draggable={false}
+              />
+              <div>
+                <h1 className="text-xl font-semibold tracking-tight">One Browser</h1>
+                <p className="text-muted-foreground mt-0.5 text-xs">{copy.title}</p>
+              </div>
+            </div>
+
+            <p className="text-muted-foreground mt-8 text-sm leading-6">
+              {copy.webDescription}
+            </p>
+            {authNotice ? (
+              <Alert className="mt-4" aria-live="polite">
+                <AlertDescription>{authNotice}</AlertDescription>
+              </Alert>
+            ) : null}
+            <Button
+              className="mt-5 h-11 min-w-32 self-end rounded-md px-5"
+              disabled={opening}
+              onClick={() => void openWebLogin()}
+              size="lg"
+            >
+              {opening ? <Spinner data-icon="inline-start" /> : null}
+              {opening ? copy.openingAuthLogin : copy.webAuthLogin}
+            </Button>
+
+          </section>
+          <section className="bg-card text-card-foreground rounded-2xl p-6 sm:p-7">
+              <h2 className="text-sm font-medium">{copy.desktopDownload}</h2>
+              <p className="text-muted-foreground mt-1 text-xs leading-5">
+                {copy.desktopDescription}
+              </p>
+              <AppDownloadCard
+                showHeader={false}
+                className="mt-4 rounded-none bg-transparent p-0 shadow-none ring-0 [&_[data-slot=card-content]]:px-0 [&_a]:bg-primary [&_a]:text-primary-foreground [&_a:hover]:bg-primary/90"
+              />
+          </section>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main
       className="bg-background text-foreground relative isolate grid min-h-dvh place-items-center overflow-hidden rounded-[var(--app-radius)] px-5 py-6"
@@ -288,7 +357,7 @@ export function LoginPage({ authManaged = false }: LoginPageProps) {
           </Alert>
         ) : null}
 
-        <div className="mt-4 flex w-full flex-col gap-2">
+        <div className="mt-4 flex w-full max-w-80 flex-col gap-2">
           <Button
             className="w-full"
             disabled={opening || !canOpenLogin}
@@ -305,41 +374,49 @@ export function LoginPage({ authManaged = false }: LoginPageProps) {
                 data-icon="inline-start"
               />
             )}
-            {opening ? copy.openingAuthLogin : copy.openAuthLogin}
+            {opening
+              ? copy.openingAuthLogin
+              : isDesktop
+                ? copy.openAuthLogin
+                : copy.webAuthLogin}
           </Button>
 
-          <div className="grid w-full grid-cols-[3fr_2fr] gap-2">
-            <CopyButton
-              variant="outline"
-              className="border-border/70 bg-background/60 hover:bg-muted/70 min-w-0 px-2"
-              disabled={!canOpenLogin}
-              getText={() => prepareWebLoginUrl(currentBrowserReturnTo())}
-              idleLabel={copy.copyLoginLink}
-              copyingLabel={copy.copyingLoginLink}
-              copiedLabel={copy.copied}
-              successMessage={copy.copySuccess}
-              errorMessage={copy.copyError}
-              size="lg"
-            >
-              {(stage) =>
-                stage === 'copying' ? copy.copyingLoginLink : copy.copyLoginLink
-              }
-            </CopyButton>
+          {isDesktop ? (
+            <div className="grid w-full grid-cols-[3fr_2fr] gap-2">
+              <CopyButton
+                variant="outline"
+                className="border-border/70 bg-background/60 hover:bg-muted/70 min-w-0 px-2"
+                disabled={!canOpenLogin}
+                getText={() => prepareWebLoginUrl(currentBrowserReturnTo())}
+                idleLabel={copy.copyLoginLink}
+                copyingLabel={copy.copyingLoginLink}
+                copiedLabel={copy.copied}
+                successMessage={copy.copySuccess}
+                errorMessage={copy.copyError}
+                size="lg"
+              >
+                {(stage) =>
+                  stage === 'copying'
+                    ? copy.copyingLoginLink
+                    : copy.copyLoginLink
+                }
+              </CopyButton>
 
-            <Button
-              variant="outline"
-              className="border-destructive/25 bg-background/60 text-destructive hover:bg-destructive/10 hover:text-destructive min-w-0 px-2"
-              onClick={() => void exitApp()}
-              size="lg"
-            >
-              <HugeiconsIcon
-                icon={Door01Icon}
-                strokeWidth={2}
-                data-icon="inline-start"
-              />
-              {copy.exitApp}
-            </Button>
-          </div>
+              <Button
+                variant="outline"
+                className="border-destructive/25 bg-background/60 text-destructive hover:bg-destructive/10 hover:text-destructive min-w-0 px-2"
+                onClick={() => void exitApp()}
+                size="lg"
+              >
+                <HugeiconsIcon
+                  icon={Door01Icon}
+                  strokeWidth={2}
+                  data-icon="inline-start"
+                />
+                {copy.exitApp}
+              </Button>
+            </div>
+          ) : null}
         </div>
       </section>
     </main>
