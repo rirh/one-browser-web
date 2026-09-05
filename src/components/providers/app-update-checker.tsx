@@ -10,29 +10,9 @@ import {
 
 const APP_UPDATE_CHECKER_WORKER_URL = '/app-update-checker.worker.js';
 
-type AppUpdateCheckerWorkerMessage =
-  | {
-      type: 'baseline' | 'unchanged' | 'unavailable';
-      url: string;
-      source?: string;
-    }
-  | {
-      type: 'changed';
-      url: string;
-      source?: string;
-      current?: PageValidator;
-      previous?: PageValidator;
-    }
-  | {
-      type: 'error';
-      url: string;
-      source?: string;
-      message?: string;
-    };
-
-type PageValidator = {
-  etag: string | null;
-  lastModified: string | null;
+type AppUpdateCheckerWorkerMessage = {
+  type: 'unchanged' | 'changed' | 'error';
+  message?: string;
 };
 
 export function AppUpdateChecker() {
@@ -54,10 +34,13 @@ export function AppUpdateChecker() {
     let worker: Worker;
 
     try {
-      worker = new Worker(APP_UPDATE_CHECKER_WORKER_URL, {
-        name: 'app-update-checker',
-        type: 'module',
-      });
+      worker = new Worker(
+        `${APP_UPDATE_CHECKER_WORKER_URL}?build=${encodeURIComponent(__APP_BUILD_ID__)}`,
+        {
+          name: 'app-update-checker',
+          type: 'module',
+        },
+      );
     } catch (error) {
       console.warn('App update checker worker failed to start.', error);
       return;
@@ -71,7 +54,11 @@ export function AppUpdateChecker() {
       worker.postMessage({
         type: 'check',
         source,
-        url: window.location.href,
+        url: new URL(
+          'app-version.json',
+          new URL(import.meta.env.BASE_URL, window.location.origin),
+        ).toString(),
+        buildId: __APP_BUILD_ID__,
       });
     };
 

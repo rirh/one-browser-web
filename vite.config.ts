@@ -15,18 +15,29 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiProxyTarget = env.VITE_DEV_BACKEND_URL || 'http://127.0.0.1:27514';
   const appName = env.VITE_APP_NAME || pkg.appName || pkg.name;
+  const appVersion = env.VITE_APP_VERSION?.trim() || pkg.version;
+  const buildTime = env.VITE_BUILD_TIME?.trim() || new Date().toISOString();
+  const buildId = `${appVersion}:${buildTime}`;
 
   return {
     base: env.VITE_BASE_URL || '/',
     define: {
-      __APP_BUILD_TIME__: JSON.stringify(new Date().toISOString()),
-      __APP_VERSION__: JSON.stringify(pkg.version),
+      __APP_BUILD_TIME__: JSON.stringify(buildTime),
+      __APP_VERSION__: JSON.stringify(appVersion),
+      __APP_BUILD_ID__: JSON.stringify(buildId),
     },
     plugins: [
       react(),
       tailwindcss(),
       {
         name: 'html-app-name',
+        generateBundle() {
+          this.emitFile({
+            type: 'asset',
+            fileName: 'app-version.json',
+            source: JSON.stringify({ version: appVersion, buildId }),
+          });
+        },
         transformIndexHtml: (html) => html.replaceAll('%APP_NAME%', appName),
       },
     ],

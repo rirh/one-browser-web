@@ -21,7 +21,6 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import pkg from '../../../../package.json';
 import {
   ChromiumDownloadFooter,
   resolveChromiumDownloadLabel,
@@ -142,7 +141,7 @@ export function AppFooter() {
   const apiStatus = status?.apiStatus;
   const apiEnabled = Boolean(apiStatus?.enabled);
   const apiRunning = Boolean(apiStatus?.running);
-  const appVersion = appVersionLabel(status?.appVersion ?? pkg.version);
+  const appVersion = appVersionLabel(__APP_VERSION__);
   const apiStatusLabel = statusQuery.isLoading
     ? 'API 检测中'
     : statusQuery.isError

@@ -7,9 +7,7 @@ import {
   type DesktopInvokeOptions,
 } from '@/lib/desktop/types';
 
-import pkg from '../../../package.json';
-
-const packageAppVersion = pkg.version.trim() || '0.0.0';
+const packageAppVersion = __APP_VERSION__;
 
 declare global {
   interface Window {

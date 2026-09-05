@@ -13,9 +13,7 @@ import {
   mockSettings,
 } from '@/lib/desktop/mock/state';
 
-import pkg from '../../../../package.json';
-
-const packageAppVersion = pkg.version.trim() || '0.0.0';
+const packageAppVersion = __APP_VERSION__;
 
 export function mockResult<T>(value: unknown) {
   return Promise.resolve(value as T);
