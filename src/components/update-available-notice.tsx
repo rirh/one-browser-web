@@ -1,0 +1,92 @@
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { SweepShine } from '@/components/ui/sweep-shine';
+import { X } from 'lucide-react';
+import * as React from 'react';
+
+export interface UpdateAvailableNoticeProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onUpdate?: () => void | Promise<void>;
+  title?: string;
+  description?: string;
+  updateLabel?: string;
+  updatingLabel?: string;
+  closeLabel?: string;
+  resetUpdatingAfterUpdate?: boolean;
+}
+
+export function UpdateAvailableNotice({
+  open,
+  onOpenChange,
+  onUpdate,
+  title = '发现新版本',
+  description = '新版本已经准备好，更新后即可使用。',
+  updateLabel = '更新',
+  updatingLabel = '正在更新…',
+  closeLabel = '关闭更新提示',
+  resetUpdatingAfterUpdate = false,
+}: UpdateAvailableNoticeProps) {
+  const [updating, setUpdating] = React.useState(false);
+
+  async function handleUpdate() {
+    setUpdating(true);
+    try {
+      await onUpdate?.();
+    } finally {
+      if (resetUpdatingAfterUpdate) {
+        setUpdating(false);
+      }
+    }
+  }
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 w-[calc(100%-2rem)] max-w-sm sm:right-6 sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] sm:w-full">
+      <Card
+        role="alert"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-label="One Browser 更新"
+        className="animate-in fade-in slide-in-from-bottom-3 border-border bg-card gap-0 rounded-xl border p-3 shadow-lg duration-300 motion-reduce:animate-none"
+      >
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm leading-none font-semibold">{title}</p>
+            <p className="text-muted-foreground mt-1 text-xs leading-4">
+              {description}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => void handleUpdate()}
+              disabled={updating}
+              aria-busy={updating || undefined}
+            >
+              <SweepShine
+                active={updating}
+                className={updating ? 'text-primary-foreground/70' : undefined}
+              >
+                {updating ? updatingLabel : updateLabel}
+              </SweepShine>
+            </Button>
+            <Button
+              type="button"
+              size="icon-sm"
+              variant="ghost"
+              className="text-muted-foreground/60 hover:text-muted-foreground"
+              onClick={() => onOpenChange(false)}
+              disabled={updating}
+              aria-label={closeLabel}
+            >
+              <X aria-hidden="true" />
+            </Button>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}

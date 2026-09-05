@@ -1,4 +1,4 @@
-import { UpdateAvailableDialog } from '@/components/update-available-dialog';
+import { UpdateAvailableNotice } from '@/components/update-available-notice';
 import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
 import * as React from 'react';
 
@@ -167,7 +167,7 @@ export function AppUpdateChecker() {
   const isDesktopUpdate = desktopUpdate !== null;
 
   return (
-    <UpdateAvailableDialog
+    <UpdateAvailableNotice
       key={isDesktopUpdate ? 'desktop-app-update' : 'page-update'}
       open={isDesktopUpdate || pageUpdateAvailable}
       onOpenChange={(open) => {
@@ -185,7 +185,6 @@ export function AppUpdateChecker() {
       }
       updateLabel={isDesktopUpdate ? '前往官网更新' : undefined}
       updatingLabel={isDesktopUpdate ? '正在打开官网…' : undefined}
-      closeLabel="关闭"
       resetUpdatingAfterUpdate={isDesktopUpdate}
     />
   );
