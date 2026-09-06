@@ -124,8 +124,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       );
     } finally {
       http.updateTokens(null);
-      queryClient.removeQueries({ queryKey: ['auth'] });
-      queryClient.removeQueries({ queryKey: ['remote-browser'] });
+      await queryClient.cancelQueries();
+      queryClient.clear();
       router.replace('/login');
       setIsLoggingOut(false);
     }

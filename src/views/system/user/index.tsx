@@ -373,8 +373,12 @@ function UserRoleDialog({
     queryFn: () => getUserRole(user.user_id),
   });
   const [roleId, setRoleId] = React.useState<string | null>(null);
+  const currentRoleId = bindingQuery.data?.role_id;
   const selectedRoleId =
-    roleId ?? (bindingQuery.data ? String(bindingQuery.data.role_id) : '');
+    roleId ??
+    (rolesQuery.data?.some((role) => role.role_id === currentRoleId)
+      ? String(currentRoleId)
+      : '');
   const mutation = useMutation({
     mutationFn: () => setUserRole(user.user_id, Number(selectedRoleId)),
     onSuccess: async () => {

@@ -463,7 +463,7 @@ function RoleEditorDialog({
       (appPermissionsQuery.data ?? []).map(appPermissionOption),
     ),
     access,
-  );
+  ).filter((option) => option.assignable);
 
   return (
     <LoadedRoleEditorDialog
@@ -489,6 +489,7 @@ function LoadedRoleEditorDialog({
   onClose: () => void;
 }) {
   const queryClient = useQueryClient();
+  const { access } = useAuth();
   const [roleName, setRoleName] = React.useState(role?.role_name ?? '');
   const [roleKey, setRoleKey] = React.useState(role?.role_key ?? '');
   const [remark, setRemark] = React.useState(role?.remark ?? '');
@@ -503,7 +504,12 @@ function LoadedRoleEditorDialog({
     mutationFn: async () => {
       const roleId = role
         ? role.role_id
-        : await createRole({ role_name: roleName, role_key: roleKey, remark });
+        : await createRole({
+            role_name: roleName,
+            role_key: roleKey,
+            remark,
+            data_scope: access.is_super_admin ? '1' : '5',
+          });
       if (role) {
         await updateRole(role, {
           role_name: roleName,
@@ -1004,10 +1010,16 @@ function permissionTypeLabel(type: PermissionOption['type']) {
 }
 
 async function listSystemMenus() {
-  const response = await http.get<PageResponse<MenuResource>>('/system/menus', {
-    page_size: 100,
-  });
-  return response.data.list;
+  const menus: MenuResource[] = [];
+  for (let page = 1; ; page += 1) {
+    const response = await http.get<PageResponse<MenuResource>>(
+      '/system/menus',
+      { page, page_size: 100 },
+    );
+    menus.push(...response.data.list);
+    if (menus.length >= response.data.total || response.data.list.length === 0)
+      return menus;
+  }
 }
 
 async function listAppPermissions() {
@@ -1025,6 +1037,7 @@ async function getRolePermissions(roleId: number) {
 }
 
 async function createRole(values: {
+  data_scope: string;
   role_name: string;
   role_key: string;
   remark: string;
@@ -1033,7 +1046,6 @@ async function createRole(values: {
     '/system/roles',
     {
       ...values,
-      data_scope: '1',
       status: '0',
     },
   );
