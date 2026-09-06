@@ -66,7 +66,12 @@ type WebLoginConfig =
     };
 
 export function getWebLoginConfig(): WebLoginConfig {
+  const desktopLoginUrl = isTauriRuntime()
+    ? (window as Window & { __ONE_BROWSER_CONFIG__?: { webLoginUrl?: string } })
+        .__ONE_BROWSER_CONFIG__?.webLoginUrl
+    : undefined;
   const configuredUrl =
+    desktopLoginUrl?.trim() ||
     import.meta.env.VITE_WEB_LOGIN_URL?.trim() ||
     (import.meta.env.DEV ? DEVELOPMENT_WEB_LOGIN_URL : undefined);
 
