@@ -81,7 +81,7 @@ export function TablePagination({
         {isUpdating ? <SweepShine>更新中...</SweepShine> : null}
       </div>
 
-      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+      <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-end">
         {pageSizeOptions?.length && onPageSizeChange ? (
           <NativeSelect
             size="sm"
@@ -117,13 +117,22 @@ export function TablePagination({
               />
             </PaginationItem>
 
+            <PaginationItem className="px-2 text-xs tabular-nums sm:hidden">
+              <span aria-live="polite" aria-atomic="true">
+                {page} / {pageCount}
+              </span>
+            </PaginationItem>
+
             {pageItems.map((item, index) =>
               item === 'ellipsis' ? (
-                <PaginationItem key={`ellipsis-${index}`}>
+                <PaginationItem
+                  className="hidden sm:block"
+                  key={`ellipsis-${index}`}
+                >
                   <PaginationEllipsis />
                 </PaginationItem>
               ) : (
-                <PaginationItem key={item}>
+                <PaginationItem className="hidden sm:block" key={item}>
                   <PaginationLink
                     href="#"
                     size="icon-sm"

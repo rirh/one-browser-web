@@ -22,6 +22,7 @@ export interface RemoteBatchDeleteResult {
 export type { RemoteMemberPermissionOptionResource };
 
 export interface RemoteTeamRoleResource {
+  read_only?: boolean;
   role_id: number;
   team_id: number;
   role_name: string;

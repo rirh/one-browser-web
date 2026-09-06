@@ -1,4 +1,9 @@
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { DesktopAppGateProvider } from '@/lib/desktop/app-gate';
 import { isTauriRuntime } from '@/lib/desktop';
@@ -14,6 +19,7 @@ export { useBrowserShell } from './browser-shell-context';
 
 export function DashboardShell({ children }: React.PropsWithChildren) {
   const platform = useDesktopPlatform();
+  const isMobile = useIsMobile();
   const showSiteHeader = isTauriRuntime() && platform === 'macos';
 
   return (
@@ -37,10 +43,14 @@ export function DashboardShell({ children }: React.PropsWithChildren) {
             )}
           >
             {showSiteHeader ? <SiteHeader /> : null}
-            <div className="flex min-h-0 flex-1">
+            <header className="bg-sidebar flex shrink-0 items-center gap-2 border-b px-2 pt-[env(safe-area-inset-top)] md:hidden">
+              <SidebarTrigger className="size-11" aria-label="打开导航菜单" />
+              <span className="text-sm font-semibold">One Browser</span>
+            </header>
+            <div className="flex min-h-0 min-w-0 flex-1">
               <AppSidebar
-                collapsible="none"
-                className="bg-sidebar/70 border-r"
+                collapsible={isMobile ? 'offcanvas' : 'none'}
+                className="bg-sidebar/70 shrink-0 border-r"
               />
               <SidebarInset className="bg-card min-w-0 rounded-none shadow-none md:m-0 md:peer-data-[variant=inset]:m-0">
                 <div

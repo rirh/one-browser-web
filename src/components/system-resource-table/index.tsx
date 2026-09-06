@@ -64,7 +64,12 @@ export function SystemResourceTable({
       }
     : undefined;
   const query = useQuery({
-    queryKey: ['system-resource', config.endpoint, serverParams],
+    queryKey: [
+      'system-resource',
+      config.endpoint,
+      config.queryParams,
+      serverParams,
+    ],
     queryFn: () => listSystemResources(config, serverParams),
     placeholderData: config.serverPagination
       ? (previousData) => previousData

@@ -22,7 +22,10 @@ export async function listSystemResources(
   if (params && params.status !== 'all') {
     query.status = params.status === 'enabled' ? '0' : '1';
   }
-  const response = await http.get<unknown>(config.endpoint, query);
+  const response = await http.get<unknown>(config.endpoint, {
+    ...query,
+    ...config.queryParams,
+  });
   return normalizePage(response.data);
 }
 

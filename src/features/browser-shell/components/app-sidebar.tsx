@@ -14,6 +14,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { logout } from '@/features/auth/api';
 import { useAuth } from '@/features/auth/auth-gate';
@@ -95,6 +97,11 @@ function isActivePath(pathname: string, href: string) {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  React.useEffect(() => {
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
   const router = useRouter();
   const queryClient = useQueryClient();
   const { access, user } = useAuth();
@@ -133,6 +140,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
+      {isMobile ? (
+        <div className="flex shrink-0 items-center justify-between border-b px-3 pt-[env(safe-area-inset-top)]">
+          <span className="text-sm font-semibold">导航菜单</span>
+          <SidebarTrigger className="size-11" aria-label="关闭导航菜单" />
+        </div>
+      ) : null}
       {showTeamShortcuts ? (
         <SidebarHeader>
           <AppTeamSwitcher access={access} />
@@ -205,6 +218,7 @@ function SidebarNavItem({
   pathname: string;
 }) {
   const active = isActivePath(pathname, item.href);
+  const { setOpenMobile } = useSidebar();
 
   return (
     <SidebarMenuItem>
@@ -212,13 +226,17 @@ function SidebarNavItem({
         asChild
         size="sm"
         className={cn(
-          'gap-1.5 [&_svg]:size-3.5',
+          'h-11 gap-1.5 md:h-7 [&_svg]:size-3.5',
           active &&
             'bg-sidebar-primary/10 text-sidebar-primary hover:bg-sidebar-primary/15 hover:text-sidebar-primary font-medium',
         )}
         tooltip={item.title}
       >
-        <Link to={item.href} aria-current={active ? 'page' : undefined}>
+        <Link
+          to={item.href}
+          aria-current={active ? 'page' : undefined}
+          onClick={() => setOpenMobile(false)}
+        >
           <HugeiconsIcon
             icon={item.icon}
             strokeWidth={2}

@@ -4,6 +4,7 @@ export type SystemResourceConfig = {
   columns: string[];
   description: string;
   endpoint: string;
+  queryParams?: Record<string, string | number | boolean>;
   serverPagination?: boolean;
   title: string;
 };

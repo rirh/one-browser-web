@@ -1,7 +1,7 @@
 import { BrowserAssetsPage } from '@/features/browser/assets/page';
 import { RemoteMembersPage } from '@/features/browser/organization/members';
 import { RemotePermissionsPage } from '@/features/browser/organization/permissions';
-import { RemoteRolesPage } from '@/features/browser/organization/roles';
+import RolePage from '@/views/system/role';
 import { RemoteTeamsPage } from '@/features/browser/organization/teams';
 import { ProfilesPage } from '@/features/browser/profiles/page';
 import { ProxiesPage } from '@/features/browser/proxies/page';
@@ -30,7 +30,7 @@ export function MembersRoute() {
 }
 
 export function RolesRoute() {
-  return <RemoteRolesPage />;
+  return <RolePage />;
 }
 
 export function PermissionsRoute() {

@@ -31,11 +31,11 @@ export function BrowserTableToolbar({
   actions,
 }: BrowserTableToolbarProps) {
   return (
-    <div className="bg-muted/40 flex shrink-0 flex-col gap-1.5 border-b px-3 py-2 sm:flex-row sm:items-center sm:justify-between lg:px-4">
-      <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center">
+    <div className="bg-muted/40 flex shrink-0 flex-col gap-1.5 border-b px-3 py-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between lg:px-4">
+      <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center">
         {filters}
       </div>
-      <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+      <div className="flex min-w-0 flex-wrap items-center justify-start gap-1.5 sm:ml-auto sm:justify-end">
         {actions}
       </div>
     </div>
@@ -84,7 +84,7 @@ export function BrowserTableSearchField({
   onValueChange,
 }: BrowserTableSearchFieldProps) {
   return (
-    <InputGroup className={cn('h-6', className)}>
+    <InputGroup className={cn('h-9 sm:h-6', className)}>
       <InputGroupAddon className="h-full py-0">
         <HugeiconsIcon icon={Search01Icon} strokeWidth={2} />
       </InputGroupAddon>

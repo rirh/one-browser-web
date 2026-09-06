@@ -1,1 +1,1 @@
-export { RolesRoute as default } from '@/features/browser-shell/routes';
+export { default } from '@/views/system/role';
