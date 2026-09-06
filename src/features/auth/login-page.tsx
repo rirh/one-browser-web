@@ -1,3 +1,12 @@
+import { useI18n } from '@/i18n/provider';
+import { locales, type Locale } from '@/i18n';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from '@/components/ui/dropdown-menu';
 import { ThemeToggleButton } from '@/components/theme/theme-toggle-button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -274,7 +283,7 @@ export function LoginPage({ authManaged = false }: LoginPageProps) {
   if (!isDesktop) {
     return (
       <main className="bg-muted text-foreground flex min-h-svh w-full items-center justify-center px-4 py-10">
-        <ThemeToggleButton className="absolute top-3 right-3 z-20" />
+        <LoginPageControls />
         <div className="flex w-full max-w-md flex-col gap-4 text-left">
           <section className="bg-card text-card-foreground flex flex-col rounded-2xl p-6 sm:p-7">
             <div className="flex items-center gap-3">
@@ -288,17 +297,23 @@ export function LoginPage({ authManaged = false }: LoginPageProps) {
                 draggable={false}
               />
               <div>
-                <h1 className="text-xl font-semibold tracking-tight">One Browser</h1>
-                <p className="text-muted-foreground mt-0.5 text-xs">{copy.title}</p>
+                <h1 className="text-xl font-semibold tracking-tight">
+                  One Browser
+                </h1>
+                <p className="text-muted-foreground mt-0.5 text-xs">
+                  {copy.title}
+                </p>
               </div>
             </div>
 
             <p className="text-muted-foreground mt-8 text-sm leading-6">
               {copy.webDescription}
             </p>
-            {authNotice ? (
+            {authNotice || !canOpenLogin ? (
               <Alert className="mt-4" aria-live="polite">
-                <AlertDescription>{authNotice}</AlertDescription>
+                <AlertDescription>
+                  {authNotice || loginConfigMessage}
+                </AlertDescription>
               </Alert>
             ) : null}
             <Button
@@ -310,17 +325,16 @@ export function LoginPage({ authManaged = false }: LoginPageProps) {
               {opening ? <Spinner data-icon="inline-start" /> : null}
               {opening ? copy.openingAuthLogin : copy.webAuthLogin}
             </Button>
-
           </section>
           <section className="bg-card text-card-foreground rounded-2xl p-6 sm:p-7">
-              <h2 className="text-sm font-medium">{copy.desktopDownload}</h2>
-              <p className="text-muted-foreground mt-1 text-xs leading-5">
-                {copy.desktopDescription}
-              </p>
-              <AppDownloadCard
-                showHeader={false}
-                className="mt-4 rounded-none bg-transparent p-0 shadow-none ring-0 [&_[data-slot=card-content]]:px-0 [&_a]:bg-primary [&_a]:text-primary-foreground [&_a:hover]:bg-primary/90"
-              />
+            <h2 className="text-sm font-medium">{copy.desktopDownload}</h2>
+            <p className="text-muted-foreground mt-1 text-xs leading-5">
+              {copy.desktopDescription}
+            </p>
+            <AppDownloadCard
+              showHeader={false}
+              className="[&_a]:bg-primary [&_a]:text-primary-foreground [&_a:hover]:bg-primary/90 mt-4 rounded-none bg-transparent p-0 shadow-none ring-0 [&_[data-slot=card-content]]:px-0"
+            />
           </section>
         </div>
       </main>
@@ -333,7 +347,7 @@ export function LoginPage({ authManaged = false }: LoginPageProps) {
       onMouseDown={(event) => void startWindowDrag(event)}
     >
       <InteractiveGridBackground />
-      <ThemeToggleButton className="absolute top-3 right-3 z-20" />
+      <LoginPageControls />
       <section className="relative z-10 flex w-full max-w-80 flex-col items-center text-center">
         <div className="relative flex size-[4.5rem] items-center justify-center">
           <Image
@@ -351,9 +365,11 @@ export function LoginPage({ authManaged = false }: LoginPageProps) {
           {copy.title}
         </h1>
 
-        {authNotice ? (
+        {authNotice || !canOpenLogin ? (
           <Alert className="mt-4" aria-live="polite">
-            <AlertDescription>{authNotice}</AlertDescription>
+            <AlertDescription>
+              {authNotice || loginConfigMessage}
+            </AlertDescription>
           </Alert>
         ) : null}
 
@@ -423,18 +439,41 @@ export function LoginPage({ authManaged = false }: LoginPageProps) {
   );
 }
 
-function useLoginPageCopy() {
-  const [locale] = React.useState(resolveLoginPageLocale);
-  return LOGIN_PAGE_COPY[locale];
+function LoginPageControls() {
+  const { locale, setLocale } = useI18n();
+  return (
+    <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            aria-label={locale === 'zh-CN' ? '切换语言' : 'Change language'}
+          >
+            <HugeiconsIcon icon={Globe02Icon} strokeWidth={2} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuRadioGroup
+            value={locale}
+            onValueChange={(value) => setLocale(value as Locale)}
+          >
+            {locales.map((option) => (
+              <DropdownMenuRadioItem key={option.code} value={option.code}>
+                {option.label}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ThemeToggleButton />
+    </div>
+  );
 }
 
-function resolveLoginPageLocale(): 'zh-CN' | 'en-US' {
-  if (typeof navigator === 'undefined') {
-    return 'zh-CN';
-  }
-
-  const language = navigator.language.toLowerCase();
-  return language.startsWith('zh') ? 'zh-CN' : 'en-US';
+function useLoginPageCopy() {
+  const { locale } = useI18n();
+  return LOGIN_PAGE_COPY[locale];
 }
 
 function localizedLoginConfigMessage(
