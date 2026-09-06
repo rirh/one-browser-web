@@ -41,7 +41,8 @@ export type DesktopCommand =
   | 'open_profile'
   | 'close_profile'
   | 'close_all_profiles'
-  | 'update_tunnel_route';
+  | 'update_tunnel_route'
+  | 'get_tunnel_renewal_credential';
 
 export type DesktopCommandArgs = Record<string, unknown>;
 

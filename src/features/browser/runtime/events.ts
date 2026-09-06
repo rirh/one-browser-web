@@ -1,5 +1,6 @@
 import { browserQueryKeys } from '@/features/browser/cache/query-keys';
 import type {
+  CloseProfileResult,
   OpenProfileProgressPayload,
   OpenProfileProgressStep,
   RuntimeProfile,
@@ -27,11 +28,13 @@ const openProfileProgressSteps: OpenProfileProgressStep[] = [
 
 type RuntimeChangedPayload = {
   runtime: RuntimeProfile[];
-  closedProfileIds?: string[];
+  closedProfiles?: CloseProfileResult[];
 };
 
+type RemoteEnvironmentLease = { environmentId: number; generation: number };
+
 type RemoteEnvironmentExitSyncPayload = {
-  environmentIds: number[];
+  environments: RemoteEnvironmentLease[];
 };
 
 export function useRuntimeEvents(queryClient: QueryClient) {
@@ -42,29 +45,23 @@ export function useRuntimeEvents(queryClient: QueryClient) {
         return;
       }
 
-      const previousRuntime =
-        queryClient.getQueryData<RuntimeProfile[]>(
-          browserQueryKeys.runtime(),
-        ) ?? [];
       const nextRuntime = payload.runtime;
 
       queryClient.setQueryData(browserQueryKeys.runtime(), nextRuntime);
       syncProfileListsFromRuntime(queryClient, nextRuntime);
       void syncClosedRemoteEnvironments(
         queryClient,
-        previousRuntime,
-        nextRuntime,
-        payload.closedProfileIds ?? [],
+        payload.closedProfiles ?? [],
       );
     }
 
     function handleRemoteEnvironmentExitSync(event: Event) {
       const payload = (event as CustomEvent<unknown>).detail;
-      const environmentIds = isRemoteEnvironmentExitSyncPayload(payload)
-        ? [...new Set(payload.environmentIds)]
+      const environments = isRemoteEnvironmentExitSyncPayload(payload)
+        ? payload.environments
         : [];
 
-      void syncRemoteEnvironmentsBeforeExit(environmentIds).finally(() =>
+      void syncRemoteEnvironmentsBeforeExit(environments).finally(() =>
         completeRemoteEnvironmentExitSync(),
       );
     }
@@ -105,10 +102,12 @@ export function useRuntimeEvents(queryClient: QueryClient) {
   }, [queryClient]);
 }
 
-async function syncRemoteEnvironmentsBeforeExit(environmentIds: number[]) {
+async function syncRemoteEnvironmentsBeforeExit(
+  environments: RemoteEnvironmentLease[],
+) {
   const results = await Promise.allSettled(
-    environmentIds.map((environmentId) =>
-      closeRemoteEnvironment(environmentId),
+    environments.map(({ environmentId, generation }) =>
+      closeRemoteEnvironment(environmentId, generation),
     ),
   );
 
@@ -118,7 +117,7 @@ async function syncRemoteEnvironmentsBeforeExit(environmentIds: number[]) {
       !isUnauthorizedRemoteSyncError(result.reason)
     ) {
       console.error(
-        `failed to close remote environment ${environmentIds[index]} before app exit`,
+        `failed to close remote environment ${environments[index].environmentId} before app exit`,
         result.reason,
       );
     }
@@ -135,34 +134,15 @@ async function completeRemoteEnvironmentExitSync() {
 
 async function syncClosedRemoteEnvironments(
   queryClient: QueryClient,
-  previousRuntime: RuntimeProfile[],
-  nextRuntime: RuntimeProfile[],
-  explicitlyClosedProfileIds: string[],
+  explicitlyClosedProfiles: CloseProfileResult[],
 ) {
-  const nextProfileIds = new Set(
-    nextRuntime.map((runtime) => runtime.profileId),
+  const closedEnvironments = closedRemoteEnvironmentLeases(
+    explicitlyClosedProfiles,
   );
-  const closedEnvironmentIds = [
-    ...new Set(
-      previousRuntime
-        .filter((runtime) => !nextProfileIds.has(runtime.profileId))
-        .map((runtime) => runtime.profileId)
-        .concat(explicitlyClosedProfileIds)
-        .map(parseRemoteEnvironmentProfileId)
-        .filter(
-          (environmentId): environmentId is number =>
-            typeof environmentId === 'number',
-        ),
-    ),
-  ];
-
-  if (!closedEnvironmentIds.length) {
-    return;
-  }
-
+  if (!closedEnvironments.length) return;
   const results = await Promise.allSettled(
-    closedEnvironmentIds.map((environmentId) =>
-      closeRemoteEnvironment(environmentId),
+    closedEnvironments.map(({ environmentId, generation }) =>
+      closeRemoteEnvironment(environmentId, generation),
     ),
   );
 
@@ -176,7 +156,7 @@ async function syncClosedRemoteEnvironments(
     }
 
     console.error(
-      `failed to sync closed remote environment ${closedEnvironmentIds[index]}`,
+      `failed to sync closed remote environment ${closedEnvironments[index].environmentId}`,
       result.reason,
     );
   });
@@ -184,6 +164,28 @@ async function syncClosedRemoteEnvironments(
   void queryClient.invalidateQueries({
     queryKey: remoteEnvironmentQueryKeys.environments(),
   });
+}
+
+export function closedRemoteEnvironmentLeases(
+  explicitlyClosedProfiles: CloseProfileResult[],
+): RemoteEnvironmentLease[] {
+  const leases = new Map<string, RemoteEnvironmentLease>();
+  for (const profile of explicitlyClosedProfiles) {
+    const environmentId = parseRemoteEnvironmentProfileId(profile.profileId);
+    const generation = profile.tunnelGeneration;
+    if (
+      environmentId !== null &&
+      typeof generation === 'number' &&
+      Number.isSafeInteger(generation) &&
+      generation > 0
+    ) {
+      leases.set(`${environmentId}:${generation}`, {
+        environmentId,
+        generation,
+      });
+    }
+  }
+  return [...leases.values()];
 }
 
 export function useProfileOpenProgressEvents(
@@ -222,10 +224,10 @@ function isRuntimeChangedPayload(
   const candidate = payload as RuntimeChangedPayload;
   return (
     Array.isArray(candidate.runtime) &&
-    (candidate.closedProfileIds === undefined ||
-      (Array.isArray(candidate.closedProfileIds) &&
-        candidate.closedProfileIds.every(
-          (profileId) => typeof profileId === 'string',
+    (candidate.closedProfiles === undefined ||
+      (Array.isArray(candidate.closedProfiles) &&
+        candidate.closedProfiles.every(
+          (profile) => typeof profile.profileId === 'string',
         )))
   );
 }
@@ -236,12 +238,13 @@ function isRemoteEnvironmentExitSyncPayload(
   return (
     typeof payload === 'object' &&
     payload !== null &&
-    Array.isArray(
-      (payload as RemoteEnvironmentExitSyncPayload).environmentIds,
-    ) &&
-    (payload as RemoteEnvironmentExitSyncPayload).environmentIds.every(
-      (environmentId) =>
-        Number.isSafeInteger(environmentId) && environmentId > 0,
+    Array.isArray((payload as RemoteEnvironmentExitSyncPayload).environments) &&
+    (payload as RemoteEnvironmentExitSyncPayload).environments.every(
+      ({ environmentId, generation }) =>
+        Number.isSafeInteger(environmentId) &&
+        environmentId > 0 &&
+        Number.isSafeInteger(generation) &&
+        generation > 0,
     )
   );
 }

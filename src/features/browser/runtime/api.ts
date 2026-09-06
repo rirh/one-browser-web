@@ -27,3 +27,13 @@ export function closeAllProfiles() {
 export function updateTunnelRoute(request: UpdateTunnelRouteRequest) {
   return desktopInvoke<RuntimeProfile>('update_tunnel_route', { request });
 }
+
+export function getTunnelRenewalCredential(
+  profileId: string,
+  generation: number,
+) {
+  return desktopInvoke<string>('get_tunnel_renewal_credential', {
+    profileId,
+    generation,
+  });
+}

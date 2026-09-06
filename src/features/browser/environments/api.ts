@@ -83,9 +83,13 @@ export async function openRemoteEnvironment(
   return response.data;
 }
 
-export async function closeRemoteEnvironment(environmentId: number) {
+export async function closeRemoteEnvironment(
+  environmentId: number,
+  generation: number,
+) {
   const response = await http.post<RemoteEnvironmentResource>(
     `${environmentPath}/${environmentId}/close`,
+    { generation },
   );
   return response.data;
 }

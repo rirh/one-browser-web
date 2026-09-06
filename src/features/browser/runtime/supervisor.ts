@@ -6,7 +6,11 @@ import type { RuntimeProfile, TunnelRoute } from '../contracts';
 import { renewRemoteEnvironment } from '../environments/api';
 import { parseRemoteEnvironmentProfileId } from '../environments/runtime-profile-id';
 import type { RemoteTunnelRoute } from '../environments/types';
-import { listRuntime, updateTunnelRoute } from './api';
+import {
+  getTunnelRenewalCredential,
+  listRuntime,
+  updateTunnelRoute,
+} from './api';
 import {
   isRuntimeRenewCandidate,
   nextRuntimeRenewDelay,
@@ -33,10 +37,16 @@ export function useRuntimeSupervisor() {
       const current = renewals.get(environmentId);
       if (current) return current;
 
-      const renewal = renewRemoteEnvironment(environmentId, {
-        generation: runtime.tunnelGeneration,
-        routeExpiresAt: runtime.tunnelRouteExpiresAt,
-      })
+      const generation = runtime.tunnelGeneration;
+      const routeExpiresAt = runtime.tunnelRouteExpiresAt;
+      const renewal = getTunnelRenewalCredential(runtime.profileId, generation)
+        .then((accessToken) =>
+          renewRemoteEnvironment(environmentId, {
+            generation,
+            routeExpiresAt,
+            accessToken,
+          }),
+        )
         .then((renewed) =>
           updateTunnelRoute({
             profileId: runtime.profileId,

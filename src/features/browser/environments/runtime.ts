@@ -79,9 +79,9 @@ export async function openRemoteEnvironmentLocally(environmentId: number) {
     egressSelection,
   );
 
+  const tunnelRoute =
+    openedEnvironment.tunnelRoute ?? openedEnvironment.tunnel_route;
   try {
-    const tunnelRoute =
-      openedEnvironment.tunnelRoute ?? openedEnvironment.tunnel_route;
     if (!tunnelRoute) {
       throw new Error('服务器未返回 Egress 隧道路由，已阻止浏览器直连');
     }
@@ -117,7 +117,8 @@ export async function openRemoteEnvironmentLocally(environmentId: number) {
     };
   } catch (error) {
     try {
-      await closeRemoteEnvironment(environmentId);
+      if (tunnelRoute)
+        await closeRemoteEnvironment(environmentId, tunnelRoute.generation);
     } catch (rollbackError) {
       console.error(
         '[remote-environment] failed to release remote environment after local open failure',
@@ -139,7 +140,8 @@ export async function closeRemoteEnvironmentLocally(environmentId: number) {
     }
   }
 
-  return closeRemoteEnvironment(environmentId);
+  // Native runtime events own remote synchronization, including natural exits.
+  return { environment_id: environmentId };
 }
 
 function remoteEnvironmentToProfileRequest(

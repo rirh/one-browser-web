@@ -77,6 +77,7 @@ export interface RemoteTunnelRoute {
 }
 
 export interface RenewRemoteEnvironmentRequest {
+  accessToken: string;
   generation: number;
   routeExpiresAt: string;
 }

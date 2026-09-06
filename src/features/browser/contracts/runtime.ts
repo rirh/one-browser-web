@@ -79,6 +79,7 @@ export interface CloseProfileRequest {
 export interface CloseProfileResult {
   profileId: string;
   closed: boolean;
+  tunnelGeneration?: number | null;
 }
 
 export interface CloseAllProfilesResult {

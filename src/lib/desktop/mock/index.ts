@@ -162,6 +162,8 @@ export function invokeMockCommand<T>(
       return mockResult<T>(mockCloseProfile(request));
     case 'close_all_profiles':
       return mockResult<T>(mockCloseAllProfiles());
+    case 'get_tunnel_renewal_credential':
+      throw new Error('Mock runtimes do not carry Egress renewal credentials');
     case 'update_tunnel_route':
       return mockResult<T>(mockRuntime.get(String(request?.profileId)) ?? null);
   }

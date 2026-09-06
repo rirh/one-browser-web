@@ -223,7 +223,8 @@ export function RemoteEnvironmentEditorDialog({
   }
 
   function saveEnvironment(values: ProfileEditorForm) {
-    if (!teamId) {
+    const targetTeamId = record?.team_id ?? teamId;
+    if (!targetTeamId) {
       toast.error('请选择团队');
       return;
     }
@@ -234,7 +235,7 @@ export function RemoteEnvironmentEditorDialog({
     const proxyId = remoteProxyId(payload.proxyId);
 
     onSubmit({
-      team_id: teamId,
+      team_id: targetTeamId,
       environment_key: environmentKey,
       environment_no: payload.profileNo,
       name: payload.name || environmentKey,

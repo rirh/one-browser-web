@@ -148,21 +148,44 @@ export function useEnvironmentActions({
     [],
   );
 
+  const [editorTeamId, setEditorTeamId] = React.useState(selectedTeamId);
+  if (editorTeamId !== selectedTeamId) {
+    setEditorTeamId(selectedTeamId);
+    setDialogState(null);
+    setLoadingDetailId(null);
+  }
+  const detailRequest = React.useRef(0);
+  const selectedTeam = React.useRef(selectedTeamId);
+  React.useLayoutEffect(() => {
+    selectedTeam.current = selectedTeamId;
+    detailRequest.current += 1;
+    return () => {
+      detailRequest.current += 1;
+    };
+  }, [selectedTeamId]);
+
   const openEditor = React.useCallback(async (environmentId: number | null) => {
+    const requestId = ++detailRequest.current;
+    const requestedTeamId = selectedTeam.current;
     if (environmentId === null) {
+      setLoadingDetailId(null);
       setDialogState({ mode: 'create' });
       return;
     }
     setLoadingDetailId(environmentId);
     try {
       const record = await getRemoteEnvironment(environmentId);
-      setDialogState({ mode: 'edit', record });
+      if (
+        requestId === detailRequest.current &&
+        selectedTeam.current === requestedTeamId
+      ) {
+        setDialogState({ mode: 'edit', record });
+      }
     } catch (error) {
-      toast.error(toBrowserErrorMessage(error));
+      if (requestId === detailRequest.current)
+        toast.error(toBrowserErrorMessage(error));
     } finally {
-      setLoadingDetailId((current) =>
-        current === environmentId ? null : current,
-      );
+      if (requestId === detailRequest.current) setLoadingDetailId(null);
     }
   }, []);
 
@@ -368,7 +391,11 @@ export function useEnvironmentActions({
     close,
     requestDelete: (record: RemoteEnvironmentListItem) =>
       setDeleteTarget({ environmentIds: [record.environment_id] }),
-    closeEditor: () => setDialogState(null),
+    closeEditor: () => {
+      detailRequest.current += 1;
+      setLoadingDetailId(null);
+      setDialogState(null);
+    },
     submit,
     clearSelection: () => setSelectedIds([]),
     openSelected,
