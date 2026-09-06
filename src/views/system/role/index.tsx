@@ -536,7 +536,11 @@ function LoadedRoleEditorDialog({
       toast.success(role ? '角色已更新' : '角色已创建');
       onClose();
     },
-    onError: (error) => toast.error(toBrowserErrorMessage(error)),
+    onError: async (error) => {
+      toast.error(toBrowserErrorMessage(error));
+      // Creating the role may succeed before its permission request fails.
+      await queryClient.invalidateQueries({ queryKey: ROLES_QUERY_KEY });
+    },
   });
 
   return (
