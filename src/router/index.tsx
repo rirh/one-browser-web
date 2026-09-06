@@ -17,6 +17,7 @@ import {
 } from 'react-router-dom';
 
 const LoginPage = lazy(() => import('@/views/auth/login'));
+const DownloadPage = lazy(() => import('@/views/download'));
 const CallbackPage = lazy(() => import('@/views/auth/callback'));
 const TeamInvitePage = lazy(() => import('@/views/auth/team-invite'));
 const DashboardOverviewPage = lazy(() => import('@/views/dashboard'));
@@ -54,6 +55,7 @@ export function AppRouter() {
       >
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/download" element={<DownloadPage />} />
           <Route path="/callback" element={<CallbackPage />} />
           <Route path="/team-invite" element={<TeamInvitePage />} />
           <Route path="/index" element={<Navigate to="/dashboard" replace />} />

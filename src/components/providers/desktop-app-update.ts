@@ -7,7 +7,7 @@ import { readInjectedAppStatus } from '@/features/browser/status/api';
 import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
 import { http } from '@/lib/http';
 
-export const DESKTOP_APP_DOWNLOAD_URL = 'https://browser.aicbe.com';
+export const DESKTOP_APP_DOWNLOAD_URL = 'https://browser.aicbe.com/download';
 
 const sha256Pattern = /^[0-9a-f]{64}$/;
 
