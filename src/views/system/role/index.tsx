@@ -1,3 +1,5 @@
+import { remoteMemberQueryKeys } from '@/features/browser/organization/members/query-keys';
+import { remoteTeamQueryKeys } from '@/features/browser/organization/teams/query-keys';
 import {
   ResponsiveDialog,
   ResponsiveDialogBody,
@@ -116,6 +118,20 @@ type RoleEditorState =
 
 const ROLES_QUERY_KEY = ['system-resource', '/system/roles'] as const;
 
+async function invalidateRoleDependents(
+  queryClient: ReturnType<typeof useQueryClient>,
+) {
+  await Promise.all(
+    [
+      ROLES_QUERY_KEY,
+      remoteRoleQueryKeys.roles(),
+      remoteMemberQueryKeys.members(),
+      remoteTeamQueryKeys.teams(),
+      ['auth', 'permissions'],
+    ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+  );
+}
+
 export default function RolePage() {
   const { access } = useAuth();
   const queryClient = useQueryClient();
@@ -140,12 +156,7 @@ export default function RolePage() {
       status: StatusFlag;
     }) => updateRoleStatus(role, status),
     onSuccess: async (_, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ROLES_QUERY_KEY }),
-        queryClient.invalidateQueries({
-          queryKey: remoteRoleQueryKeys.roles(),
-        }),
-      ]);
+      await invalidateRoleDependents(queryClient);
       toast.success(variables.status === '0' ? '角色已启用' : '角色已停用');
       if (variables.status === '1') {
         setDisablingRole(null);
@@ -340,12 +351,7 @@ function TeamRoleEditorDialog({
     mutationFn: (payload: RemoteTeamRolePayload) =>
       updateRemoteTeamRole(role.role_id, payload),
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ROLES_QUERY_KEY }),
-        queryClient.invalidateQueries({
-          queryKey: remoteRoleQueryKeys.roles(),
-        }),
-      ]);
+      await invalidateRoleDependents(queryClient);
       toast.success('角色已更新');
       onClose();
     },
@@ -532,14 +538,14 @@ function LoadedRoleEditorDialog({
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ROLES_QUERY_KEY });
+      await invalidateRoleDependents(queryClient);
       toast.success(role ? '角色已更新' : '角色已创建');
       onClose();
     },
     onError: async (error) => {
       toast.error(toBrowserErrorMessage(error));
       // Creating the role may succeed before its permission request fails.
-      await queryClient.invalidateQueries({ queryKey: ROLES_QUERY_KEY });
+      await invalidateRoleDependents(queryClient);
     },
   });
 
@@ -849,7 +855,7 @@ function RoleDeleteDialog({
   const mutation = useMutation({
     mutationFn: () => deleteRole(role?.role_id ?? 0),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ROLES_QUERY_KEY });
+      await invalidateRoleDependents(queryClient);
       toast.success('角色已删除');
       onClose();
     },

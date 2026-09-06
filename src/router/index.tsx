@@ -24,6 +24,7 @@ const DashboardOverviewPage = lazy(() => import('@/views/dashboard'));
 const EnvironmentsPage = lazy(() => import('@/views/browser/environments'));
 const ProxiesPage = lazy(() => import('@/views/browser/proxies'));
 const TeamsPage = lazy(() => import('@/views/browser/teams'));
+const TeamRolesPage = lazy(() => import('@/views/browser/roles'));
 const MembersPage = lazy(() => import('@/views/browser/members'));
 const VersionsPage = lazy(() => import('@/views/browser/versions'));
 const SettingsPage = lazy(() => import('@/views/browser/settings'));
@@ -64,6 +65,7 @@ export function AppRouter() {
             <Route path="/dashboard" element={<DashboardOverviewPage />} />
             <Route path="/system/user" element={<SystemUserPage />} />
             <Route path="/system/role" element={<SystemRolePage />} />
+            <Route path="/browser/roles" element={<TeamRolesPage />} />
             <Route path="/system/menu" element={<SystemMenuPage />} />
             <Route path="/system/notice" element={<SystemNoticePage />} />
             <Route path="/system/egress/node" element={<EgressNodePage />} />

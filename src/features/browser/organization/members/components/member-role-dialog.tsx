@@ -155,10 +155,10 @@ function MemberRoleForm({
   return (
     <>
       <ResponsiveDialogBody className="flex flex-col gap-3">
-        <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+        <div className="bg-muted/50 text-muted-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-xs">
           <HugeiconsIcon icon={ShieldUserIcon} strokeWidth={2} />
           <span>
-            角色决定成员可以看到的浏览器菜单，以及可以执行的按钮操作。
+            仅可分配当前团队中、权限不超出你当前权限的角色。环境访问范围单独授权。
           </span>
         </div>
 
@@ -218,7 +218,7 @@ function MemberRoleForm({
               })}
             </FieldGroup>
           ) : (
-            <div className="rounded-lg border border-dashed px-3 py-8 text-center text-xs text-muted-foreground">
+            <div className="text-muted-foreground rounded-lg border border-dashed px-3 py-8 text-center text-xs">
               暂无可分配角色，请先到角色管理中创建角色。
             </div>
           )}
@@ -264,7 +264,7 @@ function MemberRoleDialogState({
   return (
     <>
       <ResponsiveDialogBody>
-        <div className="flex min-h-48 flex-col items-center justify-center gap-3 text-center text-xs text-muted-foreground">
+        <div className="text-muted-foreground flex min-h-48 flex-col items-center justify-center gap-3 text-center text-xs">
           {isLoading ? (
             <>
               <Spinner />
