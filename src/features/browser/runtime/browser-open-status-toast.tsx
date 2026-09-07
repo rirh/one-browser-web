@@ -1,3 +1,4 @@
+import { CopyButton } from '@/components/ui/copy-button';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { SweepShine } from '@/components/ui/sweep-shine';
@@ -6,7 +7,6 @@ import {
   AlertCircleIcon,
   Cancel01Icon,
   CheckmarkCircle02Icon,
-  Loading03Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 
@@ -22,10 +22,7 @@ type BrowserOpenStatusToastProps = {
 };
 
 const statusPresentation = {
-  loading: {
-    icon: Loading03Icon,
-    iconClassName: 'text-muted-foreground',
-  },
+  loading: null,
   success: {
     icon: CheckmarkCircle02Icon,
     iconClassName: 'text-success',
@@ -58,22 +55,24 @@ export function BrowserOpenStatusToast({
       role={status === 'error' ? 'alert' : 'status'}
       aria-live={status === 'error' ? 'assertive' : 'polite'}
       aria-atomic="true"
-      className="h-auto w-96 max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-lg"
+      className="border-border bg-popover text-popover-foreground h-auto w-96 max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border shadow-lg"
     >
       <div className="flex items-start gap-2.5 p-3">
-        <div
-          className={cn(
-            'mt-0.5 flex size-5 shrink-0 items-center justify-center',
-            presentation.iconClassName,
-          )}
-          aria-hidden="true"
-        >
-          <HugeiconsIcon
-            icon={presentation.icon}
-            strokeWidth={2}
-            className={cn('size-4', status === 'loading' && 'animate-spin')}
-          />
-        </div>
+        {presentation ? (
+          <div
+            className={cn(
+              'mt-0.5 flex size-5 shrink-0 items-center justify-center',
+              presentation.iconClassName,
+            )}
+            aria-hidden="true"
+          >
+            <HugeiconsIcon
+              icon={presentation.icon}
+              strokeWidth={2}
+              className="size-4"
+            />
+          </div>
+        ) : null}
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
@@ -83,14 +82,14 @@ export function BrowserOpenStatusToast({
               </h2>
             </SweepShine>
             {hasProgress ? (
-              <span className="shrink-0 pt-0.5 text-xs/4 tabular-nums text-muted-foreground">
+              <span className="text-muted-foreground shrink-0 pt-0.5 text-xs/4 tabular-nums">
                 {currentStep}/{totalSteps}
               </span>
             ) : null}
           </div>
           {description ? (
             <SweepShine active={status === 'loading'} asChild>
-              <p className="mt-0.5 text-xs/5 break-words text-muted-foreground">
+              <p className="text-muted-foreground mt-0.5 max-h-60 overflow-y-auto text-xs/5 break-words whitespace-pre-wrap select-text">
                 {description}
               </p>
             </SweepShine>
@@ -104,6 +103,14 @@ export function BrowserOpenStatusToast({
           ) : null}
         </div>
 
+        {status === 'error' ? (
+          <CopyButton
+            text={[title, description].filter(Boolean).join('\n')}
+            variant="ghost"
+            size="icon-sm"
+            idleLabel="复制错误信息"
+          />
+        ) : null}
         {status !== 'loading' && onClose ? (
           <Button
             type="button"

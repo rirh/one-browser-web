@@ -146,35 +146,39 @@ export function AppUpdateChecker() {
         request: { url: DESKTOP_APP_DOWNLOAD_URL },
       });
       setDesktopUpdate(null);
-      setPageUpdateAvailable(false);
     } catch (error) {
       console.warn('Failed to open the desktop app download page.', error);
     }
   }
 
-  const isDesktopUpdate = desktopUpdate !== null;
-
   return (
-    <UpdateAvailableNotice
-      key={isDesktopUpdate ? 'desktop-app-update' : 'page-update'}
-      open={isDesktopUpdate || pageUpdateAvailable}
-      onOpenChange={(open) => {
-        if (!open) {
-          setDesktopUpdate(null);
-          setPageUpdateAvailable(false);
+    <div className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 flex w-[calc(100%-2rem)] max-w-sm flex-col gap-2 sm:right-6 sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] sm:w-full">
+      <UpdateAvailableNotice
+        open={pageUpdateAvailable}
+        onOpenChange={setPageUpdateAvailable}
+        onUpdate={reloadWithTimestamp}
+        title="网页有更新"
+        description="刷新页面即可加载新版界面。"
+        updateLabel="刷新页面"
+        updatingLabel="正在刷新…"
+      />
+      <UpdateAvailableNotice
+        open={desktopUpdate !== null}
+        onOpenChange={(open) => {
+          if (!open) setDesktopUpdate(null);
+        }}
+        onUpdate={openDesktopDownloadPage}
+        title="客户端有更新"
+        description={
+          desktopUpdate
+            ? `v${desktopUpdate.currentVersion} → v${desktopUpdate.latestVersion}，下载安装后生效。`
+            : undefined
         }
-      }}
-      onUpdate={isDesktopUpdate ? openDesktopDownloadPage : reloadWithTimestamp}
-      title={isDesktopUpdate ? '发现客户端新版本' : undefined}
-      description={
-        isDesktopUpdate
-          ? '当前客户端暂未签名，无法自动更新，请前往官网下载安装最新版本。'
-          : undefined
-      }
-      updateLabel={isDesktopUpdate ? '前往官网更新' : undefined}
-      updatingLabel={isDesktopUpdate ? '正在打开官网…' : undefined}
-      resetUpdatingAfterUpdate={isDesktopUpdate}
-    />
+        updateLabel="下载客户端"
+        updatingLabel="正在打开…"
+        resetUpdatingAfterUpdate
+      />
+    </div>
   );
 }
 

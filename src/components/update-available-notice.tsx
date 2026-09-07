@@ -43,17 +43,17 @@ export function UpdateAvailableNotice({
   if (!open) return null;
 
   return (
-    <div className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 w-[calc(100%-2rem)] max-w-sm sm:right-6 sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] sm:w-full">
+    <div>
       <Card
         role="alert"
         aria-live="polite"
         aria-atomic="true"
-        aria-label="One Browser 更新"
-        className="animate-in fade-in slide-in-from-bottom-3 border-border bg-card gap-0 rounded-xl border p-3 shadow-lg duration-300 motion-reduce:animate-none"
+        aria-label={title}
+        className="animate-in fade-in slide-in-from-bottom-3 bg-card gap-0 rounded-lg border-0 p-3 shadow-sm ring-0 duration-300 motion-reduce:animate-none"
       >
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
-            <p className="text-sm leading-none font-semibold">{title}</p>
+            <p className="text-sm leading-5 font-medium">{title}</p>
             <p className="text-muted-foreground mt-1 text-xs leading-4">
               {description}
             </p>

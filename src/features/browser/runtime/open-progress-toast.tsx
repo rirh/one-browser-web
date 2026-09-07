@@ -144,8 +144,7 @@ function showBrowserOpenToast({
     ),
     {
       id: browserOpenToastId,
-      duration:
-        status === 'loading' ? Infinity : status === 'error' ? 8000 : 3500,
+      duration: status === 'success' ? 3500 : Infinity,
       dismissible: status !== 'loading',
       richColors: true,
       unstyled: true,
