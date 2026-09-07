@@ -62,7 +62,7 @@ export function AppShell() {
   );
 
   return (
-    <div className="bg-background text-foreground flex min-h-dvh">
+    <div className="bg-muted text-foreground flex min-h-dvh">
       <aside className="bg-muted/20 hidden w-60 shrink-0 border-r md:flex md:flex-col">
         <div className="flex h-14 items-center gap-2 px-4">
           <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">

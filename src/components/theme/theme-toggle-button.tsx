@@ -138,7 +138,7 @@ export function ThemeToggleButton({
       <Button
         aria-label={label}
         className={cn(
-          'shrink-0 border-border/60 bg-muted/70 text-foreground shadow-none hover:bg-muted dark:bg-muted/50 dark:hover:bg-muted/70',
+          'shrink-0 border-border/60 bg-muted text-foreground shadow-none hover:bg-muted dark:bg-muted dark:hover:bg-muted',
           className,
         )}
         onClick={handleToggle}

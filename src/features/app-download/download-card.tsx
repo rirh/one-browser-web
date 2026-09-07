@@ -90,9 +90,11 @@ export function AppDownloadCard({
         </CardHeader>
       ) : null}
       <CardContent className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
           <AnimatedSegmentedTabs
             label="选择系统"
+            className="max-w-full"
+            listClassName="max-w-full overflow-x-auto"
             triggerClassName="px-2 text-xs"
             value={selectedTarget.platform}
             options={PLATFORM_OPTIONS.map((item) => ({
@@ -107,6 +109,8 @@ export function AppDownloadCard({
           />
           <AnimatedSegmentedTabs
             label="选择架构"
+            className="ml-auto max-w-full"
+            listClassName="max-w-full overflow-x-auto"
             triggerClassName="px-2 text-xs"
             value={targetKey(selectedTarget)}
             options={platformTargets.map((item) => ({

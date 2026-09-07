@@ -62,7 +62,9 @@ export function ResourceDistributionChart({
               borderRadius: 4,
             },
           })),
-          barMaxWidth: 36,
+          barMaxWidth: 24,
+          // ECharts cannot auto-lift OKLCH theme colors; retain the SVG fill on hover.
+          emphasis: { itemStyle: { color: 'inherit' } },
           label: { show: true, position: 'top', color: palette.text },
         },
       ],
@@ -106,7 +108,7 @@ export function StatusPieChart({
           radius: ['45%', '70%'],
           center: ['50%', '43%'],
           avoidLabelOverlap: true,
-          label: { color: palette.text, formatter: '{b}\n{c}' },
+          label: { color: palette.text, formatter: '{b} ({c})' },
           data: data.map((item) => ({ name: item.label, value: item.value })),
         },
       ],
@@ -189,7 +191,7 @@ function ChartCard({
   return (
     <Card
       size="sm"
-      className={cn('border-border/60 bg-card shadow-xs', className)}
+      className={cn('bg-card border-0 shadow-none ring-0', className)}
     >
       <CardHeader className="pb-0">
         <CardTitle className="text-sm">{title}</CardTitle>
@@ -201,28 +203,25 @@ function ChartCard({
 
 function useChartPalette() {
   const { resolvedTheme } = useTheme();
-  return React.useMemo(
-    () => {
-      const primary =
-        typeof window === 'undefined'
-          ? '#2563eb'
-          : getComputedStyle(document.documentElement)
-              .getPropertyValue('--primary')
-              .trim() || '#2563eb';
-      return resolvedTheme === 'dark'
-        ? {
-            text: '#e2e8f0',
-            muted: '#94a3b8',
-            grid: '#334155',
-            primary,
-          }
-        : {
-            text: '#0f172a',
-            muted: '#64748b',
-            grid: '#e2e8f0',
-            primary,
-          };
-    },
-    [resolvedTheme],
-  );
+  return React.useMemo(() => {
+    const primary =
+      typeof window === 'undefined'
+        ? '#2563eb'
+        : getComputedStyle(document.documentElement)
+            .getPropertyValue('--primary')
+            .trim() || '#2563eb';
+    return resolvedTheme === 'dark'
+      ? {
+          text: '#e2e8f0',
+          muted: '#94a3b8',
+          grid: '#334155',
+          primary,
+        }
+      : {
+          text: '#0f172a',
+          muted: '#64748b',
+          grid: '#e2e8f0',
+          primary,
+        };
+  }, [resolvedTheme]);
 }

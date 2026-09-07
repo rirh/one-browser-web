@@ -306,7 +306,7 @@ html.platform-other {
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-muted text-foreground;
     min-height: 100dvh;
     overflow: hidden;
     border-radius: var(--app-radius);
@@ -314,7 +314,7 @@ html.platform-other {
   }
 
   html {
-    @apply bg-background font-sans;
+    @apply bg-muted font-sans;
     font-size: var(--app-font-size, 16px);
     overflow: hidden;
     border-radius: var(--app-radius);
@@ -330,7 +330,7 @@ html.platform-other {
 
   html.platform-windows body,
   html.platform-other body {
-    @apply bg-background;
+    @apply bg-muted;
   }
 
   button:not([disabled]),

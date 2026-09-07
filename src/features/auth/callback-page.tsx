@@ -81,14 +81,14 @@ export function CallbackPage() {
   }, []);
 
   return (
-    <main className="bg-background text-foreground grid min-h-dvh place-items-center px-5 py-12">
+    <main className="bg-background text-foreground grid min-h-dvh place-items-center border-0 px-5 py-12">
       <section className="flex w-full max-w-sm flex-col items-center text-center">
         <AppImage
           src="/pwa-512x512.png"
           alt="有个浏览器"
           width={72}
           height={72}
-          className="size-18 rounded-[1.25rem] shadow-sm"
+          className="size-18 rounded-[1.25rem]"
           priority
         />
         {callbackState.status === 'loading' ? (

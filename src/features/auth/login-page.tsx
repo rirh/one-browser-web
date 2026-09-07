@@ -448,6 +448,7 @@ function LoginPageControls() {
           <Button
             variant="outline"
             size="icon-sm"
+            className="border-border/60 bg-muted text-foreground shadow-none hover:bg-muted dark:bg-muted dark:hover:bg-muted"
             aria-label={locale === 'zh-CN' ? '切换语言' : 'Change language'}
           >
             <HugeiconsIcon icon={Globe02Icon} strokeWidth={2} />

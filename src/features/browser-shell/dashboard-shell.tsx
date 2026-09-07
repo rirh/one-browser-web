@@ -26,7 +26,7 @@ export function DashboardShell({ children }: React.PropsWithChildren) {
     <BrowserShellProvider>
       <DesktopAppGateProvider>
         <SidebarProvider
-          className="bg-background h-dvh flex-col"
+          className="bg-muted h-dvh flex-col"
           style={
             {
               '--sidebar-width': '11.75rem',
@@ -36,7 +36,7 @@ export function DashboardShell({ children }: React.PropsWithChildren) {
         >
           <div
             className={cn(
-              'bg-background flex min-h-0 flex-1 flex-col overflow-hidden',
+              'bg-muted flex min-h-0 flex-1 flex-col overflow-hidden',
               showSiteHeader
                 ? 'border-border/70 rounded-[var(--app-radius)] border shadow-2xl'
                 : 'rounded-none border-0 shadow-none',
@@ -52,7 +52,7 @@ export function DashboardShell({ children }: React.PropsWithChildren) {
                 collapsible={isMobile ? 'offcanvas' : 'none'}
                 className="bg-sidebar/70 shrink-0 border-r"
               />
-              <SidebarInset className="bg-card min-w-0 rounded-none shadow-none md:m-0 md:peer-data-[variant=inset]:m-0">
+              <SidebarInset className="bg-muted min-w-0 rounded-none shadow-none md:m-0 md:peer-data-[variant=inset]:m-0">
                 <div
                   data-slot="app-content"
                   className="app-content-container flex min-h-0 w-full flex-1 flex-col"

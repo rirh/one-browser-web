@@ -78,14 +78,14 @@ export default function DashboardOverviewPage() {
   const activityHasValues = hasActivityValues(data?.charts.activity ?? []);
   const hasChartScope = Boolean(
     resourceData.length ||
-      environmentData.length ||
-      proxyData.length ||
-      activityHasValues,
+    environmentData.length ||
+    proxyData.length ||
+    activityHasValues,
   );
 
   return (
-    <section className="bg-muted/30 flex min-h-0 flex-1 flex-col overflow-auto">
-      <div className="mx-auto flex w-full max-w-[96rem] flex-col gap-3 p-3 lg:gap-4 lg:p-4">
+    <section className="bg-muted flex min-h-0 flex-1 flex-col overflow-auto">
+      <div className="mx-auto flex w-full max-w-[96rem] flex-col gap-3 p-3 lg:p-4">
         <div className="flex items-center justify-end gap-2 px-1">
           {data ? (
             <span
@@ -150,21 +150,21 @@ export default function DashboardOverviewPage() {
             {quickLinks.length ? (
               <section className="flex flex-col gap-2">
                 <h2 className="px-1 text-sm font-semibold">快捷入口</h2>
-                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {quickLinks.map((item) => (
                     <Link
                       key={item.href}
                       to={item.href}
-                      className="group border-border/60 bg-card hover:border-primary/25 hover:bg-card flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-2.5 shadow-xs transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:shadow-sm"
+                      className="group bg-card hover:bg-primary/5 flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-1.5 transition-colors"
                     >
-                      <div className="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground flex size-7 shrink-0 items-center justify-center rounded-lg transition-colors">
+                      <div className="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground flex size-6 shrink-0 items-center justify-center rounded-md transition-colors">
                         <HugeiconsIcon
                           icon={item.icon}
                           strokeWidth={2}
                           className="size-3.5"
                         />
                       </div>
-                      <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                      <span className="min-w-0 flex-1 truncate text-xs font-medium">
                         {item.title}
                       </span>
                       <HugeiconsIcon
@@ -191,16 +191,20 @@ function MetricCard({ metric }: { metric: DashboardMetric }) {
   return (
     <Link
       to={metric.href}
-      className="group border-border/60 bg-card hover:border-primary/25 flex min-w-0 items-center gap-2.5 rounded-xl border p-3 shadow-xs transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:shadow-sm"
+      className="group bg-card flex min-w-0 items-center gap-2.5 rounded-xl px-3 py-2 transition-transform hover:-translate-y-0.5"
     >
       <div className="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-lg">
         <HugeiconsIcon icon={Icon} strokeWidth={2} className="size-4" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-muted-foreground truncate text-xs">{metric.title}</p>
-        <p className="text-lg leading-6 font-semibold tabular-nums">
-          {metric.value}
-        </p>
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="text-muted-foreground truncate text-xs">
+            {metric.title}
+          </p>
+          <p className="shrink-0 text-lg leading-6 font-semibold tabular-nums">
+            {metric.value}
+          </p>
+        </div>
         <p className="text-muted-foreground/80 truncate text-[0.6875rem]">
           {metric.secondary_label} {metric.secondary_value}
         </p>

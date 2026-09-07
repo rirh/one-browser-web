@@ -1,7 +1,6 @@
 import { ThemeToggleButton } from '@/components/theme/theme-toggle-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { SweepShine } from '@/components/ui/sweep-shine';
 import { getWebLoginConfig, prepareWebLoginUrl } from '@/features/auth/api';
 import { isReducedMotionPreferred } from '@/features/auth/components/auth-motion';
 import { desktopInvoke, isTauriRuntime } from '@/lib/desktop';
@@ -220,10 +219,9 @@ function AppLoadingStatus({
 
   return (
     <main
-      className="border-border/60 bg-background text-foreground relative isolate flex min-h-dvh items-center justify-center overflow-hidden rounded-[var(--app-radius)] border px-6 py-8 shadow-2xl select-none"
+      className="bg-background text-foreground relative isolate flex min-h-dvh items-center justify-center overflow-hidden border-0 px-6 py-8 select-none"
       onMouseDown={(event) => void startWindowDrag(event)}
     >
-      <ThemeToggleButton className="absolute top-3 right-3 z-20" />
       <section
         ref={containerRef}
         className="flex w-full max-w-80 flex-col items-center text-center"
@@ -236,14 +234,10 @@ function AppLoadingStatus({
           width={64}
           height={64}
           priority
-          className="size-16 rounded-[1.35rem] drop-shadow-[0_12px_20px_rgba(15,23,42,0.18)] select-none dark:drop-shadow-[0_14px_22px_rgba(0,0,0,0.4)]"
+          className="size-16 object-contain select-none"
           draggable={false}
         />
-        <SweepShine asChild>
-          <p className="text-muted-foreground mt-5 max-w-full text-sm/6 font-medium tracking-normal">
-            {statusText}
-          </p>
-        </SweepShine>
+        <p className="sr-only">{statusText}</p>
       </section>
     </main>
   );
