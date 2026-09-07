@@ -1,5 +1,8 @@
 import { LoadingState } from '@/components/loading-state';
-import { RouteProgress } from '@/components/route-progress';
+import {
+  RouteProgress,
+  RouteProgressPending,
+} from '@/components/route-progress';
 import { SweepShine } from '@/components/ui/sweep-shine';
 import { AccountSettingsLayout } from '@/features/account/profile/account-settings-layout';
 import { AuthGate } from '@/features/auth/auth-gate';
@@ -46,12 +49,16 @@ const JobPage = lazy(() => import('@/views/monitor/job'));
 export function AppRouter() {
   return (
     <AppErrorBoundary>
+      <RouteProgress />
       <Suspense
         fallback={
-          <LoadingState
-            className="bg-background min-h-dvh"
-            label="正在加载工作区..."
-          />
+          <>
+            <RouteProgressPending />
+            <LoadingState
+              className="bg-background min-h-dvh"
+              label="正在加载工作区..."
+            />
+          </>
         }
       >
         <Routes>
@@ -113,7 +120,7 @@ function DashboardLayout() {
   return (
     <AuthGate>
       <DashboardShell>
-        <RouteProgress active={location.key !== deferredLocationKey} />
+        {location.key !== deferredLocationKey && <RouteProgressPending />}
         <Suspense fallback={<RouteLoading />}>{deferredOutlet}</Suspense>
       </DashboardShell>
     </AuthGate>
@@ -127,6 +134,7 @@ function RouteLoading() {
       aria-label="页面加载中"
       className="bg-card text-muted-foreground flex min-h-0 flex-1 items-center justify-center text-sm"
     >
+      <RouteProgressPending />
       <SweepShine>页面加载中</SweepShine>
     </div>
   );

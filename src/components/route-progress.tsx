@@ -1,22 +1,44 @@
-export function RouteProgress({ active }: { active: boolean }) {
-  return (
-    <div
-      role={active ? 'progressbar' : undefined}
-      aria-label="页面切换中"
-      aria-hidden={!active}
-      className={
-        active
-          ? 'pointer-events-none fixed inset-x-0 top-0 z-[100] h-0.5 overflow-hidden opacity-100 transition-opacity duration-100'
-          : 'pointer-events-none fixed inset-x-0 top-0 z-[100] h-0.5 overflow-hidden opacity-0 transition-opacity delay-150 duration-100'
-      }
-    >
-      <div
-        className={
-          active
-            ? 'route-progress-running bg-primary h-full origin-left shadow-[0_0_8px_var(--primary)]'
-            : 'route-progress-complete bg-primary h-full origin-left shadow-[0_0_8px_var(--primary)]'
-        }
-      />
-    </div>
+import { useEffect, useLayoutEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
+import './route-progress.css';
+
+NProgress.configure({ showSpinner: false });
+
+let pendingRoutes = 0;
+
+export function RouteProgress() {
+  const location = useLocation();
+
+  useLayoutEffect(() => {
+    NProgress.start();
+    const timer = window.setTimeout(() => {
+      if (pendingRoutes === 0) NProgress.done();
+    }, 150);
+    return () => window.clearTimeout(timer);
+  }, [location]);
+
+  useEffect(
+    () => () => {
+      NProgress.done();
+      NProgress.remove();
+    },
+    [],
   );
+
+  return null;
+}
+
+export function RouteProgressPending() {
+  useLayoutEffect(() => {
+    pendingRoutes += 1;
+    NProgress.start();
+    return () => {
+      pendingRoutes -= 1;
+      if (pendingRoutes === 0) NProgress.done();
+    };
+  }, []);
+
+  return null;
 }
