@@ -27,13 +27,17 @@ function startWorker(fetch: ReturnType<typeof vi.fn>) {
           type: 'check',
           url: 'https://browser.example.test/app-version.json',
           buildId: 'loaded-build',
+          version: '26.907.1117',
         },
       }),
   };
 }
-const manifest = (buildId: string) => ({
+const manifest = (
+  buildId: string,
+  version = buildId === 'loaded-build' ? '26.907.1117' : '26.907.1118',
+) => ({
   ok: true,
-  json: async () => ({ buildId }),
+  json: async () => ({ buildId, version }),
 });
 
 describe('page update worker', () => {
@@ -91,3 +95,16 @@ describe('page update worker', () => {
     );
   });
 });
+
+it.each(['26.907.1117', '26.0907.1117', '26.906.2359'])(
+  'does not offer same or older date version %s with a different build',
+  async (version) => {
+    const worker = startWorker(
+      vi.fn().mockResolvedValue(manifest('different-build', version)),
+    );
+    worker.check();
+    await vi.waitFor(() =>
+      expect(worker.postMessage).toHaveBeenCalledWith({ type: 'unchanged' }),
+    );
+  },
+);

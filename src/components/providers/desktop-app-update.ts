@@ -45,7 +45,7 @@ export async function findDesktopAppUpdate() {
   return evaluateDesktopAppUpdate(installed, latest);
 }
 
-function evaluateDesktopAppUpdate(
+export function evaluateDesktopAppUpdate(
   installed: InstalledAppIdentity,
   latest: LatestAppRelease,
 ): DesktopAppUpdate | null {
@@ -55,18 +55,6 @@ function evaluateDesktopAppUpdate(
   );
 
   if (versionComparison > 0) {
-    return {
-      currentVersion: installed.version,
-      latestVersion: latest.version,
-    };
-  }
-  if (versionComparison < 0) {
-    return null;
-  }
-
-  const installedSha256 = normalizeSha256(installed.executableSha256);
-  const latestSha256 = normalizeSha256(latest.executableSha256);
-  if (installedSha256 && latestSha256 && installedSha256 !== latestSha256) {
     return {
       currentVersion: installed.version,
       latestVersion: latest.version,

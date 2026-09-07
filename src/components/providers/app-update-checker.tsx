@@ -59,6 +59,7 @@ export function AppUpdateChecker() {
           new URL(import.meta.env.BASE_URL, window.location.origin),
         ).toString(),
         buildId: __APP_BUILD_ID__,
+        version: __APP_VERSION__,
       });
     };
 
